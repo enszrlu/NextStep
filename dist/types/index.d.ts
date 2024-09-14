@@ -35,6 +35,7 @@ export interface NextStepProps {
     onComplete?: () => void;
     onSkip?: () => void;
     displayArrow?: boolean;
+    clickThroughOverlay?: boolean;
 }
 export interface CardComponentProps {
     step: Step;

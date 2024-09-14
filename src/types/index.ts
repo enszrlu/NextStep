@@ -48,6 +48,7 @@ export interface NextStepProps {
   onComplete?: () => void;
   onSkip?: () => void;
   displayArrow?: boolean;
+  clickThroughOverlay?: boolean;
 }
 
 // Custom Card

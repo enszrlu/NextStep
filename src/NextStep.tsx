@@ -20,6 +20,7 @@ const NextStep: React.FC<NextStepProps> = ({
   onComplete = () => {},
   onSkip = () => {},
   displayArrow = true,
+  clickThroughOverlay = false,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -38,6 +39,7 @@ const NextStep: React.FC<NextStepProps> = ({
   const observeRef = useRef(null); // Ref for the observer element
   const isInView = useInView(observeRef);
   const offset = 20;
+  const [documentHeight, setDocumentHeight] = useState(0);
 
   // - -
   // Route Changes
@@ -168,6 +170,26 @@ const NextStep: React.FC<NextStepProps> = ({
       return () => window.removeEventListener("resize", updatePointerPosition);
     }
   }, [currentStep, currentTourSteps, isNextStepVisible]);
+
+  // - -
+  // Update document height on window resize
+  useEffect(() => {
+    const updateDocumentHeight = () => {
+      const height = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+      );
+      setDocumentHeight(height);
+    };
+
+    updateDocumentHeight();
+    window.addEventListener('resize', updateDocumentHeight);
+    return () => window.removeEventListener('resize', updateDocumentHeight);
+  }, []);
 
   // - -
   // Step Controls
@@ -528,6 +550,9 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerPadding = currentTourSteps?.[currentStep]?.pointerPadding ?? 30;
   const pointerPadOffset = pointerPadding / 2;
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
+  console.log("pointerPosition", pointerPosition);
+  console.log(pointerPosition?.y || 0 - pointerPadOffset)
+  console.log("documentHeight", documentHeight)
 
   return (
     <div
@@ -545,18 +570,64 @@ const NextStep: React.FC<NextStepProps> = ({
         <Portal>
           <motion.div
             data-name="nextstep-overlay"
-            className="absolute inset-0 "
+            className="absolute inset-0"
             initial="hidden"
             animate={isNextStepVisible ? "visible" : "hidden"}
             variants={variants}
             transition={{ duration: 0.5 }}
+            style={{
+              height: `${documentHeight}px`,
+              zIndex: 997, // Ensure it's below the pointer but above other content
+              pointerEvents: 'none',
+            }}
           >
+            {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
+            {!clickThroughOverlay && (
+            <div className="absolute inset-0 z-[998] pointer-events-none" style={{ width: '100vw', height: `${documentHeight}px` }}>
+              {/* Top overlay */}
+              <div 
+                className="absolute top-0 left-0 right-0 pointer-events-auto" 
+                style={{ height: Math.max(pointerPosition.y - pointerPadOffset, 0) }}
+              ></div>
+              
+              {/* Bottom overlay */}
+              <div 
+                className="absolute left-0 right-0 pointer-events-auto" 
+                style={{ 
+                  top: `${pointerPosition.y + pointerPosition.height + pointerPadOffset}px`,
+                  height: `${documentHeight - (pointerPosition.y + pointerPosition.height + pointerPadOffset)}px`
+                }}
+              ></div>
+              
+              {/* Left overlay */}
+              <div 
+                className="absolute left-0 top-0 pointer-events-auto" 
+                style={{ 
+                  width: Math.max(pointerPosition.x - pointerPadOffset, 0),
+                  height: `${documentHeight}px`
+                }}
+              ></div>
+              
+              {/* Right overlay */}
+              <div 
+                className="absolute top-0 pointer-events-auto" 
+                style={{ 
+                  left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
+                  right: 0,
+                  height: `${documentHeight}px`
+                }}
+              ></div>
+            </div>
+            )}
+
+            {/* Pointer */}
             <motion.div
               data-name="nextstep-pointer"
               className="relative z-[999]"
               style={{
-                boxShadow: `0 0 200vw 200vh rgba(${shadowRgb}, ${shadowOpacity})`,
+                boxShadow: `0 0 200vw 9999vh rgba(${shadowRgb}, ${shadowOpacity})`,
                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
+                pointerEvents: 'none',
               }}
               initial={
                 pointerPosition
