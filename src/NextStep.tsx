@@ -19,6 +19,7 @@ const NextStep: React.FC<NextStepProps> = ({
   onStepChange = () => {},
   onComplete = () => {},
   onSkip = () => {},
+  displayArrow = true,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -49,7 +50,7 @@ const NextStep: React.FC<NextStepProps> = ({
       console.log("NextStep: Current Step Changed");
 
       const step = currentTourSteps[currentStep];
-      if (step) {
+      if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
           setPointerPosition(getElementPosition(element));
@@ -64,6 +65,16 @@ const NextStep: React.FC<NextStepProps> = ({
             element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         }
+      } else {
+        // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+        setPointerPosition({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          width: 0,
+          height: 0,
+        });
+        currentElementRef.current = null;
+        setElementToScroll(null);
       }
     }
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
@@ -88,7 +99,7 @@ const NextStep: React.FC<NextStepProps> = ({
     if (isNextStepVisible && currentTourSteps) {
       console.log("NextStep: Current Step Changed");
       const step = currentTourSteps[currentStep];
-      if (step) {
+      if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
           setPointerPosition(getElementPosition(element));
@@ -103,6 +114,16 @@ const NextStep: React.FC<NextStepProps> = ({
             element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         }
+      } else {
+        // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+        setPointerPosition({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          width: 0,
+          height: 0,
+        });
+        currentElementRef.current = null;
+        setElementToScroll(null);
       }
     }
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
@@ -117,6 +138,9 @@ const NextStep: React.FC<NextStepProps> = ({
         block: isAbove ? "center" : "center",
         inline: "center",
       });
+    } else {
+      // Scroll to the top of the body
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [elementToScroll, isInView, isNextStepVisible]);
 
@@ -125,11 +149,13 @@ const NextStep: React.FC<NextStepProps> = ({
   const updatePointerPosition = () => {
     if (currentTourSteps) {
       const step = currentTourSteps[currentStep];
-      if (step) {
+      if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
           setPointerPosition(getElementPosition(element));
         }
+      } else {
+        setPointerPosition(null);
       }
     }
   };
@@ -158,24 +184,28 @@ const NextStep: React.FC<NextStepProps> = ({
 
           const targetSelector = currentTourSteps[nextStepIndex].selector;
 
-          // Use MutationObserver to detect when the target element is available in the DOM
-          const observer = new MutationObserver((mutations, observer) => {
-            const element = document.querySelector(targetSelector);
-            if (element) {
-              // Once the element is found, update the step and scroll to the element
-              setCurrentStep(nextStepIndex);
-              scrollToElement(nextStepIndex);
+          if (targetSelector) {
+            // Use MutationObserver to detect when the target element is available in the DOM
+            const observer = new MutationObserver((mutations, observer) => {
+              const element = document.querySelector(targetSelector);
+              if (element) {
+                // Once the element is found, update the step and scroll to the element
+                setCurrentStep(nextStepIndex);
+                scrollToElement(nextStepIndex);
 
-              // Stop observing after the element is found
-              observer.disconnect();
-            }
-          });
+                // Stop observing after the element is found
+                observer.disconnect();
+              }
+            });
 
-          // Start observing the document body for changes
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-          });
+            // Start observing the document body for changes
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
+          } else {
+            setCurrentStep(nextStepIndex);
+          }
         } else {
           setCurrentStep(nextStepIndex);
           scrollToElement(nextStepIndex);
@@ -203,24 +233,28 @@ const NextStep: React.FC<NextStepProps> = ({
 
           const targetSelector = currentTourSteps[prevStepIndex].selector;
 
-          // Use MutationObserver to detect when the target element is available in the DOM
-          const observer = new MutationObserver((mutations, observer) => {
-            const element = document.querySelector(targetSelector);
-            if (element) {
-              // Once the element is found, update the step and scroll to the element
-              setCurrentStep(prevStepIndex);
-              scrollToElement(prevStepIndex);
+          if (targetSelector) {
+            // Use MutationObserver to detect when the target element is available in the DOM
+            const observer = new MutationObserver((mutations, observer) => {
+              const element = document.querySelector(targetSelector);
+              if (element) {
+                // Once the element is found, update the step and scroll to the element
+                setCurrentStep(prevStepIndex);
+                scrollToElement(prevStepIndex);
 
-              // Stop observing after the element is found
-              observer.disconnect();
-            }
-          });
+                // Stop observing after the element is found
+                observer.disconnect();
+              }
+            });
 
-          // Start observing the document body for changes
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-          });
+            // Start observing the document body for changes
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
+          } else {
+            setCurrentStep(prevStepIndex);
+          }
         } else {
           setCurrentStep(prevStepIndex);
           scrollToElement(prevStepIndex);
@@ -265,25 +299,44 @@ const NextStep: React.FC<NextStepProps> = ({
   // Scroll to the correct element when the step changes
   const scrollToElement = (stepIndex: number) => {
     if (currentTourSteps) {
-      const element = document.querySelector(
-        currentTourSteps[stepIndex].selector
-      ) as Element | null;
-      if (element) {
-        const { top } = element.getBoundingClientRect();
-        const isInViewport =
-          top >= -offset && top <= window.innerHeight + offset;
-        if (!isInViewport) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
+      const selector = currentTourSteps[stepIndex].selector;
+      if (selector) {
+        const element = document.querySelector(selector) as Element | null;
+        if (element) {
+          const { top } = element.getBoundingClientRect();
+          const isInViewport =
+            top >= -offset && top <= window.innerHeight + offset;
+          if (!isInViewport) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+          // Update pointer position after scrolling
+          setPointerPosition(getElementPosition(element));
         }
-        // Update pointer position after scrolling
-        setPointerPosition(getElementPosition(element));
+      } else {
+        // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+        setPointerPosition({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          width: 0,
+          height: 0,
+        });
       }
     }
   };
 
   // - -
   // Card Side
-  const getCardStyle = (side: string) => {
+  const getCardStyle = (side: string) : React.CSSProperties => {
+    if (!side || !currentTourSteps?.[currentStep].selector) {
+      // Center the card if the selector is undefined or empty
+      return {
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)", // Center the card
+        position: "fixed", // Make sure it's positioned relative to the viewport
+        margin: "0",
+      };
+    }
     switch (side) {
       case "top":
         return {
@@ -447,7 +500,10 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Card Arrow
-  const CardArrow = () => {
+  const CardArrow = ({isVisible}: {isVisible: boolean}) => {
+    if (!isVisible) {
+      return null;
+    }
     return (
       <svg
         viewBox="0 0 54 54"
@@ -538,7 +594,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   totalSteps={currentTourSteps?.length ?? 0}
                   nextStep={nextStep}
                   prevStep={prevStep}
-                  arrow={<CardArrow />}
+                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
                   skipTour={skipTour}
                 /> : <DefaultCard
                   step={currentTourSteps?.[currentStep]!}
@@ -546,7 +602,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   totalSteps={currentTourSteps?.length ?? 0}
                   nextStep={nextStep}
                   prevStep={prevStep}
-                  arrow={<CardArrow />}
+                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
                   skipTour={skipTour}
                 />}
               </div>

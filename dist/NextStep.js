@@ -6,7 +6,7 @@ import { motion, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
 import DefaultCard from './DefaultCard';
-const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, }) => {
+const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -24,7 +24,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
         if (isNextStepVisible && currentTourSteps) {
             console.log("NextStep: Current Step Changed");
             const step = currentTourSteps[currentStep];
-            if (step) {
+            if (step && step.selector) {
                 const element = document.querySelector(step.selector);
                 if (element) {
                     setPointerPosition(getElementPosition(element));
@@ -36,6 +36,17 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                         element.scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                 }
+            }
+            else {
+                // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+                setPointerPosition({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    width: 0,
+                    height: 0,
+                });
+                currentElementRef.current = null;
+                setElementToScroll(null);
             }
         }
     }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
@@ -58,7 +69,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
         if (isNextStepVisible && currentTourSteps) {
             console.log("NextStep: Current Step Changed");
             const step = currentTourSteps[currentStep];
-            if (step) {
+            if (step && step.selector) {
                 const element = document.querySelector(step.selector);
                 if (element) {
                     setPointerPosition(getElementPosition(element));
@@ -70,6 +81,17 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                         element.scrollIntoView({ behavior: "smooth", block: "center" });
                     }
                 }
+            }
+            else {
+                // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+                setPointerPosition({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    width: 0,
+                    height: 0,
+                });
+                currentElementRef.current = null;
+                setElementToScroll(null);
             }
         }
     }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
@@ -84,17 +106,24 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 inline: "center",
             });
         }
+        else {
+            // Scroll to the top of the body
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }, [elementToScroll, isInView, isNextStepVisible]);
     // - -
     // Update pointer position on window resize
     const updatePointerPosition = () => {
         if (currentTourSteps) {
             const step = currentTourSteps[currentStep];
-            if (step) {
+            if (step && step.selector) {
                 const element = document.querySelector(step.selector);
                 if (element) {
                     setPointerPosition(getElementPosition(element));
                 }
+            }
+            else {
+                setPointerPosition(null);
             }
         }
     };
@@ -117,22 +146,27 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 if (route) {
                     await router.push(route);
                     const targetSelector = currentTourSteps[nextStepIndex].selector;
-                    // Use MutationObserver to detect when the target element is available in the DOM
-                    const observer = new MutationObserver((mutations, observer) => {
-                        const element = document.querySelector(targetSelector);
-                        if (element) {
-                            // Once the element is found, update the step and scroll to the element
-                            setCurrentStep(nextStepIndex);
-                            scrollToElement(nextStepIndex);
-                            // Stop observing after the element is found
-                            observer.disconnect();
-                        }
-                    });
-                    // Start observing the document body for changes
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true,
-                    });
+                    if (targetSelector) {
+                        // Use MutationObserver to detect when the target element is available in the DOM
+                        const observer = new MutationObserver((mutations, observer) => {
+                            const element = document.querySelector(targetSelector);
+                            if (element) {
+                                // Once the element is found, update the step and scroll to the element
+                                setCurrentStep(nextStepIndex);
+                                scrollToElement(nextStepIndex);
+                                // Stop observing after the element is found
+                                observer.disconnect();
+                            }
+                        });
+                        // Start observing the document body for changes
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true,
+                        });
+                    }
+                    else {
+                        setCurrentStep(nextStepIndex);
+                    }
                 }
                 else {
                     setCurrentStep(nextStepIndex);
@@ -157,22 +191,27 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 if (route) {
                     await router.push(route);
                     const targetSelector = currentTourSteps[prevStepIndex].selector;
-                    // Use MutationObserver to detect when the target element is available in the DOM
-                    const observer = new MutationObserver((mutations, observer) => {
-                        const element = document.querySelector(targetSelector);
-                        if (element) {
-                            // Once the element is found, update the step and scroll to the element
-                            setCurrentStep(prevStepIndex);
-                            scrollToElement(prevStepIndex);
-                            // Stop observing after the element is found
-                            observer.disconnect();
-                        }
-                    });
-                    // Start observing the document body for changes
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true,
-                    });
+                    if (targetSelector) {
+                        // Use MutationObserver to detect when the target element is available in the DOM
+                        const observer = new MutationObserver((mutations, observer) => {
+                            const element = document.querySelector(targetSelector);
+                            if (element) {
+                                // Once the element is found, update the step and scroll to the element
+                                setCurrentStep(prevStepIndex);
+                                scrollToElement(prevStepIndex);
+                                // Stop observing after the element is found
+                                observer.disconnect();
+                            }
+                        });
+                        // Start observing the document body for changes
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true,
+                        });
+                    }
+                    else {
+                        setCurrentStep(prevStepIndex);
+                    }
                 }
                 else {
                     setCurrentStep(prevStepIndex);
@@ -215,21 +254,43 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     // Scroll to the correct element when the step changes
     const scrollToElement = (stepIndex) => {
         if (currentTourSteps) {
-            const element = document.querySelector(currentTourSteps[stepIndex].selector);
-            if (element) {
-                const { top } = element.getBoundingClientRect();
-                const isInViewport = top >= -offset && top <= window.innerHeight + offset;
-                if (!isInViewport) {
-                    element.scrollIntoView({ behavior: "smooth", block: "center" });
+            const selector = currentTourSteps[stepIndex].selector;
+            if (selector) {
+                const element = document.querySelector(selector);
+                if (element) {
+                    const { top } = element.getBoundingClientRect();
+                    const isInViewport = top >= -offset && top <= window.innerHeight + offset;
+                    if (!isInViewport) {
+                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                    // Update pointer position after scrolling
+                    setPointerPosition(getElementPosition(element));
                 }
-                // Update pointer position after scrolling
-                setPointerPosition(getElementPosition(element));
+            }
+            else {
+                // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+                setPointerPosition({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    width: 0,
+                    height: 0,
+                });
             }
         }
     };
     // - -
     // Card Side
     const getCardStyle = (side) => {
+        if (!side || !currentTourSteps?.[currentStep].selector) {
+            // Center the card if the selector is undefined or empty
+            return {
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)", // Center the card
+                position: "fixed", // Make sure it's positioned relative to the viewport
+                margin: "0",
+            };
+        }
         switch (side) {
             case "top":
                 return {
@@ -391,7 +452,10 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     };
     // - -
     // Card Arrow
-    const CardArrow = () => {
+    const CardArrow = ({ isVisible }) => {
+        if (!isVisible) {
+            return null;
+        }
         return (_jsx("svg", { viewBox: "0 0 54 54", "data-name": "nextstep-arrow", className: "absolute w-6 h-6 origin-center", style: getArrowStyle(currentTourSteps?.[currentStep]?.side), children: _jsx("path", { id: "triangle", d: "M27 27L0 0V54L27 27Z", fill: "currentColor" }) }));
     };
     // - -
@@ -422,6 +486,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                                 width: pointerPosition.width + pointerPadding,
                                 height: pointerPosition.height + pointerPadding,
                             }
-                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: CardComponent ? _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) : _jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) }) }) }) }))] }));
+                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: CardComponent ? _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour }) : _jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour }) }) }) }) }))] }));
 };
 export default NextStep;

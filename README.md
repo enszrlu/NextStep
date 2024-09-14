@@ -128,7 +128,7 @@ const steps = [
 | `icon`           | `React.ReactNode`, `string`, `null` | An icon or element to display alongside the step title.                                |
 | `title`          | `string`                        | The title of your step                     |
 | `content`        | `React.ReactNode`               | The main content or body of the step.                                                 |
-| `selector`       | `string`                        | A string used to target an `id` that this step refers to.            |
+| `selector`       | `string`                        | Optional. A string used to target an `id` that this step refers to. If not provided, card will be displayed in the center top of the document body.            |
 | `side`           | `"top"`, `"bottom"`, `"left"`, `"right"` | Optional. Determines where the tooltip should appear relative to the selector.          |
 | `showControls`   | `boolean`                       | Optional. Determines whether control buttons (next, prev) should be shown if using the default card.           |
 | `pointerPadding` | `number`                        | Optional. The padding around the pointer (keyhole) highlighting the target element.             |

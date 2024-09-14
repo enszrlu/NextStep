@@ -17,7 +17,7 @@ export interface Step {
   icon: React.ReactNode | string | null;
   title: string;
   content: React.ReactNode;
-  selector: string;
+  selector?: string;
   // Options
   side?: "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "left-top" | "left-bottom" | "right-top" | "right-bottom";
   showControls?: boolean;
@@ -47,6 +47,7 @@ export interface NextStepProps {
   onStepChange?: (step: number) => void;
   onComplete?: () => void;
   onSkip?: () => void;
+  displayArrow?: boolean;
 }
 
 // Custom Card
