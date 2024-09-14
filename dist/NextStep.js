@@ -1,5 +1,5 @@
 "use client";
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNextStep } from "./NextStepContext";
 import { motion, useInView } from "framer-motion";
@@ -8,6 +8,9 @@ import { Portal } from "@radix-ui/react-portal";
 import DefaultCard from './DefaultCard';
 const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
+    if (!isNextStepVisible) {
+        return _jsx(_Fragment, { children: children });
+    }
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
     const [pointerPosition, setPointerPosition] = useState(null);
@@ -484,7 +487,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     console.log("pointerPosition", pointerPosition);
     console.log(pointerPosition?.y || 0 - pointerPadOffset);
     console.log("documentHeight", documentHeight);
-    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && (_jsx(Portal, { children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute inset-0", initial: "hidden", animate: isNextStepVisible ? "visible" : "hidden", variants: variants, transition: { duration: 0.5 }, style: {
+    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && (_jsx(Portal, { children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute inset-0 overflow-hidden", initial: "hidden", animate: isNextStepVisible ? "visible" : "hidden", variants: variants, transition: { duration: 0.5 }, style: {
                         height: `${documentHeight}px`,
                         zIndex: 997, // Ensure it's below the pointer but above other content
                         pointerEvents: 'none',

@@ -24,6 +24,11 @@ const NextStep: React.FC<NextStepProps> = ({
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
+  
+  if (!isNextStepVisible) {
+    return <>{children}</>
+  }
+
   const currentTourSteps = steps.find(
     (tour) => tour.tour === currentTour
   )?.steps;
@@ -570,7 +575,7 @@ const NextStep: React.FC<NextStepProps> = ({
         <Portal>
           <motion.div
             data-name="nextstep-overlay"
-            className="absolute inset-0"
+            className="absolute inset-0 overflow-hidden"
             initial="hidden"
             animate={isNextStepVisible ? "visible" : "hidden"}
             variants={variants}
