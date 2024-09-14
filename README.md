@@ -1,6 +1,6 @@
 # NextStep - Lightweight Next.js Onboarding Library
 
-NextStep is a lightweight onboarding library for Next.js applications, inspired by Onborda. It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling. The library provides fully customizable pointers (tooltips) that can be easily integrated with [shadcn/ui](https://ui.shadcn.com/) for modern web applications.
+NextStep is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda). It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling. The library provides fully customizable pointers (tooltips) that can be easily integrated with [shadcn/ui](https://ui.shadcn.com/) for modern web applications.
 
 - **Demo - [nextstep.vercel.app](https://nextstep.vercel.app)**
 - **[Demo repository](https://github.com/enszrlu/NextStep-website)**
@@ -166,7 +166,7 @@ const steps = [
       icon: <>👋👋</>,
         title: "Second tour, Step 1",
         content: <>Second tour, first step!</>,
-        selector: "#onborda-step1",
+        selector: "#nextstep-step1",
         side: "top",
         showControls: true,
         pointerPadding: 10,
@@ -192,7 +192,6 @@ const steps = [
 | `onStepChange` | `(step: number) => void` | Callback function triggered when the step changes
 | `onComplete` | `() => void` | Callback function triggered when the tour completes
 | `onSkip` | `() => void` | Callback function triggered when the user skips the tour
-| `persistProgress` | `boolean` | Whether to save progress in localStorage
 
 
 ```typescriptreact
@@ -206,13 +205,12 @@ const steps = [
   onStepChange={(step) => console.log(`Step changed to ${step}`)}
   onComplete={() => console.log("Tour completed")}
   onSkip={() => console.log("Tour skipped")}
-  persistProgress={true}
 >
   {children}
 </NextStep>
 ```
 
-## COMING SOON:Keyboard Navigation
+## Keyboard Navigation
 
 NextStep supports keyboard navigation:
 
