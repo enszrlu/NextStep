@@ -294,20 +294,36 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     // - -
     // Check if Card is Cut Off on Sides
     const checkSideCutOff = (side) => {
+        let tempSide = side;
+        let removeSide = false;
         // Check if card would be cut off on sides
-        if (side === "right" || side === "left") {
-            if (pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
-                side = "top";
-            }
+        if (side.startsWith("right") && pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+            removeSide = true;
+        }
+        if (side.startsWith("left") && pointerPosition && pointerPosition.x < 256) {
+            removeSide = true;
         }
         // Check if card would be cut off on top or bottom
-        if (pointerPosition && pointerPosition.y < 256) {
-            side = "bottom";
+        if (side.includes("top") && pointerPosition && pointerPosition.y < 256) {
+            if (removeSide) {
+                tempSide = "bottom";
+            }
+            else {
+                tempSide = side.replace("top", "bottom");
+            }
         }
-        if (pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
-            side = "top";
+        else if (side.includes("bottom") && pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+            if (removeSide) {
+                tempSide = "top";
+            }
+            else {
+                tempSide = side.replace("bottom", "top");
+            }
         }
-        return side;
+        else if (removeSide) {
+            tempSide = pointerPosition && pointerPosition.y < 256 ? "bottom" : "top";
+        }
+        return tempSide;
     };
     // - -
     // Card Side
