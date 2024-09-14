@@ -7,6 +7,7 @@ import { Portal } from "@radix-ui/react-portal";
 
 // Types
 import { NextStepProps } from "./types";
+import DefaultCard from './DefaultCard';
 
 const NextStep: React.FC<NextStepProps> = ({
   children,
@@ -244,7 +245,6 @@ const NextStep: React.FC<NextStepProps> = ({
       if (isNextStepVisible) {
         switch (event.key) {
           case "ArrowRight":
-          case "Enter":
             nextStep();
             break;
           case "ArrowLeft":
@@ -485,7 +485,7 @@ const NextStep: React.FC<NextStepProps> = ({
       </div>
 
       {/* NextStep Overlay Step Content */}
-      {pointerPosition && isNextStepVisible && CardComponent && (
+      {pointerPosition && isNextStepVisible && (
         <Portal>
           <motion.div
             data-name="nextstep-overlay"
@@ -532,7 +532,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   currentTourSteps?.[currentStep]?.side as any
                 )}
               >
-                <CardComponent
+                {CardComponent ? <CardComponent
                   step={currentTourSteps?.[currentStep]!}
                   currentStep={currentStep}
                   totalSteps={currentTourSteps?.length ?? 0}
@@ -540,7 +540,15 @@ const NextStep: React.FC<NextStepProps> = ({
                   prevStep={prevStep}
                   arrow={<CardArrow />}
                   skipTour={skipTour}
-                />
+                /> : <DefaultCard
+                  step={currentTourSteps?.[currentStep]!}
+                  currentStep={currentStep}
+                  totalSteps={currentTourSteps?.length ?? 0}
+                  nextStep={nextStep}
+                  prevStep={prevStep}
+                  arrow={<CardArrow />}
+                  skipTour={skipTour}
+                />}
               </div>
             </motion.div>
           </motion.div>

@@ -214,7 +214,7 @@ const steps = [
 
 NextStep supports keyboard navigation:
 
-- Right Arrow / Enter: Next step
+- Right Arrow: Next step
 - Left Arrow: Previous step
 - Escape: Skip tour
 

@@ -5,6 +5,7 @@ import { useNextStep } from "./NextStepContext";
 import { motion, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
+import DefaultCard from './DefaultCard';
 const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
@@ -196,7 +197,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
             if (isNextStepVisible) {
                 switch (event.key) {
                     case "ArrowRight":
-                    case "Enter":
                         nextStep();
                         break;
                     case "ArrowLeft":
@@ -405,7 +405,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     const pointerPadding = currentTourSteps?.[currentStep]?.pointerPadding ?? 30;
     const pointerPadOffset = pointerPadding / 2;
     const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
-    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && CardComponent && (_jsx(Portal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay", className: "absolute inset-0 ", initial: "hidden", animate: isNextStepVisible ? "visible" : "hidden", variants: variants, transition: { duration: 0.5 }, children: _jsx(motion.div, { "data-name": "nextstep-pointer", className: "relative z-[999]", style: {
+    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && (_jsx(Portal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay", className: "absolute inset-0 ", initial: "hidden", animate: isNextStepVisible ? "visible" : "hidden", variants: variants, transition: { duration: 0.5 }, children: _jsx(motion.div, { "data-name": "nextstep-pointer", className: "relative z-[999]", style: {
                             boxShadow: `0 0 200vw 200vh rgba(${shadowRgb}, ${shadowOpacity})`,
                             borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
                         }, initial: pointerPosition
@@ -422,6 +422,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                                 width: pointerPosition.width + pointerPadding,
                                 height: pointerPosition.height + pointerPadding,
                             }
-                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) }) }) }) }))] }));
+                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: CardComponent ? _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) : _jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) }) }) }) }))] }));
 };
 export default NextStep;
