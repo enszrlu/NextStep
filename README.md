@@ -14,11 +14,13 @@ The library allows user to use custom cards (tooltips) for easier integration.
 
 ```bash
 # npm
-npm i nextstep
+npm i nextstepjs
 # pnpm
-pnpm add nextstep
+pnpm add nextstepjs
 # yarn
-yarn add nextstep
+yarn add nextstepjs
+# bun
+bun add nextstepjs
 ```
 
 ### Global `layout.tsx`
@@ -43,7 +45,7 @@ Tailwind CSS needs to scan the node module to include the used classes. See [con
 ```typescript
 const config: Config = {
   content: [
-    './node_modules/nextstep/dist/**/*.{js,ts,jsx,tsx}' // Add this
+    './node_modules/nextstepjs/dist/**/*.{js,ts,jsx,tsx}' // Add this
   ]
 }
 ```
@@ -65,7 +67,7 @@ You can create a custom card component for greater control over the design:
 
 ```typescriptreact
 "use client"
-import type { CardComponentProps } from "nextstep";
+import type { CardComponentProps } from "nextstepjs";
 
 export const CustomCard = ({
   step,
@@ -95,7 +97,9 @@ export const CustomCard = ({
 NextStep supports multiple "tours", allowing you to create multiple product tours:
 
 ```typescriptreact
-const steps = [
+import { Tour } from 'nextstepjs';
+
+const steps : Tour[] = [
   {
     tour: "firstTour",
     steps: [
@@ -223,6 +227,21 @@ Target anything in your app using the element's `id` attribute.
 >
   {children}
 </NextStep>
+```
+
+## useNextStep Hook
+
+useNextStep hook allows you to control the tour from anywhere in your app.
+
+```typescriptreact
+import { useNextStep } from 'nextstepjs';
+....
+
+const { startNextStep, closeNextStep } = useNextStep();
+
+const onClickHandler = (tourName: string) => {
+  startNextStep(tourName);
+};
 ```
 
 ## Keyboard Navigation
