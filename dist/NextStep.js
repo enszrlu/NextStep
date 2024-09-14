@@ -37,7 +37,8 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                     const rect = element.getBoundingClientRect();
                     const isInViewportWithOffset = rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
                     if (!isInView || !isInViewportWithOffset) {
-                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                        const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
+                        element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
                     }
                 }
             }
@@ -82,7 +83,8 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                     const rect = element.getBoundingClientRect();
                     const isInViewportWithOffset = rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
                     if (!isInView || !isInViewportWithOffset) {
-                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                        const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
+                        element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
                     }
                 }
             }
@@ -102,13 +104,8 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     useEffect(() => {
         if (elementToScroll && !isInView && isNextStepVisible) {
             console.log("NextStep: Element to Scroll Changed");
-            const rect = elementToScroll.getBoundingClientRect();
-            const isAbove = rect.top < 0;
-            elementToScroll.scrollIntoView({
-                behavior: "smooth",
-                block: isAbove ? "center" : "center",
-                inline: "center",
-            });
+            const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
+            elementToScroll.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center", inline: "center" });
         }
         else {
             // Scroll to the top of the body
@@ -276,7 +273,8 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                     const { top } = element.getBoundingClientRect();
                     const isInViewport = top >= -offset && top <= window.innerHeight + offset;
                     if (!isInViewport) {
-                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                        const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || "right");
+                        element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
                     }
                     // Update pointer position after scrolling
                     setPointerPosition(getElementPosition(element));
