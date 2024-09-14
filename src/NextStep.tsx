@@ -352,6 +352,30 @@ const NextStep: React.FC<NextStepProps> = ({
   };
 
   // - -
+  // Check if Card is Cut Off on Sides
+  const checkSideCutOff = (side: string) => {
+    // Check if card would be cut off on sides
+    if (side === "right" || side === "left") {
+      // x: pointerPosition.x - pointerPadOffset,
+      //                 y: pointerPosition.y - pointerPadOffset,
+      //                 width: pointerPosition.width + pointerPadding,
+      if (pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+        side = "top";
+      }
+    }
+
+    // Check if card would be cut off on top or bottom
+    if (pointerPosition && pointerPosition.y < 256) {
+      side = "bottom";
+    }
+    if (pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+      side = "top";
+    }
+
+    return side;
+  };
+
+  // - -
   // Card Side
   const getCardStyle = (side: string) : React.CSSProperties => {
     if (!side || !currentTourSteps?.[currentStep].selector) {
@@ -364,6 +388,9 @@ const NextStep: React.FC<NextStepProps> = ({
         margin: "0",
       };
     }
+
+    side = checkSideCutOff(side)
+
     switch (side) {
       case "top":
         return {
@@ -447,6 +474,8 @@ const NextStep: React.FC<NextStepProps> = ({
   // - -
   // Arrow position based on card side
   const getArrowStyle = (side: string) => {
+    side = checkSideCutOff(side);
+
     switch (side) {
       case "bottom":
         return {
@@ -555,9 +584,6 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerPadding = currentTourSteps?.[currentStep]?.pointerPadding ?? 30;
   const pointerPadOffset = pointerPadding / 2;
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
-  console.log("pointerPosition", pointerPosition);
-  console.log(pointerPosition?.y || 0 - pointerPadOffset)
-  console.log("documentHeight", documentHeight)
 
   return (
     <div

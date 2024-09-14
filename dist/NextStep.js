@@ -294,6 +294,27 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
         }
     };
     // - -
+    // Check if Card is Cut Off on Sides
+    const checkSideCutOff = (side) => {
+        // Check if card would be cut off on sides
+        if (side === "right" || side === "left") {
+            // x: pointerPosition.x - pointerPadOffset,
+            //                 y: pointerPosition.y - pointerPadOffset,
+            //                 width: pointerPosition.width + pointerPadding,
+            if (pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+                side = "top";
+            }
+        }
+        // Check if card would be cut off on top or bottom
+        if (pointerPosition && pointerPosition.y < 256) {
+            side = "bottom";
+        }
+        if (pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+            side = "top";
+        }
+        return side;
+    };
+    // - -
     // Card Side
     const getCardStyle = (side) => {
         if (!side || !currentTourSteps?.[currentStep].selector) {
@@ -306,6 +327,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 margin: "0",
             };
         }
+        side = checkSideCutOff(side);
         switch (side) {
             case "top":
                 return {
@@ -388,6 +410,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     // - -
     // Arrow position based on card side
     const getArrowStyle = (side) => {
+        side = checkSideCutOff(side);
         switch (side) {
             case "bottom":
                 return {
@@ -484,9 +507,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     const pointerPadding = currentTourSteps?.[currentStep]?.pointerPadding ?? 30;
     const pointerPadOffset = pointerPadding / 2;
     const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
-    console.log("pointerPosition", pointerPosition);
-    console.log(pointerPosition?.y || 0 - pointerPadOffset);
-    console.log("documentHeight", documentHeight);
     return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && (_jsx(Portal, { children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute inset-0 overflow-hidden", initial: "hidden", animate: isNextStepVisible ? "visible" : "hidden", variants: variants, transition: { duration: 0.5 }, style: {
                         height: `${documentHeight}px`,
                         zIndex: 997, // Ensure it's below the pointer but above other content
