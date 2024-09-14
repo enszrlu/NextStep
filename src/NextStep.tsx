@@ -160,7 +160,15 @@ const NextStep: React.FC<NextStepProps> = ({
           setPointerPosition(getElementPosition(element));
         }
       } else {
-        setPointerPosition(null);
+        // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+        setPointerPosition({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          width: 0,
+          height: 0,
+        });
+        currentElementRef.current = null;
+        setElementToScroll(null);
       }
     }
   };

@@ -124,7 +124,15 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 }
             }
             else {
-                setPointerPosition(null);
+                // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
+                setPointerPosition({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    width: 0,
+                    height: 0,
+                });
+                currentElementRef.current = null;
+                setElementToScroll(null);
             }
         }
     };
@@ -300,7 +308,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
         if (side.startsWith("right") && pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
             removeSide = true;
         }
-        if (side.startsWith("left") && pointerPosition && pointerPosition.x < 256) {
+        else if (side.startsWith("left") && pointerPosition && pointerPosition.x < 256) {
             removeSide = true;
         }
         // Check if card would be cut off on top or bottom
