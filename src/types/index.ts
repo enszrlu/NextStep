@@ -47,7 +47,6 @@ export interface NextStepProps {
   onStepChange?: (step: number) => void;
   onComplete?: () => void;
   onSkip?: () => void;
-  persistProgress?: boolean;
 }
 
 // Custom Card

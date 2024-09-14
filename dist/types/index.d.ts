@@ -34,7 +34,6 @@ export interface NextStepProps {
     onStepChange?: (step: number) => void;
     onComplete?: () => void;
     onSkip?: () => void;
-    persistProgress?: boolean;
 }
 export interface CardComponentProps {
     step: Step;

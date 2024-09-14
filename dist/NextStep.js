@@ -1,12 +1,12 @@
 "use client";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNextStep } from "./NextStepContext";
 import { motion, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
-const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, }) => {
-    const { currentTour, currentStep, setCurrentStep, isNextStepVisible } = useNextStep();
+const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, }) => {
+    const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
     const [pointerPosition, setPointerPosition] = useState(null);
@@ -18,7 +18,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     // Route Changes
     const router = useRouter();
     // - -
-    // Initialisze
+    // Initialize
     useEffect(() => {
         if (isNextStepVisible && currentTourSteps) {
             console.log("NextStep: Current Step Changed");
@@ -112,6 +112,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
             try {
                 const nextStepIndex = currentStep + 1;
                 const route = currentTourSteps[currentStep].nextRoute;
+                onStepChange?.(nextStepIndex);
                 if (route) {
                     await router.push(route);
                     const targetSelector = currentTourSteps[nextStepIndex].selector;
@@ -141,12 +142,17 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                 console.error("Error navigating to next route", error);
             }
         }
+        else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
+            onComplete?.();
+            closeNextStep();
+        }
     };
     const prevStep = async () => {
         if (currentTourSteps && currentStep > 0) {
             try {
                 const prevStepIndex = currentStep - 1;
                 const route = currentTourSteps[currentStep].prevRoute;
+                onStepChange?.(prevStepIndex);
                 if (route) {
                     await router.push(route);
                     const targetSelector = currentTourSteps[prevStepIndex].selector;
@@ -177,6 +183,34 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
             }
         }
     };
+    // - -
+    // Skip Tour
+    const skipTour = useCallback(() => {
+        closeNextStep();
+        onSkip?.();
+    }, [closeNextStep, onSkip]);
+    // - -
+    // Keyboard Controls
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (isNextStepVisible) {
+                switch (event.key) {
+                    case "ArrowRight":
+                    case "Enter":
+                        nextStep();
+                        break;
+                    case "ArrowLeft":
+                        prevStep();
+                        break;
+                    case "Escape":
+                        skipTour();
+                        break;
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isNextStepVisible, nextStep, prevStep, skipTour]);
     // - -
     // Scroll to the correct element when the step changes
     const scrollToElement = (stepIndex) => {
@@ -388,6 +422,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
                                 width: pointerPosition.width + pointerPadding,
                                 height: pointerPosition.height + pointerPadding,
                             }
-                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}) }) }) }) }) }))] }));
+                            : {}, transition: cardTransition, children: _jsx("div", { className: "absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), children: _jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, {}), skipTour: skipTour }) }) }) }) }))] }));
 };
 export default NextStep;

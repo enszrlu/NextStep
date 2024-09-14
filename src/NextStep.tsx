@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNextStep } from "./NextStepContext";
 import { motion, useInView } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,11 @@ const NextStep: React.FC<NextStepProps> = ({
   shadowOpacity = "0.2",
   cardTransition = { ease: "anticipate", duration: 0.6 },
   cardComponent: CardComponent,
+  onStepChange = () => {},
+  onComplete = () => {},
+  onSkip = () => {},
 }) => {
-  const { currentTour, currentStep, setCurrentStep, isNextStepVisible } =
+  const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
   const currentTourSteps = steps.find(
     (tour) => tour.tour === currentTour
@@ -39,10 +42,11 @@ const NextStep: React.FC<NextStepProps> = ({
   const router = useRouter();
 
   // - -
-  // Initialisze
+  // Initialize
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
       console.log("NextStep: Current Step Changed");
+
       const step = currentTourSteps[currentStep];
       if (step) {
         const element = document.querySelector(step.selector) as Element | null;
@@ -146,6 +150,8 @@ const NextStep: React.FC<NextStepProps> = ({
         const nextStepIndex = currentStep + 1;
         const route = currentTourSteps[currentStep].nextRoute;
 
+        onStepChange?.(nextStepIndex);
+
         if (route) {
           await router.push(route);
 
@@ -177,6 +183,10 @@ const NextStep: React.FC<NextStepProps> = ({
         console.error("Error navigating to next route", error);
       }
     }
+    else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
+      onComplete?.();
+      closeNextStep();
+    }
   };
 
   const prevStep = async () => {
@@ -184,6 +194,8 @@ const NextStep: React.FC<NextStepProps> = ({
       try {
         const prevStepIndex = currentStep - 1;
         const route = currentTourSteps[currentStep].prevRoute;
+
+        onStepChange?.(prevStepIndex);
 
         if (route) {
           await router.push(route);
@@ -217,6 +229,37 @@ const NextStep: React.FC<NextStepProps> = ({
       }
     }
   };
+
+  // - -
+  // Skip Tour
+  const skipTour = useCallback(() => {
+    closeNextStep();
+    onSkip?.();
+  }, [closeNextStep, onSkip]);
+
+  // - -
+  // Keyboard Controls
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isNextStepVisible) {
+        switch (event.key) {
+          case "ArrowRight":
+          case "Enter":
+            nextStep();
+            break;
+          case "ArrowLeft":
+            prevStep();
+            break;
+          case "Escape":
+            skipTour();
+            break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isNextStepVisible, nextStep, prevStep, skipTour]);
 
   // - -
   // Scroll to the correct element when the step changes
@@ -496,6 +539,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   nextStep={nextStep}
                   prevStep={prevStep}
                   arrow={<CardArrow />}
+                  skipTour={skipTour}
                 />
               </div>
             </motion.div>
