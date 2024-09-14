@@ -1,17 +1,13 @@
 # NextStep - Lightweight Next.js Onboarding Library
 
-NextStep is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda). It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling. The library provides fully customizable pointers (tooltips) that can be easily integrated with [shadcn/ui](https://ui.shadcn.com/) for modern web applications.
+NextStep is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda). 
 
-- **Demo - [nextstep.vercel.app](https://nextstep.vercel.app)**
+It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling. 
+
+The library provides allows user to use custom cards (tooltips) for modern web applications.
+
+- **[Demo App](https://nextstep.vercel.app)**
 - **[Demo repository](https://github.com/enszrlu/NextStep-website)**
-
-## Coming soon
-
-- Analytics hooks
-- Customisable card component
-- Keyboard navigation
-- Progress persistence
-- Skip functionality
 
 ## Getting Started
 
@@ -25,6 +21,7 @@ yarn add nextstep
 ```
 
 ### Global `layout.tsx`
+Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
 
 ```typescriptreact
 <NextStepProvider>
@@ -32,14 +29,6 @@ yarn add nextstep
     {children}
   </NextStep>
 </NextStepProvider>
-```
-
-### Components & `page.tsx`
-
-Target anything in your app using the element's `id` attribute.
-
-```typescriptreact
-<div id="nextstep-step1">Onboard Step</div>
 ```
 
 ### Tailwind Config
@@ -100,7 +89,7 @@ export const CustomCard = ({
 }
 ```
 
-### Steps Object
+### Tours Array
 
 NextStep supports multiple "tours", allowing you to create multiple product tours:
 
@@ -136,7 +125,15 @@ const steps = [
 | `nextRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the next step.                      |
 | `prevRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the previous step.                  |
 
-> **Note** _Both `nextRoute` and `prevRoute` have a `500`ms delay before setting the next step, a function will be added soon to control the delay in case your application loads slower than this._
+> **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
+
+### Target Anything
+
+Target anything in your app using the element's `id` attribute.
+
+```typescriptreact
+<div id="nextstep-step1">Onboard Step</div>
+```
 
 ### Example `steps`
 
@@ -156,14 +153,24 @@ const steps = [
         pointerRadius: 10,
         nextRoute: "/foo",
         prevRoute: "/bar"
+      },
+      {
+        icon: <>🎉</>,
+        title: "Tour 1, Step 2",
+        content: <>First tour, second step</>,
+        selector: "#tour1-step2",
+        side: "top",
+        showControls: true,
+        pointerPadding: 10,
+        pointerRadius: 10,
       }
-      ...
     ]
   },
   {
     tour: "secondtour",
     steps: [
-      icon: <>👋👋</>,
+      {
+        icon: <>🚀</>,
         title: "Second tour, Step 1",
         content: <>Second tour, first step!</>,
         selector: "#nextstep-step1",
@@ -173,6 +180,7 @@ const steps = [
         pointerRadius: 10,
         nextRoute: "/foo",
         prevRoute: "/bar"
+      }
     ]
   }
 ]
@@ -192,6 +200,7 @@ const steps = [
 | `onStepChange` | `(step: number) => void` | Callback function triggered when the step changes
 | `onComplete` | `() => void` | Callback function triggered when the tour completes
 | `onSkip` | `() => void` | Callback function triggered when the user skips the tour
+| `clickThroughOverlay` | `boolean` | Optional. If true, overlay background is not clickable, default is false
 
 
 ```typescriptreact
@@ -205,6 +214,7 @@ const steps = [
   onStepChange={(step) => console.log(`Step changed to ${step}`)}
   onComplete={() => console.log("Tour completed")}
   onSkip={() => console.log("Tour skipped")}
+  clickThroughOverlay={false}
 >
   {children}
 </NextStep>
@@ -217,6 +227,10 @@ NextStep supports keyboard navigation:
 - Right Arrow: Next step
 - Left Arrow: Previous step
 - Escape: Skip tour
+
+## Localization
+
+NextStep is a lightweight library and does not come with localization support. However, you can easily switch between languages by supplying the `steps` array based on locale.
 
 ## Contributing
 
