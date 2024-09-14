@@ -120,6 +120,7 @@ const steps = [
 | `selector`       | `string`                        | Optional. A string used to target an `id` that this step refers to. If not provided, card will be displayed in the center top of the document body.            |
 | `side`           | `"top"`, `"bottom"`, `"left"`, `"right"` | Optional. Determines where the tooltip should appear relative to the selector.          |
 | `showControls`   | `boolean`                       | Optional. Determines whether control buttons (next, prev) should be shown if using the default card.           |
+| `showSkip`       | `boolean`                       | Optional. Determines whether skip button should be shown if using the default card.           |
 | `pointerPadding` | `number`                        | Optional. The padding around the pointer (keyhole) highlighting the target element.             |
 | `pointerRadius`  | `number`                        | Optional. The border-radius of the pointer (keyhole) highlighting the target element.           |
 | `nextRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the next step.                      |
@@ -149,6 +150,7 @@ Target anything in your app using the element's `id` attribute.
         selector: "#tour1-step1",
         side: "top",
         showControls: true,
+        showSkip: true,
         pointerPadding: 10,
         pointerRadius: 10,
         nextRoute: "/foo",
@@ -161,6 +163,7 @@ Target anything in your app using the element's `id` attribute.
         selector: "#tour1-step2",
         side: "top",
         showControls: true,
+        showSkip: true,
         pointerPadding: 10,
         pointerRadius: 10,
       }
@@ -176,6 +179,7 @@ Target anything in your app using the element's `id` attribute.
         selector: "#nextstep-step1",
         side: "top",
         showControls: true,
+        showSkip: true,
         pointerPadding: 10,
         pointerRadius: 10,
         nextRoute: "/foo",
