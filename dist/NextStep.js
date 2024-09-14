@@ -1,5 +1,5 @@
 "use client";
-import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNextStep } from "./NextStepContext";
 import { motion, useInView } from "framer-motion";
@@ -8,9 +8,6 @@ import { Portal } from "@radix-ui/react-portal";
 import DefaultCard from './DefaultCard';
 const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2", cardTransition = { ease: "anticipate", duration: 0.6 }, cardComponent: CardComponent, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
-    if (!isNextStepVisible) {
-        return _jsx(_Fragment, { children: children });
-    }
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
     const [pointerPosition, setPointerPosition] = useState(null);
