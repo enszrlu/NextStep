@@ -1,10 +1,11 @@
-# NextStep - Lightweight Next.js Onboarding Library
+## NextStep
+![NextStep](./public/nextstepjs.png)
 
-NextStep is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda). 
+**NextStep** is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda). 
 
 It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling. 
 
-The library provides allows user to use custom cards (tooltips) for modern web applications.
+The library allows user to use custom cards (tooltips) for easier integration.
 
 - **[Demo App](https://nextstepjs.vercel.app)**
 - **[Demo repository](https://github.com/enszrlu/NextStep-Website)**
