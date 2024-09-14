@@ -1,6 +1,6 @@
 {
   "name": "nextstep",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Lightweight onboarding library for Next.js",
   "license": "MIT",
   "author": "Enes Zorlu",
