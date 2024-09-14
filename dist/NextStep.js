@@ -298,9 +298,6 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     const checkSideCutOff = (side) => {
         // Check if card would be cut off on sides
         if (side === "right" || side === "left") {
-            // x: pointerPosition.x - pointerPadOffset,
-            //                 y: pointerPosition.y - pointerPadOffset,
-            //                 width: pointerPosition.width + pointerPadding,
             if (pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
                 side = "top";
             }

@@ -334,8 +334,8 @@ const NextStep: React.FC<NextStepProps> = ({
           const isInViewport =
             top >= -offset && top <= window.innerHeight + offset;
           if (!isInViewport) {
-            element.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
+              element.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
           // Update pointer position after scrolling
           setPointerPosition(getElementPosition(element));
         }
@@ -356,9 +356,6 @@ const NextStep: React.FC<NextStepProps> = ({
   const checkSideCutOff = (side: string) => {
     // Check if card would be cut off on sides
     if (side === "right" || side === "left") {
-      // x: pointerPosition.x - pointerPadOffset,
-      //                 y: pointerPosition.y - pointerPadOffset,
-      //                 width: pointerPosition.width + pointerPadding,
       if (pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
         side = "top";
       }
