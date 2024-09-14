@@ -45,4 +45,5 @@ export interface CardComponentProps {
     prevStep: () => void;
     skipTour?: () => void;
     arrow: JSX.Element;
+    showControls?: boolean;
 }

@@ -672,6 +672,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   prevStep={prevStep}
                   arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
                   skipTour={skipTour}
+                  showControls={currentTourSteps?.[currentStep]?.showControls ?? true}
                 /> : <DefaultCard
                   step={currentTourSteps?.[currentStep]!}
                   currentStep={currentStep}
@@ -680,6 +681,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   prevStep={prevStep}
                   arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
                   skipTour={skipTour}
+                  showControls={currentTourSteps?.[currentStep]?.showControls ?? true}
                 />}
               </div>
             </motion.div>

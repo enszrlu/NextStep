@@ -8,10 +8,11 @@ const DefaultCard: React.FC<CardComponentProps> = ({
   nextStep,
   prevStep,
   skipTour,
-  arrow
+  arrow,
+  showControls
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm">
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg min-w-64">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">{step.title}</h2>
         {step.icon && <span className="text-2xl">{step.icon}</span>}
@@ -31,6 +32,9 @@ const DefaultCard: React.FC<CardComponentProps> = ({
           onClick={prevStep}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           disabled={currentStep === 0}
+          style={{
+            display: showControls ? 'block' : 'none',
+          }}
         >
           Previous
         </button>
@@ -41,6 +45,9 @@ const DefaultCard: React.FC<CardComponentProps> = ({
           <button 
             onClick={skipTour}
             className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            style={{
+              display: showControls ? 'block' : 'none',
+            }}
           >
             Finish
           </button>
@@ -48,6 +55,9 @@ const DefaultCard: React.FC<CardComponentProps> = ({
           <button 
             onClick={nextStep}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            style={{
+              display: showControls ? 'block' : 'none',
+            }}
           >
             Next
           </button>
@@ -60,6 +70,9 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         <button 
           onClick={skipTour}
           className="mt-4 w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          style={{
+            display: showControls ? 'block' : 'none',
+          }}
         >
           Skip Tour
         </button>
