@@ -15,6 +15,7 @@ export interface Step {
     side?: "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "left-top" | "left-bottom" | "right-top" | "right-bottom";
     showControls?: boolean;
     showSkip?: boolean;
+    blockKeyboardControl?: boolean;
     pointerPadding?: number;
     pointerRadius?: number;
     nextRoute?: string;

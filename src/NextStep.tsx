@@ -305,7 +305,7 @@ const NextStep: React.FC<NextStepProps> = ({
   // Keyboard Controls
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isNextStepVisible) {
+      if (isNextStepVisible && !currentTourSteps?.[currentStep]?.blockKeyboardControl) {
         switch (event.key) {
           case "ArrowRight":
             nextStep();

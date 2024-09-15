@@ -26,7 +26,7 @@ bun add nextstepjs
 ### Global `layout.tsx`
 Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
 
-```typescriptreact
+```tsx
 <NextStepProvider>
   <NextStep steps={steps}>
     {children}
@@ -65,7 +65,7 @@ You can create a custom card component for greater control over the design:
 | `arrow`         |                  | Returns an SVG object, the orientation is controlled by the steps side prop |
 | `skipTour`         |                  | A function to skip the tour |
 
-```typescriptreact
+```tsx
 "use client"
 import type { CardComponentProps } from "nextstepjs";
 
@@ -96,7 +96,7 @@ export const CustomCard = ({
 
 NextStep supports multiple "tours", allowing you to create multiple product tours:
 
-```typescriptreact
+```tsx
 import { Tour } from 'nextstepjs';
 
 const steps : Tour[] = [
@@ -126,6 +126,7 @@ const steps : Tour[] = [
 | `side`           | `"top"`, `"bottom"`, `"left"`, `"right"` | Optional. Determines where the tooltip should appear relative to the selector.          |
 | `showControls`   | `boolean`                       | Optional. Determines whether control buttons (next, prev) should be shown if using the default card.           |
 | `showSkip`       | `boolean`                       | Optional. Determines whether skip button should be shown if using the default card.           |
+| `blockKeyboardControl` | `boolean`                       | Optional. Determines whether keyboard control should be blocked|
 | `pointerPadding` | `number`                        | Optional. The padding around the pointer (keyhole) highlighting the target element.             |
 | `pointerRadius`  | `number`                        | Optional. The border-radius of the pointer (keyhole) highlighting the target element.           |
 | `nextRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the next step.                      |
@@ -137,7 +138,7 @@ const steps : Tour[] = [
 
 Target anything in your app using the element's `id` attribute.
 
-```typescriptreact
+```tsx
 <div id="nextstep-step1">Onboard Step</div>
 ```
 
@@ -209,10 +210,10 @@ Target anything in your app using the element's `id` attribute.
 | `onStepChange` | `(step: number) => void` | Callback function triggered when the step changes
 | `onComplete` | `() => void` | Callback function triggered when the tour completes
 | `onSkip` | `() => void` | Callback function triggered when the user skips the tour
-| `clickThroughOverlay` | `boolean` | Optional. If true, overlay background is not clickable, default is false
+| `clickThroughOverlay` | `boolean` | Optional. If true, overlay background is clickable, default is false
 
 
-```typescriptreact
+```tsx
 <NextStep
   steps={steps}
   showNextStep={true}
@@ -233,7 +234,7 @@ Target anything in your app using the element's `id` attribute.
 
 useNextStep hook allows you to control the tour from anywhere in your app.
 
-```typescriptreact
+```tsx
 import { useNextStep } from 'nextstepjs';
 ....
 

@@ -250,7 +250,7 @@ const NextStep = ({ children, steps, shadowRgb = "0, 0, 0", shadowOpacity = "0.2
     // Keyboard Controls
     useEffect(() => {
         const handleKeyDown = (event) => {
-            if (isNextStepVisible) {
+            if (isNextStepVisible && !currentTourSteps?.[currentStep]?.blockKeyboardControl) {
                 switch (event.key) {
                     case "ArrowRight":
                         nextStep();
