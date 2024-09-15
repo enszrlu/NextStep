@@ -38,9 +38,6 @@ Wrap your application in `NextStepProvider` and supply the `steps` array to Next
 
 Tailwind CSS needs to scan the node module to include the used classes. See [configuring source paths](https://tailwindcss.com/docs/content-configuration#configuring-source-paths) for more information.
 
-> **Note**: This is only required if you're **not using** a custom component.
-
-
 
 ```typescript
 const config: Config = {
