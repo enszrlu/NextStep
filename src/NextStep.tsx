@@ -356,7 +356,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Check if Card is Cut Off on Sides
-  const checkSideCutOff = (side: string = 'right') => {
+  const checkSideCutOff = (side: string) => {
     let tempSide = side;
 
     let removeSide = false;
@@ -487,7 +487,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Arrow position based on card side
-  const getArrowStyle = (side: string) => {
+  const getArrowStyle = (side: string = 'right') => {
     side = checkSideCutOff(side);
 
     switch (side) {
