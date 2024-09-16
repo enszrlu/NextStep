@@ -7,6 +7,8 @@ It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [
 
 The library allows user to use custom cards (tooltips) for easier integration.
 
+**If you like the project, please leave a star! ⭐️⭐️⭐️⭐️⭐️**
+
 - **[Demo App](https://nextstepjs.vercel.app)**
 - **[Demo repository](https://github.com/enszrlu/NextStep-Website)**
 
