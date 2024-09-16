@@ -357,6 +357,10 @@ const NextStep: React.FC<NextStepProps> = ({
   // - -
   // Check if Card is Cut Off on Sides
   const checkSideCutOff = (side: string) => {
+    if (!side) {
+      return side;
+    }
+
     let tempSide = side;
 
     let removeSide = false;
@@ -564,7 +568,9 @@ const NextStep: React.FC<NextStepProps> = ({
           top: "10px",
         };
       default:
-        return {}; // Default case if no side is specified
+        return {
+          display: "none",
+        }; // Default case if no side is specified
     }
   };
 
