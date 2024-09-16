@@ -703,12 +703,13 @@ const NextStep: React.FC<NextStepProps> = ({
               transition={cardTransition}
             >
               {/* Card */}
-              <div
-                className="absolute flex flex-col max-w-[100%] transition-all min-w-min pointer-events-auto z-[999]"
+              <motion.div
+                className="absolute flex flex-col max-w-[100%] min-w-min pointer-events-auto z-[999]"
                 data-name="nextstep-card"
                 style={getCardStyle(
                   currentTourSteps?.[currentStep]?.side as any
                 )}
+                transition={cardTransition}
               >
                 {CardComponent ? <CardComponent
                   step={currentTourSteps?.[currentStep]!}
@@ -727,7 +728,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
                   skipTour={skipTour}
                 />}
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
         </Portal>
