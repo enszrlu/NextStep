@@ -47,7 +47,7 @@ const NextStep: React.FC<NextStepProps> = ({
   const router = useRouter();
 
   // - -
-  // Initialize
+  // Initialize and Update pointerPosition when currentStep changes
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
       console.log("NextStep: Current Step Changed");
@@ -81,7 +81,7 @@ const NextStep: React.FC<NextStepProps> = ({
         setElementToScroll(null);
       }
     }
-  }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
+  }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible, elementToScroll]);
 
   // - -
   // Helper function to get element position
@@ -98,55 +98,7 @@ const NextStep: React.FC<NextStepProps> = ({
   };
 
   // - -
-  // Update pointerPosition when currentStep changes
-  useEffect(() => {
-    if (isNextStepVisible && currentTourSteps) {
-      console.log("NextStep: Current Step Changed");
-      const step = currentTourSteps[currentStep];
-      if (step && step.selector) {
-        const element = document.querySelector(step.selector) as Element | null;
-        if (element) {
-          setPointerPosition(getElementPosition(element));
-          currentElementRef.current = element;
-          setElementToScroll(element);
-
-          const rect = element.getBoundingClientRect();
-          const isInViewportWithOffset =
-            rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
-
-          if (!isInView || !isInViewportWithOffset) {
-            const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
-          }
-        }
-      } else {
-        // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
-        currentElementRef.current = null;
-        setElementToScroll(null);
-      }
-    }
-  }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
-
-  useEffect(() => {
-    if (elementToScroll && !isInView && isNextStepVisible) {
-      console.log("NextStep: Element to Scroll Changed");
-
-      const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-      elementToScroll.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center", inline: "center" });
-    } else {
-      // Scroll to the top of the body
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [elementToScroll, isInView, isNextStepVisible]);
-
-  // - -
-  // Update pointer position on window resize
+  // Update pointer position
   const updatePointerPosition = () => {
     if (currentTourSteps) {
       const step = currentTourSteps[currentStep];
@@ -236,7 +188,7 @@ const NextStep: React.FC<NextStepProps> = ({
             setCurrentStep(nextStepIndex);
           }
         } else {
-          setCurrentStep(nextStepIndex);
+        setCurrentStep(nextStepIndex);
           scrollToElement(nextStepIndex);
         }
       } catch (error) {
@@ -285,7 +237,7 @@ const NextStep: React.FC<NextStepProps> = ({
             setCurrentStep(prevStepIndex);
           }
         } else {
-          setCurrentStep(prevStepIndex);
+        setCurrentStep(prevStepIndex);
           scrollToElement(prevStepIndex);
         }
       } catch (error) {
