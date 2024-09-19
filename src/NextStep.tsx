@@ -3,11 +3,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Portal } from '@radix-ui/react-portal';
 
 // Types
 import { NextStepProps } from './types';
 import DefaultCard from './DefaultCard';
+import DynamicPortal from './DynamicPortal';
 
 const NextStep: React.FC<NextStepProps> = ({
   children,
@@ -650,7 +650,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
       {/* NextStep Overlay Step Content */}
       {pointerPosition && isNextStepVisible && (
-        <Portal>
+        <DynamicPortal wrapperID={currentTourSteps?.[currentStep]?.wrapperID}>
           <motion.div
             data-name="nextstep-overlay"
             className="absolute inset-0 overflow-hidden"
@@ -787,7 +787,7 @@ const NextStep: React.FC<NextStepProps> = ({
               </motion.div>
             </motion.div>
           </motion.div>
-        </Portal>
+        </DynamicPortal>
       )}
     </div>
   );

@@ -40,7 +40,6 @@
     "start": "npm run build && node dist/index.js"
   },
   "peerDependencies": {
-    "@radix-ui/react-portal": ">=1.1.1",
     "framer-motion": ">=11",
     "next": ">=13",
     "react": ">=18",
