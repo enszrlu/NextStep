@@ -1,20 +1,20 @@
-"use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNextStep } from "./NextStepContext";
-import { motion, useInView } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { Portal } from "@radix-ui/react-portal";
+'use client';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNextStep } from './NextStepContext';
+import { motion, useInView } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { Portal } from '@radix-ui/react-portal';
 
 // Types
-import { NextStepProps } from "./types";
+import { NextStepProps } from './types';
 import DefaultCard from './DefaultCard';
 
 const NextStep: React.FC<NextStepProps> = ({
   children,
   steps,
-  shadowRgb = "0, 0, 0",
-  shadowOpacity = "0.2",
-  cardTransition = { ease: "anticipate", duration: 0.6 },
+  shadowRgb = '0, 0, 0',
+  shadowOpacity = '0.2',
+  cardTransition = { ease: 'anticipate', duration: 0.6 },
   cardComponent: CardComponent,
   onStepChange = () => {},
   onComplete = () => {},
@@ -25,9 +25,7 @@ const NextStep: React.FC<NextStepProps> = ({
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
 
-  const currentTourSteps = steps.find(
-    (tour) => tour.tour === currentTour
-  )?.steps;
+  const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
 
   const [elementToScroll, setElementToScroll] = useState<Element | null>(null);
   const [pointerPosition, setPointerPosition] = useState<{
@@ -50,7 +48,7 @@ const NextStep: React.FC<NextStepProps> = ({
   // Initialize and Update pointerPosition when currentStep changes
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
-      console.log("NextStep: Current Step Changed");
+      console.log('NextStep: Current Step Changed');
 
       const step = currentTourSteps[currentStep];
       if (step && step.selector) {
@@ -65,8 +63,17 @@ const NextStep: React.FC<NextStepProps> = ({
             rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
 
           if (!isInView || !isInViewportWithOffset) {
-            const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
+            const side = checkSideCutOff(
+              currentTourSteps?.[currentStep]?.side || 'right',
+            );
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: side.includes('top')
+                ? 'end'
+                : side.includes('bottom')
+                ? 'start'
+                : 'center',
+            });
           }
         }
       } else {
@@ -81,7 +88,14 @@ const NextStep: React.FC<NextStepProps> = ({
         setElementToScroll(null);
       }
     }
-  }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible, elementToScroll]);
+  }, [
+    currentStep,
+    currentTourSteps,
+    isInView,
+    offset,
+    isNextStepVisible,
+    elementToScroll,
+  ]);
 
   // - -
   // Helper function to get element position
@@ -125,8 +139,8 @@ const NextStep: React.FC<NextStepProps> = ({
   // Update pointer position on window resize
   useEffect(() => {
     if (isNextStepVisible) {
-      window.addEventListener("resize", updatePointerPosition);
-      return () => window.removeEventListener("resize", updatePointerPosition);
+      window.addEventListener('resize', updatePointerPosition);
+      return () => window.removeEventListener('resize', updatePointerPosition);
     }
   }, [currentStep, currentTourSteps, isNextStepVisible]);
 
@@ -140,7 +154,7 @@ const NextStep: React.FC<NextStepProps> = ({
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
         document.body.clientHeight,
-        document.documentElement.clientHeight
+        document.documentElement.clientHeight,
       );
       setDocumentHeight(height);
     };
@@ -188,14 +202,13 @@ const NextStep: React.FC<NextStepProps> = ({
             setCurrentStep(nextStepIndex);
           }
         } else {
-        setCurrentStep(nextStepIndex);
+          setCurrentStep(nextStepIndex);
           scrollToElement(nextStepIndex);
         }
       } catch (error) {
-        console.error("Error navigating to next route", error);
+        console.error('Error navigating to next route', error);
       }
-    }
-    else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
+    } else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
       onComplete?.();
       closeNextStep();
     }
@@ -237,11 +250,11 @@ const NextStep: React.FC<NextStepProps> = ({
             setCurrentStep(prevStepIndex);
           }
         } else {
-        setCurrentStep(prevStepIndex);
+          setCurrentStep(prevStepIndex);
           scrollToElement(prevStepIndex);
         }
       } catch (error) {
-        console.error("Error navigating to previous route", error);
+        console.error('Error navigating to previous route', error);
       }
     }
   };
@@ -259,21 +272,21 @@ const NextStep: React.FC<NextStepProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isNextStepVisible && !currentTourSteps?.[currentStep]?.blockKeyboardControl) {
         switch (event.key) {
-          case "ArrowRight":
+          case 'ArrowRight':
             nextStep();
             break;
-          case "ArrowLeft":
+          case 'ArrowLeft':
             prevStep();
             break;
-          case "Escape":
+          case 'Escape':
             skipTour();
             break;
         }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isNextStepVisible, nextStep, prevStep, skipTour]);
 
   // - -
@@ -285,11 +298,17 @@ const NextStep: React.FC<NextStepProps> = ({
         const element = document.querySelector(selector) as Element | null;
         if (element) {
           const { top } = element.getBoundingClientRect();
-          const isInViewport =
-            top >= -offset && top <= window.innerHeight + offset;
+          const isInViewport = top >= -offset && top <= window.innerHeight + offset;
           if (!isInViewport) {
-            const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
+            const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || 'right');
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: side.includes('top')
+                ? 'end'
+                : side.includes('bottom')
+                ? 'start'
+                : 'center',
+            });
           }
           // Update pointer position after scrolling
           setPointerPosition(getElementPosition(element));
@@ -316,30 +335,37 @@ const NextStep: React.FC<NextStepProps> = ({
     let tempSide = side;
 
     let removeSide = false;
-    
+
     // Check if card would be cut off on sides
-    if (side.startsWith("right") && pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+    if (
+      side.startsWith('right') &&
+      pointerPosition &&
+      window.innerWidth < pointerPosition.x + pointerPosition.width + 256
+    ) {
       removeSide = true;
-    }else if (side.startsWith("left") && pointerPosition && pointerPosition.x < 256) {
+    } else if (side.startsWith('left') && pointerPosition && pointerPosition.x < 256) {
       removeSide = true;
     }
 
     // Check if card would be cut off on top or bottom
-    if (side.includes("top") && pointerPosition && pointerPosition.y < 256) {
+    if (side.includes('top') && pointerPosition && pointerPosition.y < 256) {
       if (removeSide) {
-        tempSide = "bottom"
-      } else{
-        tempSide = side.replace("top", "bottom");
+        tempSide = 'bottom';
+      } else {
+        tempSide = side.replace('top', 'bottom');
       }
-    }
-    else if (side.includes("bottom") && pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+    } else if (
+      side.includes('bottom') &&
+      pointerPosition &&
+      pointerPosition.y + pointerPosition.height + 256 > window.innerHeight
+    ) {
       if (removeSide) {
-        tempSide = "top"
-      } else{
-        tempSide = side.replace("bottom", "top");
+        tempSide = 'top';
+      } else {
+        tempSide = side.replace('bottom', 'top');
       }
-    }else if (removeSide) {
-      tempSide = pointerPosition && pointerPosition.y < 256 ? "bottom" : "top";
+    } else if (removeSide) {
+      tempSide = pointerPosition && pointerPosition.y < 256 ? 'bottom' : 'top';
     }
 
     return tempSide;
@@ -347,94 +373,94 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Card Side
-  const getCardStyle = (side: string) : React.CSSProperties => {
+  const getCardStyle = (side: string): React.CSSProperties => {
     if (!side || !currentTourSteps?.[currentStep].selector) {
       // Center the card if the selector is undefined or empty
       return {
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)", // Center the card
-        position: "fixed", // Make sure it's positioned relative to the viewport
-        margin: "0",
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)', // Center the card
+        position: 'fixed', // Make sure it's positioned relative to the viewport
+        margin: '0',
       };
     }
 
-    side = checkSideCutOff(side)
+    side = checkSideCutOff(side);
 
     switch (side) {
-      case "top":
+      case 'top':
         return {
           transform: `translate(-50%, 0)`,
-          left: "50%",
-          bottom: "100%",
-          marginBottom: "25px",
+          left: '50%',
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "bottom":
+      case 'bottom':
         return {
           transform: `translate(-50%, 0)`,
-          left: "50%",
-          top: "100%",
-          marginTop: "25px",
+          left: '50%',
+          top: '100%',
+          marginTop: '25px',
         };
-      case "left":
+      case 'left':
         return {
           transform: `translate(0, -50%)`,
-          right: "100%",
-          top: "50%",
-          marginRight: "25px",
+          right: '100%',
+          top: '50%',
+          marginRight: '25px',
         };
-      case "right":
+      case 'right':
         return {
           transform: `translate(0, -50%)`,
-          left: "100%",
-          top: "50%",
-          marginLeft: "25px",
+          left: '100%',
+          top: '50%',
+          marginLeft: '25px',
         };
-      case "top-left":
+      case 'top-left':
         return {
-          bottom: "100%",
-          marginBottom: "25px",
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "top-right":
-        return {
-          right: 0,
-          bottom: "100%",
-          marginBottom: "25px",
-        };
-      case "bottom-left":
-        return {
-          top: "100%",
-          marginTop: "25px",
-        };
-      case "bottom-right":
+      case 'top-right':
         return {
           right: 0,
-          top: "100%",
-          marginTop: "25px",
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "right-bottom":
+      case 'bottom-left':
         return {
-          left: "100%",
+          top: '100%',
+          marginTop: '25px',
+        };
+      case 'bottom-right':
+        return {
+          right: 0,
+          top: '100%',
+          marginTop: '25px',
+        };
+      case 'right-bottom':
+        return {
+          left: '100%',
           bottom: 0,
-          marginLeft: "25px",
+          marginLeft: '25px',
         };
-      case "right-top":
+      case 'right-top':
         return {
-          left: "100%",
+          left: '100%',
           top: 0,
-          marginLeft: "25px",
+          marginLeft: '25px',
         };
-      case "left-bottom":
+      case 'left-bottom':
         return {
-          right: "100%",
+          right: '100%',
           bottom: 0,
-          marginRight: "25px",
+          marginRight: '25px',
         };
-      case "left-top":
+      case 'left-top':
         return {
-          right: "100%",
+          right: '100%',
           top: 0,
-          marginRight: "25px",
+          marginRight: '25px',
         };
       default:
         return {}; // Default case if no side is specified
@@ -447,88 +473,88 @@ const NextStep: React.FC<NextStepProps> = ({
     side = checkSideCutOff(side);
 
     switch (side) {
-      case "bottom":
+      case 'bottom':
         return {
           transform: `translate(-50%, 0) rotate(270deg)`,
-          left: "50%",
-          top: "-23px",
+          left: '50%',
+          top: '-23px',
         };
-      case "top":
+      case 'top':
         return {
           transform: `translate(-50%, 0) rotate(90deg)`,
-          left: "50%",
-          bottom: "-23px",
+          left: '50%',
+          bottom: '-23px',
         };
-      case "right":
+      case 'right':
         return {
           transform: `translate(0, -50%) rotate(180deg)`,
-          top: "50%",
-          left: "-23px",
+          top: '50%',
+          left: '-23px',
         };
-      case "left":
+      case 'left':
         return {
           transform: `translate(0, -50%) rotate(0deg)`,
-          top: "50%",
-          right: "-23px",
+          top: '50%',
+          right: '-23px',
         };
-      case "top-left":
+      case 'top-left':
         return {
           transform: `rotate(90deg)`,
-          left: "10px",
-          bottom: "-23px",
+          left: '10px',
+          bottom: '-23px',
         };
-      case "top-right":
+      case 'top-right':
         return {
           transform: `rotate(90deg)`,
-          right: "10px",
-          bottom: "-23px",
+          right: '10px',
+          bottom: '-23px',
         };
-      case "bottom-left":
+      case 'bottom-left':
         return {
           transform: `rotate(270deg)`,
-          left: "10px",
-          top: "-23px",
+          left: '10px',
+          top: '-23px',
         };
-      case "bottom-right":
+      case 'bottom-right':
         return {
           transform: `rotate(270deg)`,
-          right: "10px",
-          top: "-23px",
+          right: '10px',
+          top: '-23px',
         };
-      case "right-bottom":
+      case 'right-bottom':
         return {
           transform: `rotate(180deg)`,
-          left: "-23px",
-          bottom: "10px",
+          left: '-23px',
+          bottom: '10px',
         };
-      case "right-top":
+      case 'right-top':
         return {
           transform: `rotate(180deg)`,
-          left: "-23px",
-          top: "10px",
+          left: '-23px',
+          top: '10px',
         };
-      case "left-bottom":
+      case 'left-bottom':
         return {
           transform: `rotate(0deg)`,
-          right: "-23px",
-          bottom: "10px",
+          right: '-23px',
+          bottom: '10px',
         };
-      case "left-top":
+      case 'left-top':
         return {
           transform: `rotate(0deg)`,
-          right: "-23px",
-          top: "10px",
+          right: '-23px',
+          top: '10px',
         };
       default:
         return {
-          display: "none",
+          display: 'none',
         }; // Default case if no side is specified
     }
   };
 
   // - -
   // Card Arrow
-  const CardArrow = ({isVisible}: {isVisible: boolean}) => {
+  const CardArrow = ({ isVisible }: { isVisible: boolean }) => {
     if (!isVisible) {
       return null;
     }
@@ -558,11 +584,7 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
 
   return (
-    <div
-      data-name="nextstep-wrapper"
-      className="relative w-full"
-      data-nextstep="dev"
-    >
+    <div data-name="nextstep-wrapper" className="relative w-full" data-nextstep="dev">
       {/* Container for the Website content */}
       <div data-name="nextstep-site" className="block w-full">
         {children}
@@ -575,7 +597,7 @@ const NextStep: React.FC<NextStepProps> = ({
             data-name="nextstep-overlay"
             className="absolute inset-0 overflow-hidden"
             initial="hidden"
-            animate={isNextStepVisible ? "visible" : "hidden"}
+            animate={isNextStepVisible ? 'visible' : 'hidden'}
             variants={variants}
             transition={{ duration: 0.5 }}
             style={{
@@ -586,41 +608,51 @@ const NextStep: React.FC<NextStepProps> = ({
           >
             {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
             {!clickThroughOverlay && (
-            <div className="absolute inset-0 z-[998] pointer-events-none" style={{ width: '100vw', height: `${documentHeight}px` }}>
-              {/* Top overlay */}
-              <div 
-                className="absolute top-0 left-0 right-0 pointer-events-auto" 
-                style={{ height: Math.max(pointerPosition.y - pointerPadOffset, 0) }}
-              ></div>
-              
-              {/* Bottom overlay */}
-              <div 
-                className="absolute left-0 right-0 pointer-events-auto" 
-                style={{ 
-                  top: `${pointerPosition.y + pointerPosition.height + pointerPadOffset}px`,
-                  height: `${documentHeight - (pointerPosition.y + pointerPosition.height + pointerPadOffset)}px`
-                }}
-              ></div>
-              
-              {/* Left overlay */}
-              <div 
-                className="absolute left-0 top-0 pointer-events-auto" 
-                style={{ 
-                  width: Math.max(pointerPosition.x - pointerPadOffset, 0),
-                  height: `${documentHeight}px`
-                }}
-              ></div>
-              
-              {/* Right overlay */}
-              <div 
-                className="absolute top-0 pointer-events-auto" 
-                style={{ 
-                  left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
-                  right: 0,
-                  height: `${documentHeight}px`
-                }}
-              ></div>
-            </div>
+              <div
+                className="absolute inset-0 z-[998] pointer-events-none"
+                style={{ width: '100vw', height: `${documentHeight}px` }}
+              >
+                {/* Top overlay */}
+                <div
+                  className="absolute top-0 left-0 right-0 pointer-events-auto"
+                  style={{ height: Math.max(pointerPosition.y - pointerPadOffset, 0) }}
+                ></div>
+
+                {/* Bottom overlay */}
+                <div
+                  className="absolute left-0 right-0 pointer-events-auto"
+                  style={{
+                    top: `${
+                      pointerPosition.y + pointerPosition.height + pointerPadOffset
+                    }px`,
+                    height: `${
+                      documentHeight -
+                      (pointerPosition.y + pointerPosition.height + pointerPadOffset)
+                    }px`,
+                  }}
+                ></div>
+
+                {/* Left overlay */}
+                <div
+                  className="absolute left-0 top-0 pointer-events-auto"
+                  style={{
+                    width: Math.max(pointerPosition.x - pointerPadOffset, 0),
+                    height: `${documentHeight}px`,
+                  }}
+                ></div>
+
+                {/* Right overlay */}
+                <div
+                  className="absolute top-0 pointer-events-auto"
+                  style={{
+                    left: `${
+                      pointerPosition.x + pointerPosition.width + pointerPadOffset
+                    }px`,
+                    right: 0,
+                    height: `${documentHeight}px`,
+                  }}
+                ></div>
+              </div>
             )}
 
             {/* Pointer */}
@@ -658,28 +690,42 @@ const NextStep: React.FC<NextStepProps> = ({
               <motion.div
                 className="absolute flex flex-col max-w-[100%] min-w-min pointer-events-auto z-[999]"
                 data-name="nextstep-card"
-                style={getCardStyle(
-                  currentTourSteps?.[currentStep]?.side as any
-                )}
+                style={getCardStyle(currentTourSteps?.[currentStep]?.side as any)}
                 transition={cardTransition}
               >
-                {CardComponent ? <CardComponent
-                  step={currentTourSteps?.[currentStep]!}
-                  currentStep={currentStep}
-                  totalSteps={currentTourSteps?.length ?? 0}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
-                  skipTour={skipTour}
-                /> : <DefaultCard
-                  step={currentTourSteps?.[currentStep]!}
-                  currentStep={currentStep}
-                  totalSteps={currentTourSteps?.length ?? 0}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
-                  skipTour={skipTour}
-                />}
+                {CardComponent ? (
+                  <CardComponent
+                    step={currentTourSteps?.[currentStep]!}
+                    currentStep={currentStep}
+                    totalSteps={currentTourSteps?.length ?? 0}
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    arrow={
+                      <CardArrow
+                        isVisible={
+                          !!(currentTourSteps?.[currentStep]?.selector && displayArrow)
+                        }
+                      />
+                    }
+                    skipTour={skipTour}
+                  />
+                ) : (
+                  <DefaultCard
+                    step={currentTourSteps?.[currentStep]!}
+                    currentStep={currentStep}
+                    totalSteps={currentTourSteps?.length ?? 0}
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    arrow={
+                      <CardArrow
+                        isVisible={
+                          !!(currentTourSteps?.[currentStep]?.selector && displayArrow)
+                        }
+                      />
+                    }
+                    skipTour={skipTour}
+                  />
+                )}
               </motion.div>
             </motion.div>
           </motion.div>

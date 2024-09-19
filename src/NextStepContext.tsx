@@ -1,8 +1,8 @@
-"use client";
-import React, { createContext, useContext, useState, useCallback } from "react";
+'use client';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 // Types
-import { NextStepContextType } from "./types";
+import { NextStepContextType } from './types';
 
 // Example Hooks Usage:
 // const { setCurrentStep, closeNextStep, startNextStep } = useNextStep();
@@ -19,14 +19,12 @@ const NextStepContext = createContext<NextStepContextType | undefined>(undefined
 const useNextStep = () => {
   const context = useContext(NextStepContext);
   if (context === undefined) {
-    throw new Error("useNextStep must be used within a NextStepProvider");
+    throw new Error('useNextStep must be used within a NextStepProvider');
   }
   return context;
 };
 
-const NextStepProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const NextStepProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentTour, setCurrentTour] = useState<string | null>(null);
   const [currentStep, setCurrentStepState] = useState(0);
   const [isNextStepVisible, setNextStepVisible] = useState(false);
