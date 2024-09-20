@@ -101,12 +101,22 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
-          y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
-          width: 0,
-          height: 0,
-        });
+        if (step.wrapperID) {
+          setPointerPosition({
+            x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
+            y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
