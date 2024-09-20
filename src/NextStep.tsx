@@ -1039,6 +1039,6 @@ const getScrollableParent = (element: Element): HTMLElement | Element => {
     parent = parent.parentElement;
   }
 
-  // No scrollable parent found, return the document body as the default
-  return document.body;
+  // No scrollable parent found, return the element itself
+  return element;
 };
