@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 // Types
 import { NextStepProps } from './types';
@@ -39,10 +39,16 @@ const NextStep: React.FC<NextStepProps> = ({
   const isInView = useInView(observeRef);
   const offset = 20;
   const [documentHeight, setDocumentHeight] = useState(0);
+  const [viewport, setViewport] = useState<Element>(window.document.body);
+  const [viewportRect, setViewportRect] = useState<DOMRect>(
+    window.document.body.getBoundingClientRect(),
+  );
+  const [scrollableParent, setScrollableParent] = useState<Element>(window.document.body);
 
   // - -
   // Route Changes
   const router = useRouter();
+  const pathname = usePathname();
 
   // - -
   // Initialize
@@ -51,6 +57,23 @@ const NextStep: React.FC<NextStepProps> = ({
       console.log('NextStep: Current Step Changed');
 
       const step = currentTourSteps[currentStep];
+
+      // Default viewport is the body
+      let tempViewport: Element = window.document.body;
+
+      if (step) {
+        if (step.wrapperID) {
+          const stepViewport = document.querySelector(`#${step.wrapperID}`);
+          if (stepViewport) {
+            tempViewport = stepViewport;
+          }
+        }
+      }
+      const tempViewportRect = tempViewport.getBoundingClientRect();
+      setViewport(tempViewport);
+      setViewportRect(tempViewportRect);
+      setScrollableParent(getScrollableParent(tempViewport));
+
       if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
@@ -79,8 +102,8 @@ const NextStep: React.FC<NextStepProps> = ({
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
         setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
+          x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
+          y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
           width: 0,
           height: 0,
         });
@@ -91,16 +114,70 @@ const NextStep: React.FC<NextStepProps> = ({
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
 
   // - -
+  // Update viewport rect on window resize and path change
+  useEffect(() => {
+    const updateViewportRect = () => {
+      // Default viewport is the body
+      let tempViewport: Element | null = window.document.body;
+
+      if (currentTourSteps && currentStep) {
+        const step = currentTourSteps[currentStep];
+        if (step.wrapperID) {
+          // If the step has a wrapperID, use the wrapper as the viewport
+          const stepViewport = document.querySelector(`#${step.wrapperID}`);
+          if (stepViewport) {
+            tempViewport = stepViewport;
+          }
+        }
+      }
+      setViewport(tempViewport);
+      setViewportRect(tempViewport.getBoundingClientRect());
+      setScrollableParent(getScrollableParent(tempViewport));
+    };
+
+    // Call the updateViewportRect function initially when currentStep changes
+    updateViewportRect();
+
+    // Set up a resize event listener to update viewport rect on window resize
+    window.addEventListener('resize', updateViewportRect);
+
+    // Clean up the event listener on unmount
+    return () => {
+      window.removeEventListener('resize', updateViewportRect);
+      window.removeEventListener('popstate', updateViewportRect);
+    };
+  }, [currentStep, pathname]);
+
+  // - -
   // Helper function to get element position
   const getElementPosition = (element: Element) => {
-    const { top, left, width, height } = element.getBoundingClientRect();
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    const elementRect = element.getBoundingClientRect();
+
+    // Default viewport is the body
+    let viewport: Element | null = window.document.body;
+    let viewPortRect: DOMRect | null = window.document.body.getBoundingClientRect();
+
+    if (currentTourSteps && currentStep) {
+      const step = currentTourSteps[currentStep];
+      if (step.wrapperID) {
+        // If the step has a wrapperID, use the wrapper as the viewport
+        const tempViewport = document.querySelector(`#${step.wrapperID}`);
+        if (tempViewport) {
+          viewport = tempViewport;
+          viewPortRect = viewport.getBoundingClientRect();
+        }
+      }
+    }
+
+    // Calculate the position of the element relative to the viewport
+    const relativeTop = elementRect.top - viewPortRect.top + viewport.scrollTop;
+    const relativeLeft = elementRect.left - viewPortRect.left + viewport.scrollLeft;
+
     return {
-      x: left + scrollLeft,
-      y: top + scrollTop,
-      width,
-      height,
+      x: relativeLeft,
+      y: relativeTop,
+      width: elementRect.width,
+      height: elementRect.height,
     };
   };
 
@@ -110,6 +187,25 @@ const NextStep: React.FC<NextStepProps> = ({
     if (isNextStepVisible && currentTourSteps) {
       console.log('NextStep: Current Step Changed');
       const step = currentTourSteps[currentStep];
+
+      // Default viewport is the body
+      let tempViewport: Element | null = window.document.body;
+
+      if (step) {
+        if (step.wrapperID) {
+          // If the step has a wrapperID, use the wrapper as the viewport
+          const viewport = document.querySelector(`#${step.wrapperID}`);
+          if (viewport) {
+            tempViewport = viewport;
+          }
+        }
+      }
+
+      const tempViewportRect = tempViewport.getBoundingClientRect();
+      setViewport(tempViewport);
+      setViewportRect(tempViewportRect);
+      setScrollableParent(getScrollableParent(tempViewport));
+
       if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
@@ -137,12 +233,22 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (step.wrapperID) {
+          setPointerPosition({
+            x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
+            y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
@@ -181,12 +287,22 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (step.wrapperID) {
+          setPointerPosition({
+            x: scrollableParent.getBoundingClientRect().width / 2,
+            y: scrollableParent.getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
@@ -208,7 +324,7 @@ const NextStep: React.FC<NextStepProps> = ({
     const updateDocumentHeight = () => {
       const height = Math.max(
         document.body.scrollHeight,
-        document.documentElement.scrollHeight,
+        // document.documentElement.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
         document.body.clientHeight,
@@ -373,12 +489,24 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (currentTourSteps?.[currentStep].wrapperID) {
+          setPointerPosition({
+            x: scrollableParent.getBoundingClientRect().width / 2,
+            y: scrollableParent.getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
+        currentElementRef.current = null;
+        setElementToScroll(null);
       }
     }
   };
@@ -653,13 +781,14 @@ const NextStep: React.FC<NextStepProps> = ({
         <DynamicPortal wrapperID={currentTourSteps?.[currentStep]?.wrapperID}>
           <motion.div
             data-name="nextstep-overlay"
-            className="absolute inset-0 overflow-hidden"
+            className="absolute top-0 left-0 overflow-hidden"
             initial="hidden"
             animate={isNextStepVisible ? 'visible' : 'hidden'}
             variants={variants}
             transition={{ duration: 0.5 }}
             style={{
-              height: `${documentHeight}px`,
+              height: `${viewport.scrollHeight}px`,
+              width: `${viewport.scrollWidth}px`,
               zIndex: 997, // Ensure it's below the pointer but above other content
               pointerEvents: 'none',
             }}
@@ -668,7 +797,10 @@ const NextStep: React.FC<NextStepProps> = ({
             {!clickThroughOverlay && (
               <div
                 className="absolute inset-0 z-[998] pointer-events-none"
-                style={{ width: '100vw', height: `${documentHeight}px` }}
+                style={{
+                  height: `${viewport.scrollHeight}px`,
+                  width: `${viewport.scrollWidth}px`,
+                }}
               >
                 {/* Top overlay */}
                 <div
@@ -678,13 +810,10 @@ const NextStep: React.FC<NextStepProps> = ({
 
                 {/* Bottom overlay */}
                 <div
-                  className="absolute left-0 right-0 pointer-events-auto"
+                  className="absolute left-0 right-0 bottom-0 pointer-events-auto"
                   style={{
-                    top: `${
-                      pointerPosition.y + pointerPosition.height + pointerPadOffset
-                    }px`,
                     height: `${
-                      documentHeight -
+                      viewportRect.height -
                       (pointerPosition.y + pointerPosition.height + pointerPadOffset)
                     }px`,
                   }}
@@ -695,7 +824,7 @@ const NextStep: React.FC<NextStepProps> = ({
                   className="absolute left-0 top-0 pointer-events-auto"
                   style={{
                     width: Math.max(pointerPosition.x - pointerPadOffset, 0),
-                    height: `${documentHeight}px`,
+                    height: viewportRect.height,
                   }}
                 ></div>
 
@@ -707,7 +836,7 @@ const NextStep: React.FC<NextStepProps> = ({
                       pointerPosition.x + pointerPosition.width + pointerPadOffset
                     }px`,
                     right: 0,
-                    height: `${documentHeight}px`,
+                    height: viewportRect.height,
                   }}
                 ></div>
               </div>
@@ -789,8 +918,117 @@ const NextStep: React.FC<NextStepProps> = ({
           </motion.div>
         </DynamicPortal>
       )}
+
+      {/* NextStep Overlay for Outside of Custom Wrapper only when wrapperID is available */}
+      {pointerPosition &&
+        isNextStepVisible &&
+        currentTourSteps?.[currentStep]?.wrapperID && (
+          <DynamicPortal>
+            <motion.div
+              data-name="nextstep-overlay2"
+              className="absolute top-0 left-0 overflow-hidden"
+              initial="hidden"
+              animate={isNextStepVisible ? 'visible' : 'hidden'}
+              variants={variants}
+              transition={{ duration: 0.5 }}
+              style={{
+                height: `${documentHeight}px`,
+                width: `${document.body.scrollWidth}px`,
+                zIndex: 997, // Ensure it's below the pointer but above other content
+                pointerEvents: 'none',
+              }}
+            >
+              {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
+              {!clickThroughOverlay && (
+                <div
+                  className="pointer-events-none absolute inset-0 z-[998]"
+                  style={{ width: '100vw', height: documentHeight }}
+                >
+                  {/* Top overlay */}
+                  <div
+                    className="pointer-events-auto absolute left-0 right-0 top-0"
+                    style={{
+                      height:
+                        scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      width: `${document.body.scrollWidth}px`,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Bottom overlay */}
+                  <div
+                    className="pointer-events-auto absolute left-0 right-0"
+                    style={{
+                      top: `${
+                        scrollableParent.getBoundingClientRect().bottom + window.scrollY
+                      }px`,
+                      height: `${
+                        documentHeight -
+                        scrollableParent.getBoundingClientRect().bottom -
+                        window.scrollY
+                      }px`,
+                      width: `${document.body.scrollWidth}px`,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Left overlay */}
+                  <div
+                    className="pointer-events-auto absolute"
+                    style={{
+                      left: '0',
+                      top: scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      width:
+                        scrollableParent.getBoundingClientRect().left + window.scrollX,
+                      height: scrollableParent.getBoundingClientRect().height,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Right overlay */}
+                  <div
+                    className="pointer-events-auto absolute top-0"
+                    style={{
+                      top: scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      left: `${
+                        scrollableParent.getBoundingClientRect().right + window.scrollX
+                      }px`,
+                      width: `${
+                        document.body.scrollWidth -
+                        scrollableParent.getBoundingClientRect().right -
+                        window.scrollX
+                      }px`,
+                      height: scrollableParent.getBoundingClientRect().height,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+                </div>
+              )}
+            </motion.div>
+          </DynamicPortal>
+        )}
     </div>
   );
 };
 
 export default NextStep;
+
+// Helper function to find the scrollable parent of an element
+const getScrollableParent = (element: Element): HTMLElement | Element => {
+  let parent: HTMLElement | null = element.parentElement;
+
+  while (parent) {
+    const computedStyle = getComputedStyle(parent);
+    const overflowY = computedStyle.overflowY;
+    const isScrollable = overflowY === 'scroll' || overflowY === 'auto';
+
+    if (isScrollable && parent.scrollHeight > parent.clientHeight) {
+      return parent; // Found a scrollable parent
+    }
+
+    parent = parent.parentElement;
+  }
+
+  // No scrollable parent found, return the document body as the default
+  return document.body;
+};
