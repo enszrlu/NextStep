@@ -800,6 +800,7 @@ const NextStep: React.FC<NextStepProps> = ({
             transition={{ duration: 0.5 }}
             style={{
               height: `${viewport.scrollHeight}px`,
+              maxHeight: `${viewportRect.height}px`,
               width: `${viewport.scrollWidth}px`,
               zIndex: 997, // Ensure it's below the pointer but above other content
               pointerEvents: 'none',
@@ -1024,7 +1025,6 @@ const NextStep: React.FC<NextStepProps> = ({
 };
 
 export default NextStep;
-
 // Helper function to find the scrollable parent of an element
 const getScrollableParent = (element: Element): HTMLElement | Element => {
   let parent: HTMLElement | null = element.parentElement;
@@ -1032,9 +1032,14 @@ const getScrollableParent = (element: Element): HTMLElement | Element => {
   while (parent) {
     const computedStyle = getComputedStyle(parent);
     const overflowY = computedStyle.overflowY;
-    const isScrollable = overflowY === 'scroll' || overflowY === 'auto';
+    const overflowX = computedStyle.overflowX;
+    const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
+    const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
 
-    if (isScrollable && parent.scrollHeight > parent.clientHeight) {
+    if (
+      (isScrollableY && parent.scrollHeight > parent.clientHeight) ||
+      (isScrollableX && parent.scrollWidth > parent.clientWidth)
+    ) {
       return parent; // Found a scrollable parent
     }
 
