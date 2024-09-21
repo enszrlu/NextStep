@@ -784,6 +784,9 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerPadOffset = pointerPadding / 2;
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
 
+  // Check if viewport is body
+  const isViewportBody = viewport === document.body;
+
   return (
     <div data-name="nextstep-wrapper" className="relative w-full" data-nextstep="dev">
       {/* Container for the Website content */}
@@ -796,15 +799,14 @@ const NextStep: React.FC<NextStepProps> = ({
         <DynamicPortal wrapperID={currentTourSteps?.[currentStep]?.wrapperID}>
           <motion.div
             data-name="nextstep-overlay"
-            className="absolute top-0 left-0 overflow-hidden"
+            className="absolute top-0 left-0 overflow-hidden h-full w-full"
             initial="hidden"
             animate={isNextStepVisible ? 'visible' : 'hidden'}
             variants={variants}
             transition={{ duration: 0.5 }}
             style={{
-              height: `${viewport.scrollHeight}px`,
-              maxHeight: `${viewportRect.height}px`,
-              width: `${viewport.scrollWidth}px`,
+              height: isViewportBody ? `${viewport.scrollHeight}px` : '',
+              width: isViewportBody ? `${viewport.scrollWidth}px` : '',
               zIndex: 997, // Ensure it's below the pointer but above other content
               pointerEvents: 'none',
             }}
