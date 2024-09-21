@@ -784,9 +784,8 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerPadOffset = pointerPadding / 2;
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
 
-  // Check if viewport is body
-  const isViewportBody = viewport === document.body;
-
+  // Check if viewport is scrollable
+  const isViewportScrollable = isElementScrollable(viewport);
   return (
     <div data-name="nextstep-wrapper" className="relative w-full" data-nextstep="dev">
       {/* Container for the Website content */}
@@ -805,8 +804,8 @@ const NextStep: React.FC<NextStepProps> = ({
             variants={variants}
             transition={{ duration: 0.5 }}
             style={{
-              height: isViewportBody ? `${viewport.scrollHeight}px` : '',
-              width: isViewportBody ? `${viewport.scrollWidth}px` : '',
+              height: isViewportScrollable ? `${viewport.scrollHeight}px` : '',
+              width: isViewportScrollable ? `${viewport.scrollWidth}px` : '',
               zIndex: 997, // Ensure it's below the pointer but above other content
               pointerEvents: 'none',
             }}
@@ -1053,4 +1052,13 @@ const getScrollableParent = (element: Element): HTMLElement | Element => {
 
   // No scrollable parent found, return the element itself
   return element;
+};
+
+// Check if element is scrollable
+const isElementScrollable = (element: Element): boolean => {
+  return (
+    element.scrollHeight > element.clientHeight ||
+    element.scrollWidth > element.clientWidth ||
+    element === document.body
+  );
 };
