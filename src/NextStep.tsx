@@ -297,9 +297,11 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        if (step.wrapperID) {
+        const stepViewport = document.querySelector(`#${step.wrapperID}`);
+
+        if (step.wrapperID && stepViewport) {
           setPointerPosition({
-            x: scrollableParent.getBoundingClientRect().width / 2,
+            x: getScrollableParent(stepViewport).getBoundingClientRect().width / 2,
             y: scrollableParent.getBoundingClientRect().height / 2,
             width: 0,
             height: 0,
