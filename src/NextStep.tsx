@@ -124,39 +124,42 @@ const NextStep: React.FC<NextStepProps> = ({
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
 
   // - -
-  // Update viewport rect on window resize and path change
-  useEffect(() => {
-    const updateViewportRect = () => {
-      // Default viewport is the body
-      let tempViewport: Element | null = window.document.body;
+  // Update viewport rect
+  const updateViewportRect = () => {
+    // Default viewport is the body
+    let tempViewport: Element | null = window.document.body;
 
-      if (currentTourSteps && currentStep) {
-        const step = currentTourSteps[currentStep];
-        if (step.wrapperID) {
-          // If the step has a wrapperID, use the wrapper as the viewport
-          const stepViewport = document.querySelector(`#${step.wrapperID}`);
-          if (stepViewport) {
-            tempViewport = stepViewport;
-          }
+    if (currentTourSteps && currentStep !== undefined) {
+      const step = currentTourSteps[currentStep];
+      if (step.wrapperID) {
+        // If the step has a wrapperID, use the wrapper as the viewport
+        const stepViewport = document.querySelector(`#${step.wrapperID}`);
+        if (stepViewport) {
+          tempViewport = stepViewport;
         }
       }
-      setViewport(tempViewport);
-      setViewportRect(tempViewport.getBoundingClientRect());
-      setScrollableParent(getScrollableParent(tempViewport));
-    };
+    }
+    setViewport(tempViewport);
+    setViewportRect(tempViewport.getBoundingClientRect());
+    setScrollableParent(getScrollableParent(tempViewport));
+  };
 
-    // Call the updateViewportRect function initially when currentStep changes
-    updateViewportRect();
+  // - -
+  // Update viewport rect on window resize and path change
+  useEffect(() => {
+    if (isNextStepVisible) {
+      // Call the updateViewportRect function initially when currentStep changes
+      updateViewportRect();
 
-    // Set up a resize event listener to update viewport rect on window resize
-    window.addEventListener('resize', updateViewportRect);
+      // Set up a resize event listener to update viewport rect on window resize
+      window.addEventListener('resize', updateViewportRect);
 
-    // Clean up the event listener on unmount
-    return () => {
-      window.removeEventListener('resize', updateViewportRect);
-      window.removeEventListener('popstate', updateViewportRect);
-    };
-  }, [currentStep, pathname]);
+      // Clean up the event listener on unmount
+      return () => {
+        window.removeEventListener('resize', updateViewportRect);
+      };
+    }
+  }, [currentStep, pathname, currentTourSteps, isNextStepVisible]);
 
   // - -
   // Helper function to get element position
