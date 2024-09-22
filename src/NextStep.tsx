@@ -1029,6 +1029,7 @@ const NextStep: React.FC<NextStepProps> = ({
 };
 
 export default NextStep;
+
 // Helper function to find the scrollable parent of an element
 const getScrollableParent = (element: Element): HTMLElement | Element => {
   let parent: HTMLElement | null = element.parentElement;
