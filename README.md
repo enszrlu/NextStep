@@ -42,7 +42,7 @@ Wrap your application in `NextStepProvider` and supply the `steps` array to Next
 ```tsx
 <NextStepProvider>
   <NextStep steps={steps}>
-    {children}
+    <Component {...pageProps} />
   </NextStep>
 </NextStepProvider>
 ```
