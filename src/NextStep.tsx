@@ -39,11 +39,16 @@ const NextStep: React.FC<NextStepProps> = ({
   const isInView = useInView(observeRef);
   const offset = 20;
   const [documentHeight, setDocumentHeight] = useState(0);
-  const [viewport, setViewport] = useState<Element>(window.document.body);
-  const [viewportRect, setViewportRect] = useState<DOMRect>(
-    window.document.body.getBoundingClientRect(),
-  );
-  const [scrollableParent, setScrollableParent] = useState<Element>(window.document.body);
+  const [viewport, setViewport] = useState<Element | null>(null);
+  const [viewportRect, setViewportRect] = useState<DOMRect | null>(null);
+  const [scrollableParent, setScrollableParent] = useState<Element | null>(null);
+
+  useEffect(() => {
+    // This code will only run on the client side
+    setViewport(window.document.body);
+    setViewportRect(window.document.body.getBoundingClientRect());
+    setScrollableParent(window.document.body);
+  }, []);
 
   // - -
   // Route Changes
@@ -302,7 +307,7 @@ const NextStep: React.FC<NextStepProps> = ({
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
         const stepViewport = document.querySelector(`#${step.viewportID}`);
 
-        if (step.viewportID && stepViewport) {
+        if (step.viewportID && stepViewport && scrollableParent) {
           setPointerPosition({
             x: getScrollableParent(stepViewport).getBoundingClientRect().width / 2,
             y: scrollableParent.getBoundingClientRect().height / 2,
@@ -504,7 +509,7 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        if (currentTourSteps?.[currentStep].viewportID) {
+        if (currentTourSteps?.[currentStep].viewportID && scrollableParent) {
           setPointerPosition({
             x: scrollableParent.getBoundingClientRect().width / 2,
             y: scrollableParent.getBoundingClientRect().height / 2,
@@ -785,7 +790,8 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
 
   // Check if viewport is scrollable
-  const isViewportScrollable = isElementScrollable(viewport);
+  const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
+
   return (
     <div data-name="nextstep-wrapper" className="relative w-full" data-nextstep="dev">
       {/* Container for the Website content */}
@@ -794,7 +800,7 @@ const NextStep: React.FC<NextStepProps> = ({
       </div>
 
       {/* NextStep Overlay Step Content */}
-      {pointerPosition && isNextStepVisible && (
+      {pointerPosition && isNextStepVisible && viewport && (
         <DynamicPortal viewportID={currentTourSteps?.[currentStep]?.viewportID}>
           <motion.div
             data-name="nextstep-overlay"
@@ -811,7 +817,7 @@ const NextStep: React.FC<NextStepProps> = ({
             }}
           >
             {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
-            {!clickThroughOverlay && (
+            {!clickThroughOverlay && viewportRect && (
               <div
                 className="absolute inset-0 z-[998] pointer-events-none"
                 style={{
@@ -939,7 +945,8 @@ const NextStep: React.FC<NextStepProps> = ({
       {/* NextStep Overlay for Outside of Custom Wrapper only when viewportID is available */}
       {pointerPosition &&
         isNextStepVisible &&
-        currentTourSteps?.[currentStep]?.viewportID && (
+        currentTourSteps?.[currentStep]?.viewportID &&
+        scrollableParent && (
           <DynamicPortal>
             <motion.div
               data-name="nextstep-overlay2"

@@ -16,9 +16,15 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const isInView = useInView(observeRef);
     const offset = 20;
     const [documentHeight, setDocumentHeight] = useState(0);
-    const [viewport, setViewport] = useState(window.document.body);
-    const [viewportRect, setViewportRect] = useState(window.document.body.getBoundingClientRect());
-    const [scrollableParent, setScrollableParent] = useState(window.document.body);
+    const [viewport, setViewport] = useState(null);
+    const [viewportRect, setViewportRect] = useState(null);
+    const [scrollableParent, setScrollableParent] = useState(null);
+    useEffect(() => {
+        // This code will only run on the client side
+        setViewport(window.document.body);
+        setViewportRect(window.document.body.getBoundingClientRect());
+        setScrollableParent(window.document.body);
+    }, []);
     // - -
     // Route Changes
     const router = useRouter();
@@ -246,7 +252,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
             else {
                 // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
                 const stepViewport = document.querySelector(`#${step.viewportID}`);
-                if (step.viewportID && stepViewport) {
+                if (step.viewportID && stepViewport && scrollableParent) {
                     setPointerPosition({
                         x: getScrollableParent(stepViewport).getBoundingClientRect().width / 2,
                         y: scrollableParent.getBoundingClientRect().height / 2,
@@ -430,7 +436,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
             }
             else {
                 // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-                if (currentTourSteps?.[currentStep].viewportID) {
+                if (currentTourSteps?.[currentStep].viewportID && scrollableParent) {
                     setPointerPosition({
                         x: scrollableParent.getBoundingClientRect().width / 2,
                         y: scrollableParent.getBoundingClientRect().height / 2,
@@ -688,13 +694,13 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const pointerPadOffset = pointerPadding / 2;
     const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
     // Check if viewport is scrollable
-    const isViewportScrollable = isElementScrollable(viewport);
-    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && (_jsx(DynamicPortal, { viewportID: currentTourSteps?.[currentStep]?.viewportID, children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute top-0 left-0 overflow-hidden h-full w-full", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
+    const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
+    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && viewport && (_jsx(DynamicPortal, { viewportID: currentTourSteps?.[currentStep]?.viewportID, children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute top-0 left-0 overflow-hidden h-full w-full", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
                         height: isViewportScrollable ? `${viewport.scrollHeight}px` : '',
                         width: isViewportScrollable ? `${viewport.scrollWidth}px` : '',
                         zIndex: 997, // Ensure it's below the pointer but above other content
                         pointerEvents: 'none',
-                    }, children: [!clickThroughOverlay && (_jsxs("div", { className: "absolute inset-0 z-[998] pointer-events-none", style: {
+                    }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { className: "absolute inset-0 z-[998] pointer-events-none", style: {
                                 height: `${viewport.scrollHeight}px`,
                                 width: `${viewport.scrollWidth}px`,
                             }, children: [_jsx("div", { className: "absolute top-0 left-0 right-0 pointer-events-auto", style: { height: Math.max(pointerPosition.y - pointerPadOffset, 0) } }), _jsx("div", { className: "absolute left-0 right-0 bottom-0 pointer-events-auto", style: {
@@ -727,7 +733,8 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                                 }
                                 : {}, transition: cardTransition, children: _jsx(motion.div, { className: "absolute flex flex-col max-w-[100%] min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), transition: cardTransition, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) }) })] }) })), pointerPosition &&
                 isNextStepVisible &&
-                currentTourSteps?.[currentStep]?.viewportID && (_jsx(DynamicPortal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay2", className: "absolute top-0 left-0 overflow-hidden", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
+                currentTourSteps?.[currentStep]?.viewportID &&
+                scrollableParent && (_jsx(DynamicPortal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay2", className: "absolute top-0 left-0 overflow-hidden", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
                         height: `${documentHeight}px`,
                         width: `${document.body.scrollWidth}px`,
                         zIndex: 997, // Ensure it's below the pointer but above other content
