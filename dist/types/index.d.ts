@@ -20,6 +20,7 @@ export interface Step {
     pointerRadius?: number;
     nextRoute?: string;
     prevRoute?: string;
+    viewportID?: string;
 }
 export interface Tour {
     tour: string;

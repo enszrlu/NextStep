@@ -1,6 +1,6 @@
-"use client";
+'use client';
 import { jsx as _jsx } from "react/jsx-runtime";
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback } from 'react';
 // Example Hooks Usage:
 // const { setCurrentStep, closeNextStep, startNextStep } = useNextStep();
 // // To trigger a specific step
@@ -12,11 +12,11 @@ const NextStepContext = createContext(undefined);
 const useNextStep = () => {
     const context = useContext(NextStepContext);
     if (context === undefined) {
-        throw new Error("useNextStep must be used within a NextStepProvider");
+        throw new Error('useNextStep must be used within a NextStepProvider');
     }
     return context;
 };
-const NextStepProvider = ({ children, }) => {
+const NextStepProvider = ({ children }) => {
     const [currentTour, setCurrentTour] = useState(null);
     const [currentStep, setCurrentStepState] = useState(0);
     const [isNextStepVisible, setNextStepVisible] = useState(false);
