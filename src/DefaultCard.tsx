@@ -11,13 +11,13 @@ const DefaultCard: React.FC<CardComponentProps> = ({
   arrow,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg min-w-64">
+    <div className="bg-white rounded-lg shadow-lg p-4 lg:p-6 max-w-lg min-w-64">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">{step.title}</h2>
+        <h2 className="text-lg lg:text-xl font-bold">{step.title}</h2>
         {step.icon && <span className="text-2xl">{step.icon}</span>}
       </div>
 
-      <div className="mb-4">{step.content}</div>
+      <div className="mb-4 text-sm lg:text-base">{step.content}</div>
 
       <div className="mb-4 bg-gray-200 rounded-full h-2.5">
         <div
@@ -26,10 +26,10 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         ></div>
       </div>
 
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex justify-between items-center gap-4 text-xs lg:text-sm ">
         <button
           onClick={prevStep}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          className="px-4 py-2 font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           disabled={currentStep === 0}
           style={{
             display: step.showControls ? 'block' : 'none',
@@ -37,13 +37,13 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         >
           Previous
         </button>
-        <span className="text-sm text-gray-500 text-nowrap">
+        <span className="text-gray-500 text-nowrap">
           {currentStep + 1} of {totalSteps}
         </span>
         {currentStep === totalSteps - 1 ? (
           <button
             onClick={skipTour}
-            className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            className="px-4 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             style={{
               display: step.showControls ? 'block' : 'none',
             }}
@@ -53,7 +53,7 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         ) : (
           <button
             onClick={nextStep}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             style={{
               display: step.showControls ? 'block' : 'none',
             }}
@@ -68,7 +68,7 @@ const DefaultCard: React.FC<CardComponentProps> = ({
       {skipTour && currentStep < totalSteps - 1 && (
         <button
           onClick={skipTour}
-          className="mt-4 w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          className="mt-4 text-xs lg:text-sm w-full px-4 py-2 font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           style={{
             display: step.showSkip ? 'block' : 'none',
           }}
