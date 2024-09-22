@@ -62,8 +62,8 @@ const NextStep: React.FC<NextStepProps> = ({
       let tempViewport: Element = window.document.body;
 
       if (step) {
-        if (step.wrapperID) {
-          const stepViewport = document.querySelector(`#${step.wrapperID}`);
+        if (step.viewportID) {
+          const stepViewport = document.querySelector(`#${step.viewportID}`);
           if (stepViewport) {
             tempViewport = stepViewport;
           }
@@ -101,7 +101,7 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        if (step.wrapperID) {
+        if (step.viewportID) {
           setPointerPosition({
             x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
             y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
@@ -131,9 +131,9 @@ const NextStep: React.FC<NextStepProps> = ({
 
     if (currentTourSteps && currentStep !== undefined) {
       const step = currentTourSteps[currentStep];
-      if (step.wrapperID) {
-        // If the step has a wrapperID, use the wrapper as the viewport
-        const stepViewport = document.querySelector(`#${step.wrapperID}`);
+      if (step.viewportID) {
+        // If the step has a viewportID, use the wrapper as the viewport
+        const stepViewport = document.querySelector(`#${step.viewportID}`);
         if (stepViewport) {
           tempViewport = stepViewport;
         }
@@ -172,9 +172,9 @@ const NextStep: React.FC<NextStepProps> = ({
 
     if (currentTourSteps && currentStep) {
       const step = currentTourSteps[currentStep];
-      if (step.wrapperID) {
-        // If the step has a wrapperID, use the wrapper as the viewport
-        const tempViewport = document.querySelector(`#${step.wrapperID}`);
+      if (step.viewportID) {
+        // If the step has a viewportID, use the wrapper as the viewport
+        const tempViewport = document.querySelector(`#${step.viewportID}`);
         if (tempViewport) {
           viewport = tempViewport;
           viewPortRect = viewport.getBoundingClientRect();
@@ -205,9 +205,9 @@ const NextStep: React.FC<NextStepProps> = ({
       let tempViewport: Element | null = window.document.body;
 
       if (step) {
-        if (step.wrapperID) {
-          // If the step has a wrapperID, use the wrapper as the viewport
-          const viewport = document.querySelector(`#${step.wrapperID}`);
+        if (step.viewportID) {
+          // If the step has a viewportID, use the wrapper as the viewport
+          const viewport = document.querySelector(`#${step.viewportID}`);
           if (viewport) {
             tempViewport = viewport;
           }
@@ -246,7 +246,7 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        if (step.wrapperID) {
+        if (step.viewportID) {
           setPointerPosition({
             x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
             y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
@@ -300,9 +300,9 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        const stepViewport = document.querySelector(`#${step.wrapperID}`);
+        const stepViewport = document.querySelector(`#${step.viewportID}`);
 
-        if (step.wrapperID && stepViewport) {
+        if (step.viewportID && stepViewport) {
           setPointerPosition({
             x: getScrollableParent(stepViewport).getBoundingClientRect().width / 2,
             y: scrollableParent.getBoundingClientRect().height / 2,
@@ -504,7 +504,7 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        if (currentTourSteps?.[currentStep].wrapperID) {
+        if (currentTourSteps?.[currentStep].viewportID) {
           setPointerPosition({
             x: scrollableParent.getBoundingClientRect().width / 2,
             y: scrollableParent.getBoundingClientRect().height / 2,
@@ -795,7 +795,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
       {/* NextStep Overlay Step Content */}
       {pointerPosition && isNextStepVisible && (
-        <DynamicPortal wrapperID={currentTourSteps?.[currentStep]?.wrapperID}>
+        <DynamicPortal viewportID={currentTourSteps?.[currentStep]?.viewportID}>
           <motion.div
             data-name="nextstep-overlay"
             className="absolute top-0 left-0 overflow-hidden h-full w-full"
@@ -936,10 +936,10 @@ const NextStep: React.FC<NextStepProps> = ({
         </DynamicPortal>
       )}
 
-      {/* NextStep Overlay for Outside of Custom Wrapper only when wrapperID is available */}
+      {/* NextStep Overlay for Outside of Custom Wrapper only when viewportID is available */}
       {pointerPosition &&
         isNextStepVisible &&
-        currentTourSteps?.[currentStep]?.wrapperID && (
+        currentTourSteps?.[currentStep]?.viewportID && (
           <DynamicPortal>
             <motion.div
               data-name="nextstep-overlay2"

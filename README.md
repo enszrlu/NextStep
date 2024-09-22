@@ -130,6 +130,7 @@ const steps : Tour[] = [
 | `pointerRadius`  | `number`                        | Optional. The border-radius of the pointer (keyhole) highlighting the target element.           |
 | `nextRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the next step.                      |
 | `prevRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the previous step.                  |
+| `viewportID`      | `string`                        | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                  |
 
 > **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
 
@@ -140,6 +141,29 @@ Target anything in your app using the element's `id` attribute.
 ```tsx
 <div id="nextstep-step1">Onboard Step</div>
 ```
+### Routing During a Tour
+
+NextStep allows you to navigate between different routes during a tour using the `nextRoute` and `prevRoute` properties in the step object. These properties enable seamless transitions between different pages or sections of your application.
+
+- `nextRoute`: Specifies the route to navigate to when the "Next" button is clicked.
+- `prevRoute`: Specifies the route to navigate to when the "Previous" button is clicked.
+
+When `nextRoute` or `prevRoute` is provided, NextStep will use Next.js's `next/navigation` to navigate to the specified route.
+
+### Using NextStepViewport and viewportID
+
+When a selector is in a scrollable area, it is best to wrap the content of the scrollable area with `NextStepViewport`. This component takes `children` and an `id` as prop. By providing the `viewportID` to the step, NextStep will target this element within the viewport. This ensures that the step is anchored to the element even if the container is scrollable.
+
+Here's an example of how to use `NextStepViewport`:
+```tsx
+
+    <div className="relative overflow-auto h-64">
+      <NextStepViewport id="scrollable-viewport">
+        {children}
+      </NextStepViewport>
+    </div>
+```
+
 
 ### Example `steps`
 
@@ -171,6 +195,7 @@ Target anything in your app using the element's `id` attribute.
         showSkip: true,
         pointerPadding: 10,
         pointerRadius: 10,
+        viewportID: "scrollable-viewport"
       }
     ]
   },

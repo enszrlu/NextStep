@@ -29,7 +29,7 @@ export interface Step {
   nextRoute?: string;
   prevRoute?: string;
   // Dynamic Portal
-  wrapperID?: string;
+  viewportID?: string;
 }
 
 // Tour
