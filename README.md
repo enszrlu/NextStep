@@ -16,16 +16,16 @@ The library allows user to use custom cards (tooltips) for easier integration.
 
 ```bash
 # npm
-npm i nextstepjs
+npm i nextstepjs framer-motion
 # pnpm
-pnpm add nextstepjs
+pnpm add nextstepjs framer-motion
 # yarn
-yarn add nextstepjs
+yarn add nextstepjs framer-motion
 # bun
-bun add nextstepjs
+bun add nextstepjs framer-motion
 ```
 
-### Global `layout.tsx`
+### App Router: Global `layout.tsx`
 Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
 
 ```tsx
@@ -34,6 +34,36 @@ Wrap your application in `NextStepProvider` and supply the `steps` array to Next
     {children}
   </NextStep>
 </NextStepProvider>
+```
+
+### Pages Router: `_app.tsx`
+Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
+
+```tsx
+<NextStepProvider>
+  <NextStep steps={steps}>
+    {children}
+  </NextStep>
+</NextStepProvider>
+```
+
+#### Troubleshooting
+
+If you encounter an error related to module exports when using the Pages Router, it is likely due to a mismatch between ES modules (which use `export` statements) and CommonJS modules (which use `module.exports`). The `nextstepjs` package uses ES module syntax, but your Next.js project might be set up to use CommonJS.
+
+To resolve this issue, ensure that your Next.js project is configured to support ES modules. You can do this by updating your `next.config.js` file to include the following configuration:
+
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  experimental: {
+    esmExternals: true,
+  },
+  transpilePackages: ['nextstepjs'],
+};
+
+export default nextConfig;
 ```
 
 ### Tailwind Config
@@ -130,7 +160,7 @@ const steps : Tour[] = [
 | `pointerRadius`  | `number`                        | Optional. The border-radius of the pointer (keyhole) highlighting the target element.           |
 | `nextRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the next step.                      |
 | `prevRoute`      | `string`                        | Optional. The route to navigate to using `next/navigation` when moving to the previous step.                  |
-| `viewportID`      | `string`                        | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                  |
+| `viewportID`      | `string`                        | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used. **(Available after > v1.1.0)**                  |
 
 > **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
 
@@ -151,7 +181,7 @@ NextStep allows you to navigate between different routes during a tour using the
 When `nextRoute` or `prevRoute` is provided, NextStep will use Next.js's `next/navigation` to navigate to the specified route.
 
 ### Using NextStepViewport and viewportID
-
+**Only available after > v1.1.0**
 When a selector is in a scrollable area, it is best to wrap the content of the scrollable area with `NextStepViewport`. This component takes `children` and an `id` as prop. By providing the `viewportID` to the step, NextStep will target this element within the viewport. This ensures that the step is anchored to the element even if the container is scrollable.
 
 Here's an example of how to use `NextStepViewport`:
