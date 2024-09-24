@@ -1,20 +1,20 @@
-"use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNextStep } from "./NextStepContext";
-import { motion, useInView } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { Portal } from "@radix-ui/react-portal";
+'use client';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNextStep } from './NextStepContext';
+import { motion, useInView } from 'framer-motion';
+import { useRouter, usePathname } from 'next/navigation';
 
 // Types
-import { NextStepProps } from "./types";
+import { NextStepProps } from './types';
 import DefaultCard from './DefaultCard';
+import DynamicPortal from './DynamicPortal';
 
 const NextStep: React.FC<NextStepProps> = ({
   children,
   steps,
-  shadowRgb = "0, 0, 0",
-  shadowOpacity = "0.2",
-  cardTransition = { ease: "anticipate", duration: 0.6 },
+  shadowRgb = '0, 0, 0',
+  shadowOpacity = '0.2',
+  cardTransition = { ease: 'anticipate', duration: 0.6 },
   cardComponent: CardComponent,
   onStepChange = () => {},
   onComplete = () => {},
@@ -25,9 +25,7 @@ const NextStep: React.FC<NextStepProps> = ({
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
 
-  const currentTourSteps = steps.find(
-    (tour) => tour.tour === currentTour
-  )?.steps;
+  const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
 
   const [elementToScroll, setElementToScroll] = useState<Element | null>(null);
   const [pointerPosition, setPointerPosition] = useState<{
@@ -41,18 +39,46 @@ const NextStep: React.FC<NextStepProps> = ({
   const isInView = useInView(observeRef);
   const offset = 20;
   const [documentHeight, setDocumentHeight] = useState(0);
+  const [viewport, setViewport] = useState<Element | null>(null);
+  const [viewportRect, setViewportRect] = useState<DOMRect | null>(null);
+  const [scrollableParent, setScrollableParent] = useState<Element | null>(null);
+
+  useEffect(() => {
+    // This code will only run on the client side
+    setViewport(window.document.body);
+    setViewportRect(window.document.body.getBoundingClientRect());
+    setScrollableParent(window.document.body);
+  }, []);
 
   // - -
   // Route Changes
   const router = useRouter();
+  const pathname = usePathname();
 
   // - -
   // Initialize
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
-      console.log("NextStep: Current Step Changed");
+      console.log('NextStep: Current Step Changed');
 
       const step = currentTourSteps[currentStep];
+
+      // Default viewport is the body
+      let tempViewport: Element = window.document.body;
+
+      if (step) {
+        if (step.viewportID) {
+          const stepViewport = document.querySelector(`#${step.viewportID}`);
+          if (stepViewport) {
+            tempViewport = stepViewport;
+          }
+        }
+      }
+      const tempViewportRect = tempViewport.getBoundingClientRect();
+      setViewport(tempViewport);
+      setViewportRect(tempViewportRect);
+      setScrollableParent(getScrollableParent(tempViewport));
+
       if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
@@ -65,18 +91,37 @@ const NextStep: React.FC<NextStepProps> = ({
             rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
 
           if (!isInView || !isInViewportWithOffset) {
-            const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
+            const side = checkSideCutOff(
+              currentTourSteps?.[currentStep]?.side || 'right',
+            );
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: side.includes('top')
+                ? 'end'
+                : side.includes('bottom')
+                ? 'start'
+                : 'center',
+            });
           }
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (step.viewportID) {
+          setPointerPosition({
+            x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
+            y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
@@ -84,16 +129,73 @@ const NextStep: React.FC<NextStepProps> = ({
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
 
   // - -
+  // Update viewport rect
+  const updateViewportRect = () => {
+    // Default viewport is the body
+    let tempViewport: Element | null = window.document.body;
+
+    if (currentTourSteps && currentStep !== undefined) {
+      const step = currentTourSteps[currentStep];
+      if (step.viewportID) {
+        // If the step has a viewportID, use the wrapper as the viewport
+        const stepViewport = document.querySelector(`#${step.viewportID}`);
+        if (stepViewport) {
+          tempViewport = stepViewport;
+        }
+      }
+    }
+    setViewport(tempViewport);
+    setViewportRect(tempViewport.getBoundingClientRect());
+    setScrollableParent(getScrollableParent(tempViewport));
+  };
+
+  // - -
+  // Update viewport rect on window resize and path change
+  useEffect(() => {
+    if (isNextStepVisible) {
+      // Call the updateViewportRect function initially when currentStep changes
+      updateViewportRect();
+
+      // Set up a resize event listener to update viewport rect on window resize
+      window.addEventListener('resize', updateViewportRect);
+
+      // Clean up the event listener on unmount
+      return () => {
+        window.removeEventListener('resize', updateViewportRect);
+      };
+    }
+  }, [currentStep, pathname, currentTourSteps, isNextStepVisible]);
+
+  // - -
   // Helper function to get element position
   const getElementPosition = (element: Element) => {
-    const { top, left, width, height } = element.getBoundingClientRect();
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    const elementRect = element.getBoundingClientRect();
+
+    // Default viewport is the body
+    let viewport: Element | null = window.document.body;
+    let viewPortRect: DOMRect | null = window.document.body.getBoundingClientRect();
+
+    if (currentTourSteps && currentStep) {
+      const step = currentTourSteps[currentStep];
+      if (step.viewportID) {
+        // If the step has a viewportID, use the wrapper as the viewport
+        const tempViewport = document.querySelector(`#${step.viewportID}`);
+        if (tempViewport) {
+          viewport = tempViewport;
+          viewPortRect = viewport.getBoundingClientRect();
+        }
+      }
+    }
+
+    // Calculate the position of the element relative to the viewport
+    const relativeTop = elementRect.top - viewPortRect.top + viewport.scrollTop;
+    const relativeLeft = elementRect.left - viewPortRect.left + viewport.scrollLeft;
+
     return {
-      x: left + scrollLeft,
-      y: top + scrollTop,
-      width,
-      height,
+      x: relativeLeft,
+      y: relativeTop,
+      width: elementRect.width,
+      height: elementRect.height,
     };
   };
 
@@ -101,8 +203,27 @@ const NextStep: React.FC<NextStepProps> = ({
   // Update pointerPosition when currentStep changes
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
-      console.log("NextStep: Current Step Changed");
+      console.log('NextStep: Current Step Changed');
       const step = currentTourSteps[currentStep];
+
+      // Default viewport is the body
+      let tempViewport: Element | null = window.document.body;
+
+      if (step) {
+        if (step.viewportID) {
+          // If the step has a viewportID, use the wrapper as the viewport
+          const viewport = document.querySelector(`#${step.viewportID}`);
+          if (viewport) {
+            tempViewport = viewport;
+          }
+        }
+      }
+
+      const tempViewportRect = tempViewport.getBoundingClientRect();
+      setViewport(tempViewport);
+      setViewportRect(tempViewportRect);
+      setScrollableParent(getScrollableParent(tempViewport));
+
       if (step && step.selector) {
         const element = document.querySelector(step.selector) as Element | null;
         if (element) {
@@ -115,18 +236,37 @@ const NextStep: React.FC<NextStepProps> = ({
             rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
 
           if (!isInView || !isInViewportWithOffset) {
-            const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
+            const side = checkSideCutOff(
+              currentTourSteps?.[currentStep]?.side || 'right',
+            );
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: side.includes('top')
+                ? 'end'
+                : side.includes('bottom')
+                ? 'start'
+                : 'center',
+            });
           }
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (step.viewportID) {
+          setPointerPosition({
+            x: getScrollableParent(tempViewport).getBoundingClientRect().width / 2,
+            y: getScrollableParent(tempViewport).getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
@@ -135,10 +275,18 @@ const NextStep: React.FC<NextStepProps> = ({
 
   useEffect(() => {
     if (elementToScroll && !isInView && isNextStepVisible) {
-      console.log("NextStep: Element to Scroll Changed");
+      console.log('NextStep: Element to Scroll Changed');
 
-      const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || "right");
-      elementToScroll.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center", inline: "center" });
+      const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
+      elementToScroll.scrollIntoView({
+        behavior: 'smooth',
+        block: side.includes('top')
+          ? 'end'
+          : side.includes('bottom')
+          ? 'start'
+          : 'center',
+        inline: 'center',
+      });
     } else {
       // Scroll to the top of the body
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -157,12 +305,24 @@ const NextStep: React.FC<NextStepProps> = ({
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        const stepViewport = document.querySelector(`#${step.viewportID}`);
+
+        if (step.viewportID && stepViewport && scrollableParent) {
+          setPointerPosition({
+            x: getScrollableParent(stepViewport).getBoundingClientRect().width / 2,
+            y: scrollableParent.getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
         currentElementRef.current = null;
         setElementToScroll(null);
       }
@@ -173,8 +333,8 @@ const NextStep: React.FC<NextStepProps> = ({
   // Update pointer position on window resize
   useEffect(() => {
     if (isNextStepVisible) {
-      window.addEventListener("resize", updatePointerPosition);
-      return () => window.removeEventListener("resize", updatePointerPosition);
+      window.addEventListener('resize', updatePointerPosition);
+      return () => window.removeEventListener('resize', updatePointerPosition);
     }
   }, [currentStep, currentTourSteps, isNextStepVisible]);
 
@@ -184,11 +344,11 @@ const NextStep: React.FC<NextStepProps> = ({
     const updateDocumentHeight = () => {
       const height = Math.max(
         document.body.scrollHeight,
-        document.documentElement.scrollHeight,
+        // document.documentElement.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.offsetHeight,
         document.body.clientHeight,
-        document.documentElement.clientHeight
+        document.documentElement.clientHeight,
       );
       setDocumentHeight(height);
     };
@@ -240,10 +400,9 @@ const NextStep: React.FC<NextStepProps> = ({
           scrollToElement(nextStepIndex);
         }
       } catch (error) {
-        console.error("Error navigating to next route", error);
+        console.error('Error navigating to next route', error);
       }
-    }
-    else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
+    } else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
       onComplete?.();
       closeNextStep();
     }
@@ -289,7 +448,7 @@ const NextStep: React.FC<NextStepProps> = ({
           scrollToElement(prevStepIndex);
         }
       } catch (error) {
-        console.error("Error navigating to previous route", error);
+        console.error('Error navigating to previous route', error);
       }
     }
   };
@@ -307,21 +466,21 @@ const NextStep: React.FC<NextStepProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isNextStepVisible && !currentTourSteps?.[currentStep]?.blockKeyboardControl) {
         switch (event.key) {
-          case "ArrowRight":
+          case 'ArrowRight':
             nextStep();
             break;
-          case "ArrowLeft":
+          case 'ArrowLeft':
             prevStep();
             break;
-          case "Escape":
+          case 'Escape':
             skipTour();
             break;
         }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isNextStepVisible, nextStep, prevStep, skipTour]);
 
   // - -
@@ -333,23 +492,41 @@ const NextStep: React.FC<NextStepProps> = ({
         const element = document.querySelector(selector) as Element | null;
         if (element) {
           const { top } = element.getBoundingClientRect();
-          const isInViewport =
-            top >= -offset && top <= window.innerHeight + offset;
+          const isInViewport = top >= -offset && top <= window.innerHeight + offset;
           if (!isInViewport) {
-            const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || "right");
-            element.scrollIntoView({ behavior: "smooth", block: side.includes("top") ? "end" : side.includes("bottom") ? "start" : "center" });
+            const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || 'right');
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: side.includes('top')
+                ? 'end'
+                : side.includes('bottom')
+                ? 'start'
+                : 'center',
+            });
           }
           // Update pointer position after scrolling
           setPointerPosition(getElementPosition(element));
         }
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
-        setPointerPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          width: 0,
-          height: 0,
-        });
+        if (currentTourSteps?.[currentStep].viewportID && scrollableParent) {
+          setPointerPosition({
+            x: scrollableParent.getBoundingClientRect().width / 2,
+            y: scrollableParent.getBoundingClientRect().height / 2,
+            width: 0,
+            height: 0,
+          });
+        } else {
+          setPointerPosition({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: 0,
+            height: 0,
+          });
+        }
+
+        currentElementRef.current = null;
+        setElementToScroll(null);
       }
     }
   };
@@ -364,30 +541,37 @@ const NextStep: React.FC<NextStepProps> = ({
     let tempSide = side;
 
     let removeSide = false;
-    
+
     // Check if card would be cut off on sides
-    if (side.startsWith("right") && pointerPosition && window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+    if (
+      side.startsWith('right') &&
+      pointerPosition &&
+      window.innerWidth < pointerPosition.x + pointerPosition.width + 256
+    ) {
       removeSide = true;
-    }else if (side.startsWith("left") && pointerPosition && pointerPosition.x < 256) {
+    } else if (side.startsWith('left') && pointerPosition && pointerPosition.x < 256) {
       removeSide = true;
     }
 
     // Check if card would be cut off on top or bottom
-    if (side.includes("top") && pointerPosition && pointerPosition.y < 256) {
+    if (side.includes('top') && pointerPosition && pointerPosition.y < 256) {
       if (removeSide) {
-        tempSide = "bottom"
-      } else{
-        tempSide = side.replace("top", "bottom");
+        tempSide = 'bottom';
+      } else {
+        tempSide = side.replace('top', 'bottom');
       }
-    }
-    else if (side.includes("bottom") && pointerPosition && pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+    } else if (
+      side.includes('bottom') &&
+      pointerPosition &&
+      pointerPosition.y + pointerPosition.height + 256 > window.innerHeight
+    ) {
       if (removeSide) {
-        tempSide = "top"
-      } else{
-        tempSide = side.replace("bottom", "top");
+        tempSide = 'top';
+      } else {
+        tempSide = side.replace('bottom', 'top');
       }
-    }else if (removeSide) {
-      tempSide = pointerPosition && pointerPosition.y < 256 ? "bottom" : "top";
+    } else if (removeSide) {
+      tempSide = pointerPosition && pointerPosition.y < 256 ? 'bottom' : 'top';
     }
 
     return tempSide;
@@ -395,94 +579,94 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Card Side
-  const getCardStyle = (side: string) : React.CSSProperties => {
+  const getCardStyle = (side: string): React.CSSProperties => {
     if (!side || !currentTourSteps?.[currentStep].selector) {
       // Center the card if the selector is undefined or empty
       return {
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)", // Center the card
-        position: "fixed", // Make sure it's positioned relative to the viewport
-        margin: "0",
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)', // Center the card
+        position: 'fixed', // Make sure it's positioned relative to the viewport
+        margin: '0',
       };
     }
 
-    side = checkSideCutOff(side)
+    side = checkSideCutOff(side);
 
     switch (side) {
-      case "top":
+      case 'top':
         return {
           transform: `translate(-50%, 0)`,
-          left: "50%",
-          bottom: "100%",
-          marginBottom: "25px",
+          left: '50%',
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "bottom":
+      case 'bottom':
         return {
           transform: `translate(-50%, 0)`,
-          left: "50%",
-          top: "100%",
-          marginTop: "25px",
+          left: '50%',
+          top: '100%',
+          marginTop: '25px',
         };
-      case "left":
+      case 'left':
         return {
           transform: `translate(0, -50%)`,
-          right: "100%",
-          top: "50%",
-          marginRight: "25px",
+          right: '100%',
+          top: '50%',
+          marginRight: '25px',
         };
-      case "right":
+      case 'right':
         return {
           transform: `translate(0, -50%)`,
-          left: "100%",
-          top: "50%",
-          marginLeft: "25px",
+          left: '100%',
+          top: '50%',
+          marginLeft: '25px',
         };
-      case "top-left":
+      case 'top-left':
         return {
-          bottom: "100%",
-          marginBottom: "25px",
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "top-right":
-        return {
-          right: 0,
-          bottom: "100%",
-          marginBottom: "25px",
-        };
-      case "bottom-left":
-        return {
-          top: "100%",
-          marginTop: "25px",
-        };
-      case "bottom-right":
+      case 'top-right':
         return {
           right: 0,
-          top: "100%",
-          marginTop: "25px",
+          bottom: '100%',
+          marginBottom: '25px',
         };
-      case "right-bottom":
+      case 'bottom-left':
         return {
-          left: "100%",
+          top: '100%',
+          marginTop: '25px',
+        };
+      case 'bottom-right':
+        return {
+          right: 0,
+          top: '100%',
+          marginTop: '25px',
+        };
+      case 'right-bottom':
+        return {
+          left: '100%',
           bottom: 0,
-          marginLeft: "25px",
+          marginLeft: '25px',
         };
-      case "right-top":
+      case 'right-top':
         return {
-          left: "100%",
+          left: '100%',
           top: 0,
-          marginLeft: "25px",
+          marginLeft: '25px',
         };
-      case "left-bottom":
+      case 'left-bottom':
         return {
-          right: "100%",
+          right: '100%',
           bottom: 0,
-          marginRight: "25px",
+          marginRight: '25px',
         };
-      case "left-top":
+      case 'left-top':
         return {
-          right: "100%",
+          right: '100%',
           top: 0,
-          marginRight: "25px",
+          marginRight: '25px',
         };
       default:
         return {}; // Default case if no side is specified
@@ -495,88 +679,88 @@ const NextStep: React.FC<NextStepProps> = ({
     side = checkSideCutOff(side);
 
     switch (side) {
-      case "bottom":
+      case 'bottom':
         return {
           transform: `translate(-50%, 0) rotate(270deg)`,
-          left: "50%",
-          top: "-23px",
+          left: '50%',
+          top: '-23px',
         };
-      case "top":
+      case 'top':
         return {
           transform: `translate(-50%, 0) rotate(90deg)`,
-          left: "50%",
-          bottom: "-23px",
+          left: '50%',
+          bottom: '-23px',
         };
-      case "right":
+      case 'right':
         return {
           transform: `translate(0, -50%) rotate(180deg)`,
-          top: "50%",
-          left: "-23px",
+          top: '50%',
+          left: '-23px',
         };
-      case "left":
+      case 'left':
         return {
           transform: `translate(0, -50%) rotate(0deg)`,
-          top: "50%",
-          right: "-23px",
+          top: '50%',
+          right: '-23px',
         };
-      case "top-left":
+      case 'top-left':
         return {
           transform: `rotate(90deg)`,
-          left: "10px",
-          bottom: "-23px",
+          left: '10px',
+          bottom: '-23px',
         };
-      case "top-right":
+      case 'top-right':
         return {
           transform: `rotate(90deg)`,
-          right: "10px",
-          bottom: "-23px",
+          right: '10px',
+          bottom: '-23px',
         };
-      case "bottom-left":
+      case 'bottom-left':
         return {
           transform: `rotate(270deg)`,
-          left: "10px",
-          top: "-23px",
+          left: '10px',
+          top: '-23px',
         };
-      case "bottom-right":
+      case 'bottom-right':
         return {
           transform: `rotate(270deg)`,
-          right: "10px",
-          top: "-23px",
+          right: '10px',
+          top: '-23px',
         };
-      case "right-bottom":
+      case 'right-bottom':
         return {
           transform: `rotate(180deg)`,
-          left: "-23px",
-          bottom: "10px",
+          left: '-23px',
+          bottom: '10px',
         };
-      case "right-top":
+      case 'right-top':
         return {
           transform: `rotate(180deg)`,
-          left: "-23px",
-          top: "10px",
+          left: '-23px',
+          top: '10px',
         };
-      case "left-bottom":
+      case 'left-bottom':
         return {
           transform: `rotate(0deg)`,
-          right: "-23px",
-          bottom: "10px",
+          right: '-23px',
+          bottom: '10px',
         };
-      case "left-top":
+      case 'left-top':
         return {
           transform: `rotate(0deg)`,
-          right: "-23px",
-          top: "10px",
+          right: '-23px',
+          top: '10px',
         };
       default:
         return {
-          display: "none",
+          display: 'none',
         }; // Default case if no side is specified
     }
   };
 
   // - -
   // Card Arrow
-  const CardArrow = ({isVisible}: {isVisible: boolean}) => {
+  const CardArrow = ({ isVisible }: { isVisible: boolean }) => {
     if (!isVisible) {
       return null;
     }
@@ -605,70 +789,80 @@ const NextStep: React.FC<NextStepProps> = ({
   const pointerPadOffset = pointerPadding / 2;
   const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
 
+  // Check if viewport is scrollable
+  const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
+
   return (
-    <div
-      data-name="nextstep-wrapper"
-      className="relative w-full"
-      data-nextstep="dev"
-    >
+    <div data-name="nextstep-wrapper" className="relative w-full" data-nextstep="dev">
       {/* Container for the Website content */}
       <div data-name="nextstep-site" className="block w-full">
         {children}
       </div>
 
       {/* NextStep Overlay Step Content */}
-      {pointerPosition && isNextStepVisible && (
-        <Portal>
+      {pointerPosition && isNextStepVisible && viewport && (
+        <DynamicPortal viewportID={currentTourSteps?.[currentStep]?.viewportID}>
           <motion.div
             data-name="nextstep-overlay"
-            className="absolute inset-0 overflow-hidden"
+            className="absolute top-0 left-0 overflow-hidden h-full w-full"
             initial="hidden"
-            animate={isNextStepVisible ? "visible" : "hidden"}
+            animate={isNextStepVisible ? 'visible' : 'hidden'}
             variants={variants}
             transition={{ duration: 0.5 }}
             style={{
-              height: `${documentHeight}px`,
+              height: isViewportScrollable ? `${viewport.scrollHeight}px` : '',
+              width: isViewportScrollable ? `${viewport.scrollWidth}px` : '',
               zIndex: 997, // Ensure it's below the pointer but above other content
               pointerEvents: 'none',
             }}
           >
             {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
-            {!clickThroughOverlay && (
-            <div className="absolute inset-0 z-[998] pointer-events-none" style={{ width: '100vw', height: `${documentHeight}px` }}>
-              {/* Top overlay */}
-              <div 
-                className="absolute top-0 left-0 right-0 pointer-events-auto" 
-                style={{ height: Math.max(pointerPosition.y - pointerPadOffset, 0) }}
-              ></div>
-              
-              {/* Bottom overlay */}
-              <div 
-                className="absolute left-0 right-0 pointer-events-auto" 
-                style={{ 
-                  top: `${pointerPosition.y + pointerPosition.height + pointerPadOffset}px`,
-                  height: `${documentHeight - (pointerPosition.y + pointerPosition.height + pointerPadOffset)}px`
+            {!clickThroughOverlay && viewportRect && (
+              <div
+                className="absolute inset-0 z-[998] pointer-events-none"
+                style={{
+                  height: `${viewport.scrollHeight}px`,
+                  width: `${viewport.scrollWidth}px`,
                 }}
-              ></div>
-              
-              {/* Left overlay */}
-              <div 
-                className="absolute left-0 top-0 pointer-events-auto" 
-                style={{ 
-                  width: Math.max(pointerPosition.x - pointerPadOffset, 0),
-                  height: `${documentHeight}px`
-                }}
-              ></div>
-              
-              {/* Right overlay */}
-              <div 
-                className="absolute top-0 pointer-events-auto" 
-                style={{ 
-                  left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
-                  right: 0,
-                  height: `${documentHeight}px`
-                }}
-              ></div>
-            </div>
+              >
+                {/* Top overlay */}
+                <div
+                  className="absolute top-0 left-0 right-0 pointer-events-auto"
+                  style={{ height: Math.max(pointerPosition.y - pointerPadOffset, 0) }}
+                ></div>
+
+                {/* Bottom overlay */}
+                <div
+                  className="absolute left-0 right-0 bottom-0 pointer-events-auto"
+                  style={{
+                    height: `${
+                      viewportRect.height -
+                      (pointerPosition.y + pointerPosition.height + pointerPadOffset)
+                    }px`,
+                  }}
+                ></div>
+
+                {/* Left overlay */}
+                <div
+                  className="absolute left-0 top-0 pointer-events-auto"
+                  style={{
+                    width: Math.max(pointerPosition.x - pointerPadOffset, 0),
+                    height: viewportRect.height,
+                  }}
+                ></div>
+
+                {/* Right overlay */}
+                <div
+                  className="absolute top-0 pointer-events-auto"
+                  style={{
+                    left: `${
+                      pointerPosition.x + pointerPosition.width + pointerPadOffset
+                    }px`,
+                    right: 0,
+                    height: viewportRect.height,
+                  }}
+                ></div>
+              </div>
             )}
 
             {/* Pointer */}
@@ -706,35 +900,173 @@ const NextStep: React.FC<NextStepProps> = ({
               <motion.div
                 className="absolute flex flex-col max-w-[100%] min-w-min pointer-events-auto z-[999]"
                 data-name="nextstep-card"
-                style={getCardStyle(
-                  currentTourSteps?.[currentStep]?.side as any
-                )}
+                style={getCardStyle(currentTourSteps?.[currentStep]?.side as any)}
                 transition={cardTransition}
               >
-                {CardComponent ? <CardComponent
-                  step={currentTourSteps?.[currentStep]!}
-                  currentStep={currentStep}
-                  totalSteps={currentTourSteps?.length ?? 0}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
-                  skipTour={skipTour}
-                /> : <DefaultCard
-                  step={currentTourSteps?.[currentStep]!}
-                  currentStep={currentStep}
-                  totalSteps={currentTourSteps?.length ?? 0}
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  arrow={<CardArrow isVisible={!!(currentTourSteps?.[currentStep]?.selector && displayArrow)} />}
-                  skipTour={skipTour}
-                />}
+                {CardComponent ? (
+                  <CardComponent
+                    step={currentTourSteps?.[currentStep]!}
+                    currentStep={currentStep}
+                    totalSteps={currentTourSteps?.length ?? 0}
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    arrow={
+                      <CardArrow
+                        isVisible={
+                          !!(currentTourSteps?.[currentStep]?.selector && displayArrow)
+                        }
+                      />
+                    }
+                    skipTour={skipTour}
+                  />
+                ) : (
+                  <DefaultCard
+                    step={currentTourSteps?.[currentStep]!}
+                    currentStep={currentStep}
+                    totalSteps={currentTourSteps?.length ?? 0}
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    arrow={
+                      <CardArrow
+                        isVisible={
+                          !!(currentTourSteps?.[currentStep]?.selector && displayArrow)
+                        }
+                      />
+                    }
+                    skipTour={skipTour}
+                  />
+                )}
               </motion.div>
             </motion.div>
           </motion.div>
-        </Portal>
+        </DynamicPortal>
       )}
+
+      {/* NextStep Overlay for Outside of Custom Wrapper only when viewportID is available */}
+      {pointerPosition &&
+        isNextStepVisible &&
+        currentTourSteps?.[currentStep]?.viewportID &&
+        scrollableParent && (
+          <DynamicPortal>
+            <motion.div
+              data-name="nextstep-overlay2"
+              className="absolute top-0 left-0 overflow-hidden"
+              initial="hidden"
+              animate={isNextStepVisible ? 'visible' : 'hidden'}
+              variants={variants}
+              transition={{ duration: 0.5 }}
+              style={{
+                height: `${documentHeight}px`,
+                width: `${document.body.scrollWidth}px`,
+                zIndex: 997, // Ensure it's below the pointer but above other content
+                pointerEvents: 'none',
+              }}
+            >
+              {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
+              {!clickThroughOverlay && (
+                <div
+                  className="pointer-events-none absolute inset-0 z-[998]"
+                  style={{ width: '100vw', height: documentHeight }}
+                >
+                  {/* Top overlay */}
+                  <div
+                    className="pointer-events-auto absolute left-0 right-0 top-0"
+                    style={{
+                      height:
+                        scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      width: `${document.body.scrollWidth}px`,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Bottom overlay */}
+                  <div
+                    className="pointer-events-auto absolute left-0 right-0"
+                    style={{
+                      top: `${
+                        scrollableParent.getBoundingClientRect().bottom + window.scrollY
+                      }px`,
+                      height: `${
+                        documentHeight -
+                        scrollableParent.getBoundingClientRect().bottom -
+                        window.scrollY
+                      }px`,
+                      width: `${document.body.scrollWidth}px`,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Left overlay */}
+                  <div
+                    className="pointer-events-auto absolute"
+                    style={{
+                      left: '0',
+                      top: scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      width:
+                        scrollableParent.getBoundingClientRect().left + window.scrollX,
+                      height: scrollableParent.getBoundingClientRect().height,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+
+                  {/* Right overlay */}
+                  <div
+                    className="pointer-events-auto absolute top-0"
+                    style={{
+                      top: scrollableParent.getBoundingClientRect().top + window.scrollY,
+                      left: `${
+                        scrollableParent.getBoundingClientRect().right + window.scrollX
+                      }px`,
+                      width: `${
+                        document.body.scrollWidth -
+                        scrollableParent.getBoundingClientRect().right -
+                        window.scrollX
+                      }px`,
+                      height: scrollableParent.getBoundingClientRect().height,
+                      backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
+                    }}
+                  ></div>
+                </div>
+              )}
+            </motion.div>
+          </DynamicPortal>
+        )}
     </div>
   );
 };
 
 export default NextStep;
+
+// Helper function to find the scrollable parent of an element
+const getScrollableParent = (element: Element): HTMLElement | Element => {
+  let parent: HTMLElement | null = element.parentElement;
+
+  while (parent) {
+    const computedStyle = getComputedStyle(parent);
+    const overflowY = computedStyle.overflowY;
+    const overflowX = computedStyle.overflowX;
+    const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
+    const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
+
+    if (
+      (isScrollableY && parent.scrollHeight > parent.clientHeight) ||
+      (isScrollableX && parent.scrollWidth > parent.clientWidth)
+    ) {
+      return parent; // Found a scrollable parent
+    }
+
+    parent = parent.parentElement;
+  }
+
+  // No scrollable parent found, return the element itself
+  return element;
+};
+
+// Check if element is scrollable
+const isElementScrollable = (element: Element): boolean => {
+  return (
+    element.scrollHeight > element.clientHeight ||
+    element.scrollWidth > element.clientWidth ||
+    element === document.body
+  );
+};
