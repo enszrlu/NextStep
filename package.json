@@ -4,7 +4,7 @@
   "description": "Lightweight onboarding library for Next.js",
   "license": "MIT",
   "author": "Alex Enes Zorlu",
-  "homepage": "https://nextstepjs.com/",
+  "homepage": "https://nextstepjs.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/enszrlu/NextStep.git"
