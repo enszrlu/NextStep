@@ -680,7 +680,13 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
         if (!isVisible) {
             return null;
         }
-        return (_jsx("svg", { viewBox: "0 0 54 54", "data-name": "nextstep-arrow", className: "absolute w-6 h-6 origin-center", style: getArrowStyle(currentTourSteps?.[currentStep]?.side), children: _jsx("path", { id: "triangle", d: "M27 27L0 0V54L27 27Z", fill: "currentColor" }) }));
+        return (_jsx("svg", { viewBox: "0 0 54 54", "data-name": "nextstep-arrow", style: {
+                ...getArrowStyle(currentTourSteps?.[currentStep]?.side),
+                position: 'absolute',
+                width: '1.5rem',
+                height: '1.5rem',
+                transformOrigin: 'center',
+            }, children: _jsx("path", { id: "triangle", d: "M27 27L0 0V54L27 27Z", fill: "currentColor" }) }));
     };
     // - -
     // Overlay Variants
@@ -695,25 +701,54 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
     // Check if viewport is scrollable
     const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
-    return (_jsxs("div", { "data-name": "nextstep-wrapper", className: "relative w-full", "data-nextstep": "dev", children: [_jsx("div", { "data-name": "nextstep-site", className: "block w-full", children: children }), pointerPosition && isNextStepVisible && viewport && (_jsx(DynamicPortal, { viewportID: currentTourSteps?.[currentStep]?.viewportID, children: _jsxs(motion.div, { "data-name": "nextstep-overlay", className: "absolute top-0 left-0 overflow-hidden h-full w-full", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
-                        height: isViewportScrollable ? `${viewport.scrollHeight}px` : '',
-                        width: isViewportScrollable ? `${viewport.scrollWidth}px` : '',
+    return (_jsxs("div", { "data-name": "nextstep-wrapper", "data-nextstep": "dev", style: { position: 'relative', width: '100%' }, children: [_jsx("div", { "data-name": "nextstep-site", style: { display: 'block', width: '100%' }, children: children }), pointerPosition && isNextStepVisible && viewport && (_jsx(DynamicPortal, { viewportID: currentTourSteps?.[currentStep]?.viewportID, children: _jsxs(motion.div, { "data-name": "nextstep-overlay", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        overflow: 'hidden',
+                        height: isViewportScrollable ? `${viewport.scrollHeight}px` : '100%',
+                        width: isViewportScrollable ? `${viewport.scrollWidth}px` : '100%',
                         zIndex: 997, // Ensure it's below the pointer but above other content
                         pointerEvents: 'none',
-                    }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { className: "absolute inset-0 z-[998] pointer-events-none", style: {
+                    }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { style: {
+                                position: 'absolute',
+                                inset: 0,
+                                zIndex: 998,
+                                pointerEvents: 'none',
                                 height: `${viewport.scrollHeight}px`,
                                 width: `${viewport.scrollWidth}px`,
-                            }, children: [_jsx("div", { className: "absolute top-0 left-0 right-0 pointer-events-auto", style: { height: Math.max(pointerPosition.y - pointerPadOffset, 0) } }), _jsx("div", { className: "absolute left-0 right-0 bottom-0 pointer-events-auto", style: {
+                            }, children: [_jsx("div", { style: {
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        pointerEvents: 'auto',
+                                        height: Math.max(pointerPosition.y - pointerPadOffset, 0),
+                                    } }), _jsx("div", { style: {
+                                        position: 'absolute',
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        pointerEvents: 'auto',
                                         height: `${viewportRect.height -
                                             (pointerPosition.y + pointerPosition.height + pointerPadOffset)}px`,
-                                    } }), _jsx("div", { className: "absolute left-0 top-0 pointer-events-auto", style: {
+                                    } }), _jsx("div", { style: {
+                                        position: 'absolute',
+                                        left: 0,
+                                        top: 0,
+                                        pointerEvents: 'auto',
                                         width: Math.max(pointerPosition.x - pointerPadOffset, 0),
                                         height: viewportRect.height,
-                                    } }), _jsx("div", { className: "absolute top-0 pointer-events-auto", style: {
+                                    } }), _jsx("div", { style: {
+                                        position: 'absolute',
+                                        top: 0,
+                                        pointerEvents: 'auto',
                                         left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
                                         right: 0,
                                         height: viewportRect.height,
-                                    } })] })), _jsx(motion.div, { "data-name": "nextstep-pointer", className: "relative z-[999]", style: {
+                                    } })] })), _jsx(motion.div, { "data-name": "nextstep-pointer", style: {
+                                position: 'relative',
+                                zIndex: 999,
                                 boxShadow: `0 0 200vw 9999vh rgba(${shadowRgb}, ${shadowOpacity})`,
                                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
                                 pointerEvents: 'none',
@@ -731,32 +766,65 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                                     width: pointerPosition.width + pointerPadding,
                                     height: pointerPosition.height + pointerPadding,
                                 }
-                                : {}, transition: cardTransition, children: _jsx(motion.div, { className: "absolute flex flex-col max-w-[100%] min-w-min pointer-events-auto z-[999]", "data-name": "nextstep-card", style: getCardStyle(currentTourSteps?.[currentStep]?.side), transition: cardTransition, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) }) })] }) })), pointerPosition &&
+                                : {}, transition: cardTransition, children: _jsx(motion.div, { "data-name": "nextstep-card", transition: cardTransition, style: {
+                                    ...getCardStyle(currentTourSteps?.[currentStep]?.side),
+                                    position: 'absolute',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    maxWidth: '100%',
+                                    minWidth: 'min-content',
+                                    pointerEvents: 'auto',
+                                    zIndex: 999,
+                                }, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) }) })] }) })), pointerPosition &&
                 isNextStepVisible &&
                 currentTourSteps?.[currentStep]?.viewportID &&
-                scrollableParent && (_jsx(DynamicPortal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay2", className: "absolute top-0 left-0 overflow-hidden", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
+                scrollableParent && (_jsx(DynamicPortal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay2", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        overflow: 'hidden',
                         height: `${documentHeight}px`,
                         width: `${document.body.scrollWidth}px`,
-                        zIndex: 997, // Ensure it's below the pointer but above other content
+                        zIndex: 997,
                         pointerEvents: 'none',
-                    }, children: !clickThroughOverlay && (_jsxs("div", { className: "pointer-events-none absolute inset-0 z-[998]", style: { width: '100vw', height: documentHeight }, children: [_jsx("div", { className: "pointer-events-auto absolute left-0 right-0 top-0", style: {
+                    }, children: !clickThroughOverlay && (_jsxs("div", { style: {
+                            position: 'absolute',
+                            inset: 0,
+                            zIndex: 998,
+                            pointerEvents: 'none',
+                            width: '100vw',
+                            height: documentHeight,
+                        }, children: [_jsx("div", { style: {
+                                    position: 'absolute',
+                                    left: 0,
+                                    right: 0,
+                                    top: 0,
+                                    pointerEvents: 'auto',
                                     height: scrollableParent.getBoundingClientRect().top + window.scrollY,
                                     width: `${document.body.scrollWidth}px`,
                                     backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
-                                } }), _jsx("div", { className: "pointer-events-auto absolute left-0 right-0", style: {
+                                } }), _jsx("div", { style: {
+                                    position: 'absolute',
+                                    left: 0,
+                                    right: 0,
+                                    pointerEvents: 'auto',
                                     top: `${scrollableParent.getBoundingClientRect().bottom + window.scrollY}px`,
                                     height: `${documentHeight -
                                         scrollableParent.getBoundingClientRect().bottom -
                                         window.scrollY}px`,
                                     width: `${document.body.scrollWidth}px`,
                                     backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
-                                } }), _jsx("div", { className: "pointer-events-auto absolute", style: {
+                                } }), _jsx("div", { style: {
+                                    position: 'absolute',
+                                    pointerEvents: 'auto',
                                     left: '0',
                                     top: scrollableParent.getBoundingClientRect().top + window.scrollY,
                                     width: scrollableParent.getBoundingClientRect().left + window.scrollX,
                                     height: scrollableParent.getBoundingClientRect().height,
                                     backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
-                                } }), _jsx("div", { className: "pointer-events-auto absolute top-0", style: {
+                                } }), _jsx("div", { style: {
+                                    position: 'absolute',
+                                    pointerEvents: 'auto',
                                     top: scrollableParent.getBoundingClientRect().top + window.scrollY,
                                     left: `${scrollableParent.getBoundingClientRect().right + window.scrollX}px`,
                                     width: `${document.body.scrollWidth -
