@@ -6,6 +6,8 @@
 
 It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling.
 
+> **Note** `NextStep` now supports non-tailwindcss projects with v1.2.0-beta.0. It is available with nextstepjs@beta.
+
 The library allows user to use custom cards (tooltips) for easier integration.
 
 **If you like the project, please leave a star! ⭐️⭐️⭐️⭐️⭐️**
@@ -68,6 +70,8 @@ export default nextConfig;
 ```
 
 ### Tailwind Config
+
+> **Note** `NextStep` now supports non-tailwindcss projects with v1.2.0-beta.0. It is available with nextstepjs@beta. This step is not required for v1.2.0-beta.0 and above.
 
 Tailwind CSS needs to scan the node module to include the used classes. See [configuring source paths](https://tailwindcss.com/docs/content-configuration#configuring-source-paths) for more information.
 
