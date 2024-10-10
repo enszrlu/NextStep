@@ -7,7 +7,19 @@ interface NextStepViewportProps {
 
 const NextStepViewport = ({ children, id }: NextStepViewportProps) => {
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', margin: 0, padding: 0 }} id={id}>
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        margin: 0,
+        padding: 0,
+        height: 'fit-content',
+        width: 'fit-content',
+        minHeight: '100%',
+        minWidth: '100%',
+      }}
+      id={id}
+    >
       {children}
     </div>
   );
