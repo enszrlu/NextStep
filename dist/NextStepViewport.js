@@ -5,8 +5,6 @@ const NextStepViewport = ({ children, id }) => {
             overflow: 'hidden',
             margin: 0,
             padding: 0,
-            height: 'fit-content',
-            width: 'fit-content',
             minHeight: '100%',
             minWidth: '100%',
         }, id: id, children: children }));
