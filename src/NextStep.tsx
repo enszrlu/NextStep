@@ -373,6 +373,31 @@ const NextStep: React.FC<NextStepProps> = ({
     return () => window.removeEventListener('resize', updateDocumentHeight);
   }, []);
 
+  // Observe selector changes and update pointer position
+  useEffect(() => {
+    if (!isNextStepVisible || !currentTour) return;
+
+    if (!currentTourSteps || currentStep === undefined) return;
+
+    const step = currentTourSteps[currentStep];
+
+    if (!step.selector) return;
+
+    const targetElement = document.querySelector(step.selector);
+
+    if (!targetElement) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      updatePointerPosition();
+    });
+
+    resizeObserver.observe(targetElement);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [currentStep, currentTour]);
+
   // - -
   // Step Controls
   const nextStep = async () => {

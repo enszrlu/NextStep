@@ -21,16 +21,16 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const [scrollableParent, setScrollableParent] = useState(null);
     // - -
     // Handle pop state
-    // const handlePopState = useCallback(() => {
-    //   closeNextStep();
-    // }, [closeNextStep]);
-    // // Add event listener for popstate
-    // useEffect(() => {
-    //   window.addEventListener('popstate', handlePopState);
-    //   return () => {
-    //     window.removeEventListener('popstate', handlePopState);
-    //   };
-    // }, [handlePopState]);
+    const handlePopState = useCallback(() => {
+        closeNextStep();
+    }, [closeNextStep]);
+    // Add event listener for popstate
+    useEffect(() => {
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [handlePopState]);
     useEffect(() => {
         // This code will only run on the client side
         setViewport(window.document.body);
@@ -306,6 +306,26 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
         window.addEventListener('resize', updateDocumentHeight);
         return () => window.removeEventListener('resize', updateDocumentHeight);
     }, []);
+    // Observe selector changes and update pointer position
+    useEffect(() => {
+        if (!isNextStepVisible || !currentTour)
+            return;
+        if (!currentTourSteps || currentStep === undefined)
+            return;
+        const step = currentTourSteps[currentStep];
+        if (!step.selector)
+            return;
+        const targetElement = document.querySelector(step.selector);
+        if (!targetElement)
+            return;
+        const resizeObserver = new ResizeObserver(() => {
+            updatePointerPosition();
+        });
+        resizeObserver.observe(targetElement);
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, [currentStep, currentTour]);
     // - -
     // Step Controls
     const nextStep = async () => {
