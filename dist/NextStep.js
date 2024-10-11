@@ -19,6 +19,18 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const [viewport, setViewport] = useState(null);
     const [viewportRect, setViewportRect] = useState(null);
     const [scrollableParent, setScrollableParent] = useState(null);
+    // - -
+    // Handle pop state
+    // const handlePopState = useCallback(() => {
+    //   closeNextStep();
+    // }, [closeNextStep]);
+    // // Add event listener for popstate
+    // useEffect(() => {
+    //   window.addEventListener('popstate', handlePopState);
+    //   return () => {
+    //     window.removeEventListener('popstate', handlePopState);
+    //   };
+    // }, [handlePopState]);
     useEffect(() => {
         // This code will only run on the client side
         setViewport(window.document.body);

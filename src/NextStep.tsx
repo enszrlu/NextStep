@@ -43,6 +43,21 @@ const NextStep: React.FC<NextStepProps> = ({
   const [viewportRect, setViewportRect] = useState<DOMRect | null>(null);
   const [scrollableParent, setScrollableParent] = useState<Element | null>(null);
 
+  // - -
+  // Handle pop state
+  const handlePopState = useCallback(() => {
+    closeNextStep();
+  }, [closeNextStep]);
+
+  // Add event listener for popstate
+  useEffect(() => {
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [handlePopState]);
+
   useEffect(() => {
     // This code will only run on the client side
     setViewport(window.document.body);
