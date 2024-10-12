@@ -389,6 +389,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
     const resizeObserver = new ResizeObserver(() => {
       updatePointerPosition();
+      updateViewportRect();
     });
 
     resizeObserver.observe(targetElement);

@@ -320,6 +320,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
             return;
         const resizeObserver = new ResizeObserver(() => {
             updatePointerPosition();
+            updateViewportRect();
         });
         resizeObserver.observe(targetElement);
         return () => {
