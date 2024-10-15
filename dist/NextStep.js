@@ -496,12 +496,15 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
         if (!side) {
             return side;
         }
+        if (!viewport) {
+            return side;
+        }
         let tempSide = side;
         let removeSide = false;
         // Check if card would be cut off on sides
         if (side.startsWith('right') &&
             pointerPosition &&
-            window.innerWidth < pointerPosition.x + pointerPosition.width + 256) {
+            viewport.scrollWidth < pointerPosition.x + pointerPosition.width + 256) {
             removeSide = true;
         }
         else if (side.startsWith('left') && pointerPosition && pointerPosition.x < 256) {
@@ -518,7 +521,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
         }
         else if (side.includes('bottom') &&
             pointerPosition &&
-            pointerPosition.y + pointerPosition.height + 256 > window.innerHeight) {
+            pointerPosition.y + pointerPosition.height + 256 > viewport.scrollHeight) {
             if (removeSide) {
                 tempSide = 'top';
             }
