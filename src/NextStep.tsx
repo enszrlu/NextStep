@@ -872,6 +872,7 @@ const NextStep: React.FC<NextStepProps> = ({
             {/* Top Right Bottom Left Overlay around the pointer to prevent clicks */}
             {!clickThroughOverlay && viewportRect && (
               <div
+                data-name="nextstep-prevent-click-overlay"
                 style={{
                   position: 'absolute',
                   inset: 0,
@@ -883,6 +884,7 @@ const NextStep: React.FC<NextStepProps> = ({
               >
                 {/* Top overlay */}
                 <div
+                  data-name="nextstep-prevent-click-overlay-top"
                   style={{
                     position: 'absolute',
                     top: 0,
@@ -895,21 +897,24 @@ const NextStep: React.FC<NextStepProps> = ({
 
                 {/* Bottom overlay */}
                 <div
+                  data-name="nextstep-prevent-click-overlay-bottom"
                   style={{
                     position: 'absolute',
                     left: 0,
                     right: 0,
                     bottom: 0,
                     pointerEvents: 'auto',
-                    height: `${
+                    height: `${Math.max(
                       viewportRect.height -
-                      (pointerPosition.y + pointerPosition.height + pointerPadOffset)
-                    }px`,
+                        (pointerPosition.y + pointerPosition.height + pointerPadOffset),
+                      0,
+                    )}px`,
                   }}
                 ></div>
 
                 {/* Left overlay */}
                 <div
+                  data-name="nextstep-prevent-click-overlay-left"
                   style={{
                     position: 'absolute',
                     left: 0,
@@ -922,6 +927,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
                 {/* Right overlay */}
                 <div
+                  data-name="nextstep-prevent-click-overlay-right"
                   style={{
                     position: 'absolute',
                     top: 0,

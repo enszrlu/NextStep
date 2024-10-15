@@ -743,36 +743,36 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                         width: isViewportScrollable ? `${viewport.scrollWidth}px` : '100%',
                         zIndex: 997, // Ensure it's below the pointer but above other content
                         pointerEvents: 'none',
-                    }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { style: {
+                    }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { "data-name": "nextstep-prevent-click-overlay", style: {
                                 position: 'absolute',
                                 inset: 0,
                                 zIndex: 998,
                                 pointerEvents: 'none',
                                 height: `${viewport.scrollHeight}px`,
                                 width: `${viewport.scrollWidth}px`,
-                            }, children: [_jsx("div", { style: {
+                            }, children: [_jsx("div", { "data-name": "nextstep-prevent-click-overlay-top", style: {
                                         position: 'absolute',
                                         top: 0,
                                         left: 0,
                                         right: 0,
                                         pointerEvents: 'auto',
                                         height: Math.max(pointerPosition.y - pointerPadOffset, 0),
-                                    } }), _jsx("div", { style: {
+                                    } }), _jsx("div", { "data-name": "nextstep-prevent-click-overlay-bottom", style: {
                                         position: 'absolute',
                                         left: 0,
                                         right: 0,
                                         bottom: 0,
                                         pointerEvents: 'auto',
-                                        height: `${viewportRect.height -
-                                            (pointerPosition.y + pointerPosition.height + pointerPadOffset)}px`,
-                                    } }), _jsx("div", { style: {
+                                        height: `${Math.max(viewportRect.height -
+                                            (pointerPosition.y + pointerPosition.height + pointerPadOffset), 0)}px`,
+                                    } }), _jsx("div", { "data-name": "nextstep-prevent-click-overlay-left", style: {
                                         position: 'absolute',
                                         left: 0,
                                         top: 0,
                                         pointerEvents: 'auto',
                                         width: Math.max(pointerPosition.x - pointerPadOffset, 0),
                                         height: viewportRect.height,
-                                    } }), _jsx("div", { style: {
+                                    } }), _jsx("div", { "data-name": "nextstep-prevent-click-overlay-right", style: {
                                         position: 'absolute',
                                         top: 0,
                                         pointerEvents: 'auto',
