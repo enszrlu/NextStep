@@ -145,7 +145,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
         // Default viewport is the body
         let viewport = window.document.body;
         let viewPortRect = window.document.body.getBoundingClientRect();
-        if (currentTourSteps && currentStep) {
+        if (currentTourSteps && currentStep !== undefined) {
             const step = currentTourSteps[currentStep];
             if (step.viewportID) {
                 // If the step has a viewportID, use the wrapper as the viewport

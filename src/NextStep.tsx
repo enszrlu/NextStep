@@ -190,7 +190,7 @@ const NextStep: React.FC<NextStepProps> = ({
     let viewport: Element | null = window.document.body;
     let viewPortRect: DOMRect | null = window.document.body.getBoundingClientRect();
 
-    if (currentTourSteps && currentStep) {
+    if (currentTourSteps && currentStep !== undefined) {
       const step = currentTourSteps[currentStep];
       if (step.viewportID) {
         // If the step has a viewportID, use the wrapper as the viewport
