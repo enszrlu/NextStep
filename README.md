@@ -4,9 +4,9 @@
 
 **NextStep** is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda).
 
-It utilizes [framer-motion](https://www.framer.com/motion/) for animations and [tailwindcss](https://tailwindcss.com/) for styling.
+It utilizes [framer-motion](https://www.framer.com/motion/) for animations.
 
-> **Note** `NextStep` now supports non-tailwindcss projects with v1.2.0-beta.0. It is available with nextstepjs@beta.
+> **Note** `NextStep` now supports non-tailwindcss projects with v1.2 onwards.
 
 The library allows user to use custom cards (tooltips) for easier integration.
 
@@ -67,20 +67,6 @@ const nextConfig = {
 };
 
 export default nextConfig;
-```
-
-### Tailwind Config
-
-> **Note** `NextStep` now supports non-tailwindcss projects with v1.2.0-beta.0. It is available with nextstepjs@beta. This step is not required for v1.2.0-beta.0 and above.
-
-Tailwind CSS needs to scan the node module to include the used classes. See [configuring source paths](https://tailwindcss.com/docs/content-configuration#configuring-source-paths) for more information.
-
-```typescript
-const config: Config = {
-  content: [
-    './node_modules/nextstepjs/dist/**/*.{js,ts,jsx,tsx}', // Add this
-  ],
-};
 ```
 
 ### Custom Card
