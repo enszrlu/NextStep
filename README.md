@@ -2,13 +2,18 @@
 
 ![NextStep](./public/nextstepjs.png)
 
-**NextStep** is a lightweight onboarding library for Next.js applications, inspired by [Onborda](https://github.com/uixmat/onborda).
+**NextStep** is a lightweight onboarding library for Next.js applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations.
 
-It utilizes [framer-motion](https://www.framer.com/motion/) for animations.
+**Some of the use cases:**
+
+- **Easier Onboarding**: Guide new users with step-by-step tours
+- **Engagement Boost**: Make help docs interactive, so users learn by _doing_.
+- **Better Error Handling**: Skip generic toasters—show users exactly what to fix with tailored tours.
+- **Event-Based Tours**: Trigger custom tours after key actions to keep users coming back.
 
 > **Note** `NextStep` now supports non-tailwindcss projects with v1.2 onwards.
 
-The library allows user to use custom cards (tooltips) for easier integration.
+The library allows users to use custom cards (tooltips) for easier integration.
 
 **If you like the project, please leave a star! ⭐️⭐️⭐️⭐️⭐️**
 
@@ -309,3 +314,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License.
+
+## Credits
+
+- [Onborda](https://github.com/uixmat/onborda) for the inspiration and some code snippets.
