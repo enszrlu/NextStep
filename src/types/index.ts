@@ -1,4 +1,5 @@
 import { Transition } from 'framer-motion';
+import { NavigationAdapter } from './navigation';
 
 // Context
 export interface NextStepContextType {
@@ -65,6 +66,7 @@ export interface NextStepProps {
   onSkip?: (step: number, tourName: string | null) => void;
   displayArrow?: boolean;
   clickThroughOverlay?: boolean;
+  navigationAdapter?: NavigationAdapter;
 }
 
 // Custom Card

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
-import { useRouter, usePathname } from 'next/navigation';
+import { createNextAdapter } from './navigation/next-adapter';
 
 // Types
 import { NextStepProps } from './types';
@@ -22,6 +22,7 @@ const NextStep: React.FC<NextStepProps> = ({
   onSkip = () => {},
   displayArrow = true,
   clickThroughOverlay = false,
+  navigationAdapter = createNextAdapter(),
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -68,8 +69,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Route Changes
-  const router = useRouter();
-  const pathname = usePathname();
+  const currentPath = navigationAdapter?.getCurrentPath() || '/';
 
   // - -
   // On Start
@@ -188,7 +188,7 @@ const NextStep: React.FC<NextStepProps> = ({
         window.removeEventListener('resize', updateViewportRect);
       };
     }
-  }, [currentStep, pathname, currentTourSteps, isNextStepVisible]);
+  }, [currentStep, currentPath, currentTourSteps, isNextStepVisible]);
 
   // - -
   // Helper function to get element position
@@ -410,7 +410,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Step Controls
-  const nextStep = async () => {
+  const nextStep = () => {
     if (currentTourSteps && currentStep < currentTourSteps.length - 1) {
       try {
         const nextStepIndex = currentStep + 1;
@@ -419,7 +419,7 @@ const NextStep: React.FC<NextStepProps> = ({
         onStepChange?.(nextStepIndex, currentTour);
 
         if (route) {
-          await router.push(route);
+          navigationAdapter?.push(route);
 
           const targetSelector = currentTourSteps[nextStepIndex].selector;
 
@@ -458,7 +458,7 @@ const NextStep: React.FC<NextStepProps> = ({
     }
   };
 
-  const prevStep = async () => {
+  const prevStep = () => {
     if (currentTourSteps && currentStep > 0) {
       try {
         const prevStepIndex = currentStep - 1;
@@ -467,7 +467,7 @@ const NextStep: React.FC<NextStepProps> = ({
         onStepChange?.(prevStepIndex, currentTour);
 
         if (route) {
-          await router.push(route);
+          navigationAdapter?.push(route);
 
           const targetSelector = currentTourSteps[prevStepIndex].selector;
 

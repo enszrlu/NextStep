@@ -3,10 +3,10 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
-import { useRouter, usePathname } from 'next/navigation';
+import { createNextAdapter } from './navigation/next-adapter';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = createNextAdapter(), }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -39,8 +39,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     }, []);
     // - -
     // Route Changes
-    const router = useRouter();
-    const pathname = usePathname();
+    const currentPath = navigationAdapter?.getCurrentPath() || '/';
     // - -
     // On Start
     useEffect(() => {
@@ -144,7 +143,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 window.removeEventListener('resize', updateViewportRect);
             };
         }
-    }, [currentStep, pathname, currentTourSteps, isNextStepVisible]);
+    }, [currentStep, currentPath, currentTourSteps, isNextStepVisible]);
     // - -
     // Helper function to get element position
     const getElementPosition = (element) => {
@@ -336,14 +335,14 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     }, [currentStep, currentTour]);
     // - -
     // Step Controls
-    const nextStep = async () => {
+    const nextStep = () => {
         if (currentTourSteps && currentStep < currentTourSteps.length - 1) {
             try {
                 const nextStepIndex = currentStep + 1;
                 const route = currentTourSteps[currentStep].nextRoute;
                 onStepChange?.(nextStepIndex, currentTour);
                 if (route) {
-                    await router.push(route);
+                    navigationAdapter?.push(route);
                     const targetSelector = currentTourSteps[nextStepIndex].selector;
                     if (targetSelector) {
                         // Use MutationObserver to detect when the target element is available in the DOM
@@ -381,14 +380,14 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
             closeNextStep();
         }
     };
-    const prevStep = async () => {
+    const prevStep = () => {
         if (currentTourSteps && currentStep > 0) {
             try {
                 const prevStepIndex = currentStep - 1;
                 const route = currentTourSteps[currentStep].prevRoute;
                 onStepChange?.(prevStepIndex, currentTour);
                 if (route) {
-                    await router.push(route);
+                    navigationAdapter?.push(route);
                     const targetSelector = currentTourSteps[prevStepIndex].selector;
                     if (targetSelector) {
                         // Use MutationObserver to detect when the target element is available in the DOM
