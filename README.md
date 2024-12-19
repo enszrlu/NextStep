@@ -33,6 +33,75 @@ yarn add nextstepjs framer-motion
 bun add nextstepjs framer-motion
 ```
 
+### Navigation Adapters (v2.0+)
+
+NextStep 2.0 introduces a framework-agnostic routing system through navigation adapters. While it defaults to Next.js routing, you can use it with any React routing solution:
+
+#### Built-in Adapters
+
+```tsx
+// Next.js (default)
+import { NextStep, createNextAdapter } from 'nextstepjs';
+
+const App = () => (
+  <NextStep
+    navigationAdapter={createNextAdapter()} // Optional - Next.js adapter is default
+    steps={steps}
+  >
+    {children}
+  </NextStep>
+);
+
+// React Router
+import { NextStep, createReactRouterAdapter } from 'nextstepjs';
+
+const App = () => (
+  <NextStep navigationAdapter={createReactRouterAdapter()} steps={steps}>
+    {children}
+  </NextStep>
+);
+
+// Remix
+import { NextStep, createRemixAdapter } from 'nextstepjs';
+
+const App = () => (
+  <NextStep navigationAdapter={createRemixAdapter()} steps={steps}>
+    {children}
+  </NextStep>
+);
+```
+
+#### Custom Navigation Adapter
+
+You can create your own navigation adapter for any routing solution by implementing the `NavigationAdapter` interface:
+
+```tsx
+import { NextStep, NavigationAdapter } from 'nextstepjs';
+
+const createCustomAdapter = (): NavigationAdapter => {
+  return {
+    // Navigate to a new route
+    push: (path: string) => {
+      // Your navigation logic here
+      // For example, using React Router
+      navigate(path);
+    },
+    // Get current route path
+    getCurrentPath: () => {
+      // Your path retrieval logic here
+      // For example, using React Router
+      return location.pathname;
+    },
+  };
+};
+
+const App = () => (
+  <NextStep navigationAdapter={createCustomAdapter()} steps={steps}>
+    {children}
+  </NextStep>
+);
+```
+
 ### App Router: Global `layout.tsx`
 
 Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
@@ -253,6 +322,7 @@ Here's an example of how to use `NextStepViewport`:
 | --------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
 | `children`            | `React.ReactNode`                                  | Your website or application content                                  |
 | `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding           |
+| `navigationAdapter`   | `NavigationAdapter`                                | Optional. Router adapter for navigation (defaults to Next.js)        |
 | `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                        |
 | `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area          |
 | `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area             |
