@@ -35,6 +35,8 @@ bun add nextstepjs framer-motion
 
 NextStep 2.0 introduces a framework-agnostic routing system through navigation adapters. Each adapter is packaged separately to minimize bundle size - only the adapter you import will be included in your bundle.
 
+> **Important:** Make sure to import the adapter you need in your app in order to access full functionality. Without an adapter, navigation features like `nextRoute` and `prevRoute` will not work properly.
+
 #### Built-in Adapters
 
 ```tsx
