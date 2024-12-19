@@ -1,12 +1,12 @@
 'use client';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
-import { createNextAdapter } from './navigation/next-adapter';
+import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = createNextAdapter(), }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -19,6 +19,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const [viewport, setViewport] = useState(null);
     const [viewportRect, setViewportRect] = useState(null);
     const [scrollableParent, setScrollableParent] = useState(null);
+    const router = navigationAdapter();
     // - -
     // Handle pop state
     const handlePopState = useCallback(() => {
@@ -39,7 +40,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     }, []);
     // - -
     // Route Changes
-    const currentPath = navigationAdapter?.getCurrentPath() || '/';
+    const currentPath = router.getCurrentPath() || '/';
     // - -
     // On Start
     useEffect(() => {
@@ -342,7 +343,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 const route = currentTourSteps[currentStep].nextRoute;
                 onStepChange?.(nextStepIndex, currentTour);
                 if (route) {
-                    navigationAdapter?.push(route);
+                    router.push(route);
                     const targetSelector = currentTourSteps[nextStepIndex].selector;
                     if (targetSelector) {
                         // Use MutationObserver to detect when the target element is available in the DOM
@@ -387,7 +388,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 const route = currentTourSteps[currentStep].prevRoute;
                 onStepChange?.(prevStepIndex, currentTour);
                 if (route) {
-                    navigationAdapter?.push(route);
+                    router.push(route);
                     const targetSelector = currentTourSteps[prevStepIndex].selector;
                     if (targetSelector) {
                         // Use MutationObserver to detect when the target element is available in the DOM
@@ -743,6 +744,15 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     const pointerRadius = currentTourSteps?.[currentStep]?.pointerRadius ?? 28;
     // Check if viewport is scrollable
     const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
+    // Handle navigation when no adapter is provided
+    const handleNavigation = useCallback((path) => {
+        console.warn('No navigation adapter provided. Please provide a navigation adapter or import one from nextstepjs/adapters/*');
+    }, []);
+    // Use a fallback adapter when none is provided
+    const effectiveAdapter = useMemo(() => navigationAdapter || {
+        push: handleNavigation,
+        getCurrentPath: () => '/',
+    }, [navigationAdapter, handleNavigation]);
     return (_jsxs("div", { "data-name": "nextstep-wrapper", "data-nextstep": "dev", style: { position: 'relative', width: '100%' }, children: [_jsx("div", { "data-name": "nextstep-site", style: { display: 'block', width: '100%' }, children: children }), pointerPosition && isNextStepVisible && viewport && (_jsx(DynamicPortal, { viewportID: currentTourSteps?.[currentStep]?.viewportID, children: _jsxs(motion.div, { "data-name": "nextstep-overlay", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
                         position: 'absolute',
                         top: 0,

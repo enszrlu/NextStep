@@ -1,8 +1,9 @@
 'use client';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'framer-motion';
-import { createNextAdapter } from './navigation/next-adapter';
+import { useWindowAdapter } from './adapters/window';
 
 // Types
 import { NextStepProps } from './types';
@@ -22,7 +23,7 @@ const NextStep: React.FC<NextStepProps> = ({
   onSkip = () => {},
   displayArrow = true,
   clickThroughOverlay = false,
-  navigationAdapter = createNextAdapter(),
+  navigationAdapter = useWindowAdapter,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -44,6 +45,8 @@ const NextStep: React.FC<NextStepProps> = ({
   const [viewport, setViewport] = useState<Element | null>(null);
   const [viewportRect, setViewportRect] = useState<DOMRect | null>(null);
   const [scrollableParent, setScrollableParent] = useState<Element | null>(null);
+
+  const router = navigationAdapter();
 
   // - -
   // Handle pop state
@@ -69,7 +72,7 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Route Changes
-  const currentPath = navigationAdapter?.getCurrentPath() || '/';
+  const currentPath = router.getCurrentPath() || '/';
 
   // - -
   // On Start
@@ -419,7 +422,7 @@ const NextStep: React.FC<NextStepProps> = ({
         onStepChange?.(nextStepIndex, currentTour);
 
         if (route) {
-          navigationAdapter?.push(route);
+          router.push(route);
 
           const targetSelector = currentTourSteps[nextStepIndex].selector;
 
@@ -467,7 +470,7 @@ const NextStep: React.FC<NextStepProps> = ({
         onStepChange?.(prevStepIndex, currentTour);
 
         if (route) {
-          navigationAdapter?.push(route);
+          router.push(route);
 
           const targetSelector = currentTourSteps[prevStepIndex].selector;
 
@@ -850,6 +853,23 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // Check if viewport is scrollable
   const isViewportScrollable = viewport ? isElementScrollable(viewport) : false;
+
+  // Handle navigation when no adapter is provided
+  const handleNavigation = useCallback((path: string) => {
+    console.warn(
+      'No navigation adapter provided. Please provide a navigation adapter or import one from nextstepjs/adapters/*',
+    );
+  }, []);
+
+  // Use a fallback adapter when none is provided
+  const effectiveAdapter = useMemo(
+    () =>
+      navigationAdapter || {
+        push: handleNavigation,
+        getCurrentPath: () => '/',
+      },
+    [navigationAdapter, handleNavigation],
+  );
 
   return (
     <div

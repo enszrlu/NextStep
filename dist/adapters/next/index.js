@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, usePathname } from 'next/navigation';
-export const createNextAdapter = () => {
+export const useNextAdapter = () => {
     const router = useRouter();
     const pathname = usePathname();
     return {

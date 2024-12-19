@@ -8,7 +8,4 @@ export type {
   NextStepContextType,
   CardComponentProps,
 } from './types';
-export { createNextAdapter } from './navigation/next-adapter';
-export { createReactRouterAdapter } from './navigation/react-router-adapter';
-export { createRemixAdapter } from './navigation/remix-adapter';
 export type { NavigationAdapter } from './types/navigation';

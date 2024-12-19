@@ -2,7 +2,7 @@
 
 ![NextStep](./public/nextstepjs.png)
 
-**NextStep** is a lightweight onboarding library for Next.js applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations.
+**NextStep** is a lightweight onboarding library for React applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
 
 **Some of the use cases:**
 
@@ -10,8 +10,6 @@
 - **Engagement Boost**: Make help docs interactive, so users learn by _doing_.
 - **Better Error Handling**: Skip generic toasters—show users exactly what to fix with tailored tours.
 - **Event-Based Tours**: Trigger custom tours after key actions to keep users coming back.
-
-> **Note** `NextStep` now supports non-tailwindcss projects with v1.2 onwards.
 
 The library allows users to use custom cards (tooltips) for easier integration.
 
@@ -35,40 +33,46 @@ bun add nextstepjs framer-motion
 
 ### Navigation Adapters (v2.0+)
 
-NextStep 2.0 introduces a framework-agnostic routing system through navigation adapters. While it defaults to Next.js routing, you can use it with any React routing solution:
+NextStep 2.0 introduces a framework-agnostic routing system through navigation adapters. Each adapter is packaged separately to minimize bundle size - only the adapter you import will be included in your bundle.
 
 #### Built-in Adapters
 
 ```tsx
-// Next.js (default)
-import { NextStep, createNextAdapter } from 'nextstepjs';
+// Next.js
+import { NextStep } from 'nextstepjs';
+import { useNextAdapter } from 'nextstepjs/adapters/next';
 
-const App = () => (
-  <NextStep
-    navigationAdapter={createNextAdapter()} // Optional - Next.js adapter is default
-    steps={steps}
-  >
-    {children}
-  </NextStep>
-);
+const App = () => {
+  return (
+    <NextStep navigationAdapter={useNextAdapter} steps={steps}>
+      {children}
+    </NextStep>
+  );
+};
 
 // React Router
-import { NextStep, createReactRouterAdapter } from 'nextstepjs';
+import { NextStep } from 'nextstepjs';
+import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
-const App = () => (
-  <NextStep navigationAdapter={createReactRouterAdapter()} steps={steps}>
-    {children}
-  </NextStep>
-);
+const App = () => {
+  return (
+    <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
+      {children}
+    </NextStep>
+  );
+};
 
 // Remix
-import { NextStep, createRemixAdapter } from 'nextstepjs';
+import { NextStep } from 'nextstepjs';
+import { useRemixAdapter } from 'nextstepjs/adapters/remix';
 
-const App = () => (
-  <NextStep navigationAdapter={createRemixAdapter()} steps={steps}>
-    {children}
-  </NextStep>
-);
+const App = () => {
+  return (
+    <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
+      {children}
+    </NextStep>
+  );
+};
 ```
 
 #### Custom Navigation Adapter
@@ -76,71 +80,89 @@ const App = () => (
 You can create your own navigation adapter for any routing solution by implementing the `NavigationAdapter` interface:
 
 ```tsx
-import { NextStep, NavigationAdapter } from 'nextstepjs';
+import { NextStep } from 'nextstepjs';
+import type { NavigationAdapter } from 'nextstepjs';
 
-const createCustomAdapter = (): NavigationAdapter => {
+const useCustomAdapter = (): NavigationAdapter => {
   return {
-    // Navigate to a new route
     push: (path: string) => {
       // Your navigation logic here
-      // For example, using React Router
-      navigate(path);
+      // Example: history.push(path)
     },
-    // Get current route path
     getCurrentPath: () => {
       // Your path retrieval logic here
-      // For example, using React Router
-      return location.pathname;
+      // Example: window.location.pathname
+      return window.location.pathname;
     },
   };
 };
 
-const App = () => (
-  <NextStep navigationAdapter={createCustomAdapter()} steps={steps}>
-    {children}
-  </NextStep>
-);
-```
-
-### App Router: Global `layout.tsx`
-
-Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
-
-```tsx
-<NextStepProvider>
-  <NextStep steps={steps}>{children}</NextStep>
-</NextStepProvider>
-```
-
-### Pages Router: `_app.tsx`
-
-Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
-
-```tsx
-<NextStepProvider>
-  <NextStep steps={steps}>
-    <Component {...pageProps} />
-  </NextStep>
-</NextStepProvider>
-```
-
-#### Troubleshooting
-
-If you encounter an error related to module exports when using the Pages Router, it is likely due to a mismatch between ES modules (which use `export` statements) and CommonJS modules (which use `module.exports`). The `nextstepjs` package uses ES module syntax, but your Next.js project might be set up to use CommonJS.
-
-To resolve this issue, ensure that your Next.js project is configured to support ES modules. You can do this by updating your `next.config.js` file to include the following configuration:
-
-```tsx
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-  experimental: {
-    esmExternals: true,
-  },
-  transpilePackages: ['nextstepjs'],
+const App = () => {
+  return (
+    <NextStep navigationAdapter={useCustomAdapter} steps={steps}>
+      {children}
+    </NextStep>
+  );
 };
+```
 
-export default nextConfig;
+#### Framework-Specific Setup
+
+##### Next.js
+
+```tsx
+// app/layout.tsx or pages/_app.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
+import { useNextAdapter } from 'nextstepjs/adapters/next';
+
+export default function Layout({ children }) {
+  return (
+    <NextStepProvider>
+      <NextStep navigationAdapter={useNextAdapter} steps={steps}>
+        {children}
+      </NextStep>
+    </NextStepProvider>
+  );
+}
+```
+
+##### React Router
+
+```tsx
+// App.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
+import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
+import { BrowserRouter } from 'react-router-dom';
+
+export default function App({ children }) {
+  return (
+    <BrowserRouter>
+      <NextStepProvider>
+        <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
+          {children}
+        </NextStep>
+      </NextStepProvider>
+    </BrowserRouter>
+  );
+}
+```
+
+##### Remix
+
+```tsx
+// root.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
+import { useRemixAdapter } from 'nextstepjs/adapters/remix';
+
+export default function App() {
+  return (
+    <NextStepProvider>
+      <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
+        <Outlet />
+      </NextStep>
+    </NextStepProvider>
+  );
+}
 ```
 
 ### Custom Card
@@ -225,9 +247,9 @@ const steps: Tour[] = [
 | `blockKeyboardControl` | `boolean`                                | Optional. Determines whether keyboard control should be blocked                                                                                     |
 | `pointerPadding`       | `number`                                 | Optional. The padding around the pointer (keyhole) highlighting the target element.                                                                 |
 | `pointerRadius`        | `number`                                 | Optional. The border-radius of the pointer (keyhole) highlighting the target element.                                                               |
-| `nextRoute`            | `string`                                 | Optional. The route to navigate to using `next/navigation` when moving to the next step.                                                            |
-| `prevRoute`            | `string`                                 | Optional. The route to navigate to using `next/navigation` when moving to the previous step.                                                        |
-| `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used. **(Available after > v1.1.x)**    |
+| `nextRoute`            | `string`                                 | Optional. The route to navigate to when moving to the next step.                                                                                    |
+| `prevRoute`            | `string`                                 | Optional. The route to navigate to when moving to the previous step.                                                                                |
+| `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                                   |
 
 > **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
 
@@ -239,18 +261,8 @@ Target anything in your app using the element's `id` attribute.
 <div id="nextstep-step1">Onboard Step</div>
 ```
 
-### Routing During a Tour
-
-NextStep allows you to navigate between different routes during a tour using the `nextRoute` and `prevRoute` properties in the step object. These properties enable seamless transitions between different pages or sections of your application.
-
-- `nextRoute`: Specifies the route to navigate to when the "Next" button is clicked.
-- `prevRoute`: Specifies the route to navigate to when the "Previous" button is clicked.
-
-When `nextRoute` or `prevRoute` is provided, NextStep will use Next.js's `next/navigation` to navigate to the specified route.
-
 ### Using NextStepViewport and viewportID
 
-**Only available after > v1.1.x**
 When a selector is in a scrollable area, it is best to wrap the content of the scrollable area with `NextStepViewport`. This component takes `children` and an `id` as prop. By providing the `viewportID` to the step, NextStep will target this element within the viewport. This ensures that the step is anchored to the element even if the container is scrollable.
 
 Here's an example of how to use `NextStepViewport`:

@@ -66,7 +66,7 @@ export interface NextStepProps {
   onSkip?: (step: number, tourName: string | null) => void;
   displayArrow?: boolean;
   clickThroughOverlay?: boolean;
-  navigationAdapter?: NavigationAdapter;
+  navigationAdapter?: () => NavigationAdapter;
 }
 
 // Custom Card

@@ -1,6 +1,6 @@
 'use client';
 import { useNavigate, useLocation } from '@remix-run/react';
-export const createRemixAdapter = () => {
+export const useRemixAdapter = () => {
     const navigate = useNavigate();
     const location = useLocation();
     return {
