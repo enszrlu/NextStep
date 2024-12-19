@@ -16,6 +16,7 @@ const NextStep: React.FC<NextStepProps> = ({
   shadowOpacity = '0.2',
   cardTransition = { ease: 'anticipate', duration: 0.6 },
   cardComponent: CardComponent,
+  onStart = () => {},
   onStepChange = () => {},
   onComplete = () => {},
   onSkip = () => {},
@@ -69,6 +70,14 @@ const NextStep: React.FC<NextStepProps> = ({
   // Route Changes
   const router = useRouter();
   const pathname = usePathname();
+
+  // - -
+  // On Start
+  useEffect(() => {
+    if (isNextStepVisible) {
+      onStart?.(currentTour);
+    }
+  }, [currentTour, onStart, isNextStepVisible]);
 
   // - -
   // Initialize
@@ -407,7 +416,7 @@ const NextStep: React.FC<NextStepProps> = ({
         const nextStepIndex = currentStep + 1;
         const route = currentTourSteps[currentStep].nextRoute;
 
-        onStepChange?.(nextStepIndex);
+        onStepChange?.(nextStepIndex, currentTour);
 
         if (route) {
           await router.push(route);
@@ -444,7 +453,7 @@ const NextStep: React.FC<NextStepProps> = ({
         console.error('Error navigating to next route', error);
       }
     } else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
-      onComplete?.();
+      onComplete?.(currentTour);
       closeNextStep();
     }
   };
@@ -455,7 +464,7 @@ const NextStep: React.FC<NextStepProps> = ({
         const prevStepIndex = currentStep - 1;
         const route = currentTourSteps[currentStep].prevRoute;
 
-        onStepChange?.(prevStepIndex);
+        onStepChange?.(prevStepIndex, currentTour);
 
         if (route) {
           await router.push(route);
@@ -496,10 +505,10 @@ const NextStep: React.FC<NextStepProps> = ({
 
   // - -
   // Skip Tour
-  const skipTour = useCallback(() => {
+  const skipTour = () => {
+    onSkip?.(currentStep, currentTour);
     closeNextStep();
-    onSkip?.();
-  }, [closeNextStep, onSkip]);
+  };
 
   // - -
   // Keyboard Controls

@@ -1,4 +1,4 @@
-import { Transition } from "framer-motion";
+import { Transition } from 'framer-motion';
 export interface NextStepContextType {
     currentStep: number;
     currentTour: string | null;
@@ -12,7 +12,7 @@ export interface Step {
     title: string;
     content: React.ReactNode;
     selector?: string;
-    side?: "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "left-top" | "left-bottom" | "right-top" | "right-bottom";
+    side?: 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'left-top' | 'left-bottom' | 'right-top' | 'right-bottom';
     showControls?: boolean;
     showSkip?: boolean;
     blockKeyboardControl?: boolean;
@@ -34,9 +34,10 @@ export interface NextStepProps {
     shadowOpacity?: string;
     cardTransition?: Transition;
     cardComponent?: React.ComponentType<CardComponentProps>;
-    onStepChange?: (step: number) => void;
-    onComplete?: () => void;
-    onSkip?: () => void;
+    onStart?: (tourName: string | null) => void;
+    onStepChange?: (step: number, tourName: string | null) => void;
+    onComplete?: (tourName: string | null) => void;
+    onSkip?: (step: number, tourName: string | null) => void;
     displayArrow?: boolean;
     clickThroughOverlay?: boolean;
 }
