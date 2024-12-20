@@ -1,3 +1,4 @@
+'use no memo';
 import { jsx as _jsx } from "react/jsx-runtime";
 const NextStepViewport = ({ children, id }) => {
     return (_jsx("div", { style: {
