@@ -2,7 +2,7 @@
 
 ![NextStep](./public/nextstepjs.png)
 
-**NextStep** is a lightweight onboarding library for React applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
+**NextStep** is a lightweight onboarding library for React applications. It utilizes [motion](https://www.motion.dev) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
 
 **Some of the use cases:**
 
@@ -22,13 +22,13 @@ The library allows users to use custom cards (tooltips) for easier integration.
 
 ```bash
 # npm
-npm i nextstepjs framer-motion
+npm i nextstepjs motion
 # pnpm
-pnpm add nextstepjs framer-motion
+pnpm add nextstepjs motion
 # yarn
-yarn add nextstepjs framer-motion
+yarn add nextstepjs motion
 # bun
-bun add nextstepjs framer-motion
+bun add nextstepjs motion
 ```
 
 ### Navigation Adapters (v2.0+)
@@ -341,7 +341,7 @@ Here's an example of how to use `NextStepViewport`:
 | `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area          |
 | `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area             |
 | `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                     |
-| `cardTransition`      | `Transition`                                       | Framer Motion transition object for step transitions                 |
+| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                        |
 | `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                     |
 | `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                    |
 | `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                  |
