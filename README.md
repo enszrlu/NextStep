@@ -39,22 +39,28 @@ NextStep 2.0 introduces a framework-agnostic routing system through navigation a
 
 #### Built-in Adapters
 
+##### Next.js
+
 ```tsx
-// Next.js
-import { NextStep } from 'nextstepjs';
+// app/layout.tsx or pages/_app.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
 import { useNextAdapter } from 'nextstepjs/adapters/next';
 
-const App = () => {
+export default function Layout({ children }) {
   return (
-    <NextStep navigationAdapter={useNextAdapter} steps={steps}>
-      {children}
-    </NextStep>
+    <NextStepProvider>
+      <NextStep navigationAdapter={useNextAdapter} steps={steps}>
+        {children}
+      </NextStep>
+    </NextStepProvider>
   );
-};
+}
 ```
 
-### React Router as Framework
-```tsx:app/routes/root.tsx
+
+#### React Router as Framework
+```tsx:app/root.tsx
+//app/root.tsx
 import { NextStepProvider } from 'nextstepjs';
 import { Outlet } from 'react-router-dom';
 
@@ -68,6 +74,7 @@ export default function App() {
 ```
 
 ```tsx:app/routes/index.tsx
+//app/routes/index.tsx
 import { NextStep, useNextStep } from 'nextstepjs';
 import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
@@ -132,18 +139,22 @@ export default defineConfig({
 });
 ```
 
+##### Remix
+
 ```tsx
-// Remix
-import { NextStep } from 'nextstepjs';
+// root.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
 import { useRemixAdapter } from 'nextstepjs/adapters/remix';
 
-const App = () => {
+export default function App() {
   return (
-    <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
-      {children}
-    </NextStep>
+    <NextStepProvider>
+      <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
+        <Outlet />
+      </NextStep>
+    </NextStepProvider>
   );
-};
+}
 ```
 
 #### Custom Navigation Adapter
@@ -177,64 +188,7 @@ const App = () => {
 };
 ```
 
-#### Framework-Specific Setup
 
-##### Next.js
-
-```tsx
-// app/layout.tsx or pages/_app.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useNextAdapter } from 'nextstepjs/adapters/next';
-
-export default function Layout({ children }) {
-  return (
-    <NextStepProvider>
-      <NextStep navigationAdapter={useNextAdapter} steps={steps}>
-        {children}
-      </NextStep>
-    </NextStepProvider>
-  );
-}
-```
-
-##### React Router
-
-```tsx
-// App.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
-import { BrowserRouter } from 'react-router-dom';
-
-export default function App({ children }) {
-  return (
-    <BrowserRouter>
-      <NextStepProvider>
-        <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
-          {children}
-        </NextStep>
-      </NextStepProvider>
-    </BrowserRouter>
-  );
-}
-```
-
-##### Remix
-
-```tsx
-// root.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useRemixAdapter } from 'nextstepjs/adapters/remix';
-
-export default function App() {
-  return (
-    <NextStepProvider>
-      <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
-        <Outlet />
-      </NextStep>
-    </NextStepProvider>
-  );
-}
-```
 
 ### Custom Card
 
