@@ -1,4 +1,6 @@
 'use client';
+'use no memo';
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { NavigationAdapter } from '../../types/navigation';
 
