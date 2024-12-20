@@ -51,27 +51,88 @@ const App = () => {
     </NextStep>
   );
 };
+```
 
-// React Router as a Framework
-// Vite Config
+### React Router as Framework
+```tsx:app/routes/root.tsx
+import { NextStepProvider } from 'nextstepjs';
+import { Outlet } from 'react-router-dom';
+
+export default function App() {
+  return (
+    <NextStepProvider>
+      <Outlet />
+    </NextStepProvider>
+  );
+}
+```
+
+```tsx:app/routes/index.tsx
+import { NextStep, useNextStep } from 'nextstepjs';
+import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
+
+const steps = [
+  {
+    tour: 'firsttour',
+    steps: [
+      {
+        icon: '👋',
+        title: 'Welcome to the Dashboard',
+        content: 'This is your first step',
+        selector: '#tour1-step1',
+        side: 'top'
+      },
+      {
+        icon: '🎯',
+        title: 'Second Step',
+        content: 'Here is another important feature',
+        selector: '#tour1-step2',
+        side: 'top'
+      }
+    ]
+  }
+];
+
+export default function Dashboard() {
+  const { startNextStep } = useNextStep();
+  const navigationAdapter = useReactRouterAdapter();
+
+  return (
+    <NextStep navigationAdapter={() => navigationAdapter} steps={steps}>
+      <div className="h-full flex flex-col gap-4 p-4">
+        <button
+          onClick={() => startNextStep('firsttour')}
+          className="self-end px-4 py-2 rounded-lg bg-primary"
+        >
+          Start Tour
+        </button>
+        
+        <div className="grid gap-4 md:grid-cols-3">
+          <div id="tour1-step1" className="aspect-video rounded-xl" />
+          <div id="tour1-step2" className="aspect-video rounded-xl" />
+        </div>
+      </div>
+    </NextStep>
+  );
+}
+```
+
+#### Important Configuration for React Router + Vite
+
+If you're using Vite with React Router, add the following configuration to your `vite.config.ts`:
+
+```ts:vite.config.ts
+export default defineConfig({
   optimizeDeps: {
     include: ['nextstepjs', 'motion']
   },
   ssr: {
-    noExternal: ['nextstepjs', 'motion'],
+    noExternal: ['nextstepjs', 'motion']
   }
+});
+```
 
-import { NextStep } from 'nextstepjs';
-import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
-
-const App = () => {
-  return (
-    <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
-      {children}
-    </NextStep>
-  );
-};
-
+```tsx
 // Remix
 import { NextStep } from 'nextstepjs';
 import { useRemixAdapter } from 'nextstepjs/adapters/remix';
