@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       motion:
-        specifier: ^11.15.0
+        specifier: '>=11'
         version: 11.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next:
         specifier: '>=13'
-        version: 14.2.11(react-dom@18.3.1)(react@18.3.1)
+        version: 14.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: '>=18'
         version: 18.3.1
@@ -323,7 +323,7 @@ snapshots:
 
   nanoid@3.3.7: {}
 
-  next@14.2.11(react-dom@18.3.1)(react@18.3.1):
+  next@14.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.11
       '@swc/helpers': 0.5.5
