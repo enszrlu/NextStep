@@ -58,7 +58,7 @@ export default function Layout({ children }) {
 ```
 
 
-#### React Router as Framework
+#### React Router as a Framework
 ```tsx:app/root.tsx
 //app/root.tsx
 import { NextStepProvider } from 'nextstepjs';
@@ -75,10 +75,10 @@ export default function App() {
 
 ```tsx:app/routes/index.tsx
 //app/routes/index.tsx
-import { NextStep, useNextStep } from 'nextstepjs';
+import { NextStep, useNextStep, type Tour } from 'nextstepjs';
 import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
-const steps = [
+const steps: Tour[] = [
   {
     tour: 'firsttour',
     steps: [
@@ -87,7 +87,7 @@ const steps = [
         title: 'Welcome to the Dashboard',
         content: 'This is your first step',
         selector: '#tour1-step1',
-        side: 'top'
+        side: 'top',
       },
       {
         icon: '🎯',
