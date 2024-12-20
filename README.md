@@ -57,8 +57,8 @@ export default function Layout({ children }) {
 }
 ```
 
-
 #### React Router as a Framework
+
 ```tsx:app/root.tsx
 //app/root.tsx
 import { NextStepProvider } from 'nextstepjs';
@@ -113,7 +113,7 @@ export default function Dashboard() {
         >
           Start Tour
         </button>
-        
+
         <div className="grid gap-4 md:grid-cols-3">
           <div id="tour1-step1" className="aspect-video rounded-xl" />
           <div id="tour1-step2" className="aspect-video rounded-xl" />
@@ -130,9 +130,6 @@ If you're using Vite with React Router, add the following configuration to your 
 
 ```ts:vite.config.ts
 export default defineConfig({
-  optimizeDeps: {
-    include: ['nextstepjs', 'motion']
-  },
   ssr: {
     noExternal: ['nextstepjs', 'motion']
   }
@@ -187,8 +184,6 @@ const App = () => {
   );
 };
 ```
-
-
 
 ### Custom Card
 
