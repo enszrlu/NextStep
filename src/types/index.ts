@@ -1,4 +1,4 @@
-import { Transition } from 'framer-motion';
+import { Transition } from 'motion/react';
 
 // Context
 export interface NextStepContextType {
