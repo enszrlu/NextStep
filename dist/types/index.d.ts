@@ -1,4 +1,4 @@
-import { Transition } from 'framer-motion';
+import { Transition } from 'motion/react';
 export interface NextStepContextType {
     currentStep: number;
     currentTour: string | null;
