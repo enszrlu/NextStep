@@ -52,7 +52,15 @@ const App = () => {
   );
 };
 
-// React Router
+// React Router as a Framework
+// Vite Config
+  optimizeDeps: {
+    include: ['nextstepjs', 'motion']
+  },
+  ssr: {
+    noExternal: ['nextstepjs', 'motion'],
+  }
+
 import { NextStep } from 'nextstepjs';
 import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
