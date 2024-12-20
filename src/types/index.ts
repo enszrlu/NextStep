@@ -19,18 +19,18 @@ export interface Step {
   selector?: string;
   // Options
   side?:
-    | 'top'
-    | 'bottom'
-    | 'left'
-    | 'right'
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right'
-    | 'left-top'
-    | 'left-bottom'
-    | 'right-top'
-    | 'right-bottom';
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'left-top'
+  | 'left-bottom'
+  | 'right-top'
+  | 'right-bottom';
   showControls?: boolean;
   showSkip?: boolean;
   blockKeyboardControl?: boolean;
@@ -65,6 +65,7 @@ export interface NextStepProps {
   onSkip?: (step: number, tourName: string | null) => void;
   displayArrow?: boolean;
   clickThroughOverlay?: boolean;
+  scrollToTop?: boolean;
 }
 
 // Custom Card

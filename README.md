@@ -249,20 +249,21 @@ Here's an example of how to use `NextStepViewport`:
 
 ### NextStep Props
 
-| Property              | Type                                               | Description                                                          |
-| --------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
-| `children`            | `React.ReactNode`                                  | Your website or application content                                  |
-| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding           |
-| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                        |
-| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area          |
-| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area             |
-| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                     |
-| `cardTransition`      | `Transition`                                       | Framer Motion transition object for step transitions                 |
-| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                     |
-| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                    |
-| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                  |
-| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour             |
-| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false |
+| Property              | Type                                               | Description                                                            |
+| --------------------- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `children`            | `React.ReactNode`                                  | Your website or application content                                    |
+| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding             |
+| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                          |
+| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area            |
+| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area               |
+| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                       |
+| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                          |
+| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                       |
+| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                      |
+| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                    |
+| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour               |
+| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false   |
+| `scrollToTop`         | `boolean`                                          | Optional. If false, the window won't auto scroll back to top on finish |
 
 ```tsx
 <NextStep

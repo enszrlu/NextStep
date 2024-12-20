@@ -22,6 +22,7 @@ const NextStep: React.FC<NextStepProps> = ({
   onSkip = () => {},
   displayArrow = true,
   clickThroughOverlay = false,
+  scrollToTop = true,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -311,7 +312,7 @@ const NextStep: React.FC<NextStepProps> = ({
           : 'center',
         inline: 'center',
       });
-    } else {
+    } else if (scrollToTop) {
       // Scroll to the top of the body
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
