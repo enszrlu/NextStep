@@ -28,9 +28,6 @@
     "onboarding-component",
     "onboarding-flow",
     "onboarding-tutorial",
-    "onboarding-guide",
-    "onboarding-tutorial",
-    "onboarding-guide",
     "onboarding-guide"
   ],
   "main": "dist/index.js",
@@ -41,12 +38,12 @@
   },
   "peerDependencies": {
     "@remix-run/react": ">=1.0.0",
+    "motion": ">=11",
     "next": ">=13.0.0",
-    "react-router": ">=7.0.0",
     "react": ">=18",
     "react-dom": ">=18",
-    "motion": ">=11"
-    },
+    "react-router": ">=7.0.0"
+  },
   "peerDependenciesMeta": {
     "next": {
       "optional": true
@@ -64,6 +61,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-router": "^5.1.20",
     "next": "^14.0.0",
+    "react-compiler-runtime": "19.0.0-beta-201e55d-20241215",
     "typescript": "^5.6.2"
   },
   "exports": {

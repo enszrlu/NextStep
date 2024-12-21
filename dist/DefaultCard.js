@@ -1,4 +1,3 @@
-'use no memo';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTour, arrow, }) => {
     return (_jsxs("div", { style: {

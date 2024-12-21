@@ -1,6 +1,4 @@
 'use client';
-'use no memo';
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNextStep } from './NextStepContext';
 import { motion, useInView } from 'motion/react';
