@@ -2,7 +2,7 @@
 
 ![NextStep](./public/nextstepjs.png)
 
-**NextStep** is a lightweight onboarding library for React applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
+**NextStep** is a lightweight onboarding library for React applications. It utilizes [motion](https://www.motion.dev) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
 
 **Some of the use cases:**
 
@@ -22,13 +22,13 @@ The library allows users to use custom cards (tooltips) for easier integration.
 
 ```bash
 # npm
-npm i nextstepjs framer-motion
+npm i nextstepjs motion
 # pnpm
-pnpm add nextstepjs framer-motion
+pnpm add nextstepjs motion
 # yarn
-yarn add nextstepjs framer-motion
+yarn add nextstepjs motion
 # bun
-bun add nextstepjs framer-motion
+bun add nextstepjs motion
 ```
 
 ### Navigation Adapters (v2.0+)
@@ -39,42 +39,119 @@ NextStep 2.0 introduces a framework-agnostic routing system through navigation a
 
 #### Built-in Adapters
 
+##### Next.js
+
 ```tsx
-// Next.js
-import { NextStep } from 'nextstepjs';
+// app/layout.tsx or pages/_app.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
 import { useNextAdapter } from 'nextstepjs/adapters/next';
 
-const App = () => {
+export default function Layout({ children }) {
   return (
-    <NextStep navigationAdapter={useNextAdapter} steps={steps}>
-      {children}
-    </NextStep>
+    <NextStepProvider>
+      <NextStep navigationAdapter={useNextAdapter} steps={steps}>
+        {children}
+      </NextStep>
+    </NextStepProvider>
   );
-};
+}
+```
 
-// React Router
-import { NextStep } from 'nextstepjs';
+#### React Router as a Framework
+
+```tsx:app/root.tsx
+//app/root.tsx
+import { NextStepProvider } from 'nextstepjs';
+import { Outlet } from 'react-router-dom';
+
+export default function App() {
+  return (
+    <NextStepProvider>
+      <Outlet />
+    </NextStepProvider>
+  );
+}
+```
+
+```tsx:app/routes/index.tsx
+//app/routes/index.tsx
+import { NextStep, useNextStep, type Tour } from 'nextstepjs';
 import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
-const App = () => {
+const steps: Tour[] = [
+  {
+    tour: 'firsttour',
+    steps: [
+      {
+        icon: '👋',
+        title: 'Welcome to the Dashboard',
+        content: 'This is your first step',
+        selector: '#tour1-step1',
+        side: 'top',
+      },
+      {
+        icon: '🎯',
+        title: 'Second Step',
+        content: 'Here is another important feature',
+        selector: '#tour1-step2',
+        side: 'top'
+      }
+    ]
+  }
+];
+
+export default function Dashboard() {
+  const { startNextStep } = useNextStep();
+  const navigationAdapter = useReactRouterAdapter();
+
   return (
-    <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
-      {children}
+    <NextStep navigationAdapter={() => navigationAdapter} steps={steps}>
+      <div className="h-full flex flex-col gap-4 p-4">
+        <button
+          onClick={() => startNextStep('firsttour')}
+          className="self-end px-4 py-2 rounded-lg bg-primary"
+        >
+          Start Tour
+        </button>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div id="tour1-step1" className="aspect-video rounded-xl" />
+          <div id="tour1-step2" className="aspect-video rounded-xl" />
+        </div>
+      </div>
     </NextStep>
   );
-};
+}
+```
 
-// Remix
-import { NextStep } from 'nextstepjs';
+#### Important Configuration for React Router + Vite
+
+If you're using Vite with React Router, add the following configuration to your `vite.config.ts`:
+
+```ts:vite.config.ts
+export default defineConfig({
+  ssr: {
+    noExternal: ['nextstepjs', 'motion']
+  }
+});
+```
+
+##### Remix
+
+```tsx
+// root.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
 import { useRemixAdapter } from 'nextstepjs/adapters/remix';
 
-const App = () => {
+export default function App() {
   return (
-    <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
-      {children}
-    </NextStep>
+    <NextStepProvider>
+      <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
+        <Outlet />
+      </NextStep>
+    </NextStepProvider>
   );
-};
+}
 ```
 
 #### Custom Navigation Adapter
@@ -106,65 +183,6 @@ const App = () => {
     </NextStep>
   );
 };
-```
-
-#### Framework-Specific Setup
-
-##### Next.js
-
-```tsx
-// app/layout.tsx or pages/_app.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useNextAdapter } from 'nextstepjs/adapters/next';
-
-export default function Layout({ children }) {
-  return (
-    <NextStepProvider>
-      <NextStep navigationAdapter={useNextAdapter} steps={steps}>
-        {children}
-      </NextStep>
-    </NextStepProvider>
-  );
-}
-```
-
-##### React Router
-
-```tsx
-// App.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
-import { BrowserRouter } from 'react-router-dom';
-
-export default function App({ children }) {
-  return (
-    <BrowserRouter>
-      <NextStepProvider>
-        <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
-          {children}
-        </NextStep>
-      </NextStepProvider>
-    </BrowserRouter>
-  );
-}
-```
-
-##### Remix
-
-```tsx
-// root.tsx
-import { NextStep, NextStepProvider } from 'nextstepjs';
-import { useRemixAdapter } from 'nextstepjs/adapters/remix';
-
-export default function App() {
-  return (
-    <NextStepProvider>
-      <NextStep navigationAdapter={useRemixAdapter} steps={steps}>
-        <Outlet />
-      </NextStep>
-    </NextStepProvider>
-  );
-}
 ```
 
 ### Custom Card
@@ -341,7 +359,7 @@ Here's an example of how to use `NextStepViewport`:
 | `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area          |
 | `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area             |
 | `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                     |
-| `cardTransition`      | `Transition`                                       | Framer Motion transition object for step transitions                 |
+| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                        |
 | `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                     |
 | `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                    |
 | `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                  |
