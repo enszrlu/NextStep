@@ -61,21 +61,7 @@ export default function Layout({ children }) {
 
 ```tsx:app/root.tsx
 //app/root.tsx
-import { NextStepProvider } from 'nextstepjs';
-import { Outlet } from 'react-router-dom';
-
-export default function App() {
-  return (
-    <NextStepProvider>
-      <Outlet />
-    </NextStepProvider>
-  );
-}
-```
-
-```tsx:app/routes/index.tsx
-//app/routes/index.tsx
-import { NextStep, useNextStep, type Tour } from 'nextstepjs';
+import { NextStepProvider, NextStep, type Tour } from 'nextstepjs';
 import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
 
 const steps: Tour[] = [
@@ -100,12 +86,25 @@ const steps: Tour[] = [
   }
 ];
 
+export default function App() {
+  return (
+    <NextStepProvider>
+      <NextStep navigationAdapter={useReactRouterAdapter} steps={steps}>
+        <Outlet />
+      </NextStep>
+    </NextStepProvider>
+  );
+}
+```
+
+```tsx:app/routes/index.tsx
+//app/routes/index.tsx
+import {useNextStep } from 'nextstepjs';
+
 export default function Dashboard() {
   const { startNextStep } = useNextStep();
-  const navigationAdapter = useReactRouterAdapter();
 
   return (
-    <NextStep navigationAdapter={() => navigationAdapter} steps={steps}>
       <div className="h-full flex flex-col gap-4 p-4">
         <button
           onClick={() => startNextStep('firsttour')}
@@ -119,7 +118,6 @@ export default function Dashboard() {
           <div id="tour1-step2" className="aspect-video rounded-xl" />
         </div>
       </div>
-    </NextStep>
   );
 }
 ```
