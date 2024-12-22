@@ -1,4 +1,6 @@
 'use client';
+'use no memo';
+
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 // Types
