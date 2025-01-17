@@ -315,8 +315,10 @@ const NextStep: React.FC<NextStepProps> = ({
         inline: 'center',
       });
     } else {
-      // Scroll to the top of the body
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (scrollToTop) {
+        // Scroll to the top of the body
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, [elementToScroll, isInView, isNextStepVisible]);
 
