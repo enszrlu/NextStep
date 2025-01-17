@@ -67,6 +67,7 @@ export interface NextStepProps {
   displayArrow?: boolean;
   clickThroughOverlay?: boolean;
   navigationAdapter?: () => NavigationAdapter;
+  scrollToTop?: boolean;
 }
 
 // Custom Card

@@ -23,6 +23,7 @@ const NextStep: React.FC<NextStepProps> = ({
   displayArrow = true,
   clickThroughOverlay = false,
   navigationAdapter = useWindowAdapter,
+  scrollToTop = true,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -314,8 +315,10 @@ const NextStep: React.FC<NextStepProps> = ({
         inline: 'center',
       });
     } else {
-      // Scroll to the top of the body
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (scrollToTop) {
+        // Scroll to the top of the body
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, [elementToScroll, isInView, isNextStepVisible]);
 
@@ -988,7 +991,7 @@ const NextStep: React.FC<NextStepProps> = ({
                 pointerPosition
                   ? {
                       x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
+                      y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? window.scrollY + pointerPosition.y - pointerPadOffset : pointerPosition.y - pointerPadOffset,
                       width: pointerPosition.width + pointerPadding,
                       height: pointerPosition.height + pointerPadding,
                     }
@@ -998,7 +1001,7 @@ const NextStep: React.FC<NextStepProps> = ({
                 pointerPosition
                   ? {
                       x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
+                      y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? window.scrollY + pointerPosition.y - pointerPadOffset : pointerPosition.y - pointerPadOffset,
                       width: pointerPosition.width + pointerPadding,
                       height: pointerPosition.height + pointerPadding,
                     }
