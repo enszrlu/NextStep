@@ -6,7 +6,7 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, scrollToTop = true, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -807,14 +807,14 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                             }, initial: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,
-                                    y: pointerPosition.y - pointerPadOffset,
+                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
                                     width: pointerPosition.width + pointerPadding,
                                     height: pointerPosition.height + pointerPadding,
                                 }
                                 : {}, animate: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,
-                                    y: pointerPosition.y - pointerPadOffset,
+                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
                                     width: pointerPosition.width + pointerPadding,
                                     height: pointerPosition.height + pointerPadding,
                                 }

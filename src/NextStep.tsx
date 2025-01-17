@@ -23,6 +23,7 @@ const NextStep: React.FC<NextStepProps> = ({
   displayArrow = true,
   clickThroughOverlay = false,
   navigationAdapter = useWindowAdapter,
+  scrollToTop = true,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -988,7 +989,7 @@ const NextStep: React.FC<NextStepProps> = ({
                 pointerPosition
                   ? {
                       x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
+                      y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
                       width: pointerPosition.width + pointerPadding,
                       height: pointerPosition.height + pointerPadding,
                     }
@@ -998,7 +999,7 @@ const NextStep: React.FC<NextStepProps> = ({
                 pointerPosition
                   ? {
                       x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
+                      y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
                       width: pointerPosition.width + pointerPadding,
                       height: pointerPosition.height + pointerPadding,
                     }
