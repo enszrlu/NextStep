@@ -807,14 +807,14 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                             }, initial: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,
-                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
+                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? window.scrollY + pointerPosition.y - pointerPadOffset : pointerPosition.y - pointerPadOffset,
                                     width: pointerPosition.width + pointerPadding,
                                     height: pointerPosition.height + pointerPadding,
                                 }
                                 : {}, animate: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,
-                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? pointerPosition.y - pointerPadOffset : 0,
+                                    y: !scrollToTop && !currentTourSteps?.[currentStep]?.selector ? window.scrollY + pointerPosition.y - pointerPadOffset : pointerPosition.y - pointerPadOffset,
                                     width: pointerPosition.width + pointerPadding,
                                     height: pointerPosition.height + pointerPadding,
                                 }
