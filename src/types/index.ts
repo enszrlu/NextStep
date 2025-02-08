@@ -67,6 +67,7 @@ export interface NextStepProps {
   displayArrow?: boolean;
   clickThroughOverlay?: boolean;
   navigationAdapter?: () => NavigationAdapter;
+  disableConsoleLogs?: boolean;
 }
 
 // Custom Card

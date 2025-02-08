@@ -42,6 +42,7 @@ export interface NextStepProps {
     displayArrow?: boolean;
     clickThroughOverlay?: boolean;
     navigationAdapter?: () => NavigationAdapter;
+    disableConsoleLogs?: boolean;
 }
 export interface CardComponentProps {
     step: Step;

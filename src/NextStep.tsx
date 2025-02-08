@@ -23,6 +23,7 @@ const NextStep: React.FC<NextStepProps> = ({
   displayArrow = true,
   clickThroughOverlay = false,
   navigationAdapter = useWindowAdapter,
+  disableConsoleLogs = false,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -85,7 +86,9 @@ const NextStep: React.FC<NextStepProps> = ({
   // Initialize
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
-      console.log('NextStep: Current Step Changed');
+      if (!disableConsoleLogs) {
+        console.log('NextStep: Current Step Changed');
+      }
 
       const step = currentTourSteps[currentStep];
 
@@ -229,7 +232,9 @@ const NextStep: React.FC<NextStepProps> = ({
   // Update pointerPosition when currentStep changes
   useEffect(() => {
     if (isNextStepVisible && currentTourSteps) {
-      console.log('NextStep: Current Step Changed');
+      if (!disableConsoleLogs) {
+        console.log('NextStep: Current Step Changed');
+      }
       const step = currentTourSteps[currentStep];
 
       // Default viewport is the body
@@ -301,7 +306,9 @@ const NextStep: React.FC<NextStepProps> = ({
 
   useEffect(() => {
     if (elementToScroll && !isInView && isNextStepVisible) {
-      console.log('NextStep: Element to Scroll Changed');
+      if (!disableConsoleLogs) {
+        console.log('NextStep: Element to Scroll Changed');
+      }
 
       const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
       elementToScroll.scrollIntoView({
@@ -452,7 +459,9 @@ const NextStep: React.FC<NextStepProps> = ({
           scrollToElement(nextStepIndex);
         }
       } catch (error) {
-        console.error('Error navigating to next route', error);
+        if (!disableConsoleLogs) {
+          console.error('Error navigating to next route', error);
+        }
       }
     } else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
       onComplete?.(currentTour);
@@ -500,7 +509,9 @@ const NextStep: React.FC<NextStepProps> = ({
           scrollToElement(prevStepIndex);
         }
       } catch (error) {
-        console.error('Error navigating to previous route', error);
+        if (!disableConsoleLogs) {
+          console.error('Error navigating to previous route', error);
+        }
       }
     }
   };
