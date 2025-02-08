@@ -6,7 +6,7 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, scrollToTop = true, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -259,8 +259,10 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
             });
         }
         else {
-            // Scroll to the top of the body
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (scrollToTop || !elementToScroll) {
+                // Scroll to the top of the body
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
     }, [elementToScroll, isInView, isNextStepVisible]);
     // - -
