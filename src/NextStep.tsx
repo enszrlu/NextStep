@@ -25,6 +25,7 @@ const NextStep: React.FC<NextStepProps> = ({
   navigationAdapter = useWindowAdapter,
   disableConsoleLogs = false,
   scrollToTop = true,
+  noInViewScroll = false,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -120,7 +121,7 @@ const NextStep: React.FC<NextStepProps> = ({
           const isInViewportWithOffset =
             rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
 
-          if (!isInView || !isInViewportWithOffset) {
+          if (!isInViewportWithOffset) {
             const side = checkSideCutOff(
               currentTourSteps?.[currentStep]?.side || 'right',
             );
@@ -267,7 +268,7 @@ const NextStep: React.FC<NextStepProps> = ({
           const isInViewportWithOffset =
             rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
 
-          if (!isInView || !isInViewportWithOffset) {
+          if (!isInViewportWithOffset) {
             const side = checkSideCutOff(
               currentTourSteps?.[currentStep]?.side || 'right',
             );
@@ -312,15 +313,17 @@ const NextStep: React.FC<NextStepProps> = ({
       }
 
       const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
-      elementToScroll.scrollIntoView({
-        behavior: 'smooth',
-        block: side.includes('top')
-          ? 'end'
-          : side.includes('bottom')
-          ? 'start'
-          : 'center',
-        inline: 'center',
-      });
+      if (!noInViewScroll) {
+        elementToScroll.scrollIntoView({
+          behavior: 'smooth',
+          block: side.includes('top')
+            ? 'end'
+            : side.includes('bottom')
+            ? 'start'
+            : 'center',
+          inline: 'center',
+        });
+      }
     } else {
       if (scrollToTop || !elementToScroll) {
         // Scroll to the top of the body

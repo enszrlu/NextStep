@@ -6,7 +6,7 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, scrollToTop = true, }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, scrollToTop = true, noInViewScroll = false, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -78,7 +78,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                     setElementToScroll(element);
                     const rect = element.getBoundingClientRect();
                     const isInViewportWithOffset = rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
-                    if (!isInView || !isInViewportWithOffset) {
+                    if (!isInViewportWithOffset) {
                         const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
                         element.scrollIntoView({
                             behavior: 'smooth',
@@ -206,7 +206,7 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                     setElementToScroll(element);
                     const rect = element.getBoundingClientRect();
                     const isInViewportWithOffset = rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
-                    if (!isInView || !isInViewportWithOffset) {
+                    if (!isInViewportWithOffset) {
                         const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
                         element.scrollIntoView({
                             behavior: 'smooth',
@@ -248,15 +248,17 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 console.log('NextStep: Element to Scroll Changed');
             }
             const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
-            elementToScroll.scrollIntoView({
-                behavior: 'smooth',
-                block: side.includes('top')
-                    ? 'end'
-                    : side.includes('bottom')
-                        ? 'start'
-                        : 'center',
-                inline: 'center',
-            });
+            if (!noInViewScroll) {
+                elementToScroll.scrollIntoView({
+                    behavior: 'smooth',
+                    block: side.includes('top')
+                        ? 'end'
+                        : side.includes('bottom')
+                            ? 'start'
+                            : 'center',
+                    inline: 'center',
+                });
+            }
         }
         else {
             if (scrollToTop || !elementToScroll) {
