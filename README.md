@@ -382,6 +382,7 @@ Here's an example of how to use `NextStepViewport`:
 | `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                  |
 | `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour             |
 | `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false |
+| `disableConsoleLogs`  | `boolean`                                          | Optional. If true, console logs are disabled, default is false       |
 
 ```tsx
 <NextStep
