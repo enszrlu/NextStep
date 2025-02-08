@@ -69,6 +69,7 @@ export interface NextStepProps {
   navigationAdapter?: () => NavigationAdapter;
   disableConsoleLogs?: boolean;
   scrollToTop?: boolean;
+  noInViewScroll?: boolean;
 }
 
 // Custom Card
