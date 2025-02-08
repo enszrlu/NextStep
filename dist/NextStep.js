@@ -6,7 +6,7 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
-const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, }) => {
+const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -52,7 +52,9 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     // Initialize
     useEffect(() => {
         if (isNextStepVisible && currentTourSteps) {
-            console.log('NextStep: Current Step Changed');
+            if (!disableConsoleLogs) {
+                console.log('NextStep: Current Step Changed');
+            }
             const step = currentTourSteps[currentStep];
             // Default viewport is the body
             let tempViewport = window.document.body;
@@ -177,7 +179,9 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     // Update pointerPosition when currentStep changes
     useEffect(() => {
         if (isNextStepVisible && currentTourSteps) {
-            console.log('NextStep: Current Step Changed');
+            if (!disableConsoleLogs) {
+                console.log('NextStep: Current Step Changed');
+            }
             const step = currentTourSteps[currentStep];
             // Default viewport is the body
             let tempViewport = window.document.body;
@@ -240,7 +244,9 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
     }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
     useEffect(() => {
         if (elementToScroll && !isInView && isNextStepVisible) {
-            console.log('NextStep: Element to Scroll Changed');
+            if (!disableConsoleLogs) {
+                console.log('NextStep: Element to Scroll Changed');
+            }
             const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
             elementToScroll.scrollIntoView({
                 behavior: 'smooth',
@@ -373,7 +379,9 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 }
             }
             catch (error) {
-                console.error('Error navigating to next route', error);
+                if (!disableConsoleLogs) {
+                    console.error('Error navigating to next route', error);
+                }
             }
         }
         else if (currentTourSteps && currentStep === currentTourSteps.length - 1) {
@@ -418,7 +426,9 @@ const NextStep = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2
                 }
             }
             catch (error) {
-                console.error('Error navigating to previous route', error);
+                if (!disableConsoleLogs) {
+                    console.error('Error navigating to previous route', error);
+                }
             }
         }
     };
