@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState, useCallback } from 'react';
-
+import { ThemeProvider } from "./components/theme-provider"
 // Types
 import { NextStepContextType } from './types';
 
@@ -53,6 +53,12 @@ const NextStepProvider: React.FC<{ children: React.ReactNode }> = ({ children })
   }, []);
 
   return (
+    <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
     <NextStepContext.Provider
       value={{
         currentTour,
@@ -65,6 +71,7 @@ const NextStepProvider: React.FC<{ children: React.ReactNode }> = ({ children })
     >
       {children}
     </NextStepContext.Provider>
+    </ThemeProvider>
   );
 };
 
