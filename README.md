@@ -152,6 +152,18 @@ export default function App() {
 }
 ```
 
+#### Important Configuration for Remix + Vite
+
+If you're using Vite with Remix, add the following configuration to your `vite.config.ts`:
+
+```ts:vite.config.ts
+export default defineConfig({
+  ssr: {
+    noExternal: ['nextstepjs', 'motion']
+  }
+});
+```
+
 #### Custom Navigation Adapter
 
 You can create your own navigation adapter for any routing solution by implementing the `NavigationAdapter` interface:
