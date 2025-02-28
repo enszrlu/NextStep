@@ -7,7 +7,6 @@ export const useNextAdapter = () => {
     return {
         push: (path) => {
             if (isClient) {
-                console.log('BETA: pushing next adapter', path);
                 router.push(path);
             }
         },

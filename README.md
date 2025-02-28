@@ -250,6 +250,15 @@ Target anything in your app using the element's `id` attribute.
 <div id="nextstep-step1">Onboard Step</div>
 ```
 
+### Routing During a Tour
+
+NextStep allows you to navigate between different routes during a tour using the `nextRoute` and `prevRoute` properties in the step object. These properties enable seamless transitions between different pages or sections of your application.
+
+- `nextRoute`: Specifies the route to navigate to when the "Next" button is clicked.
+- `prevRoute`: Specifies the route to navigate to when the "Previous" button is clicked.
+
+When `nextRoute` or `prevRoute` is provided, NextStep will use Next.js's `next/navigation` to navigate to the specified route.
+
 ### Using NextStepViewport and viewportID
 
 When a selector is in a scrollable area, it is best to wrap the content of the scrollable area with `NextStepViewport`. This component takes `children` and an `id` as prop. By providing the `viewportID` to the step, NextStep will target this element within the viewport. This ensures that the step is anchored to the element even if the container is scrollable.

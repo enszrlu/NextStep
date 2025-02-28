@@ -9,12 +9,10 @@ export const useReactRouterAdapter = (): NavigationAdapter => {
   const location = useLocation();
   const isClient = typeof window !== 'undefined';
 
-
   return {
     push: (path: string) => {
       if (isClient) {
-      console.log('BETA: pushing react-router adapter', path);
-      navigate(path);
+        navigate(path);
       }
     },
     getCurrentPath: () => (isClient ? location.pathname : '/'),

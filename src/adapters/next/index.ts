@@ -11,7 +11,6 @@ export const useNextAdapter = (): NavigationAdapter => {
   return {
     push: (path: string) => {
       if (isClient) {
-        console.log('BETA: pushing next adapter', path);
         router.push(path);
       }
     },

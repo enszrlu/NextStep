@@ -6,7 +6,7 @@ export const useWindowAdapter = (): NavigationAdapter => {
   const isClient = typeof window !== 'undefined';
 
   console.debug(
-    'Navigation is not available, using window adapter! Some features may not work.',
+    'Navigation is not available, using window adapter! Some features may not work. Use Framework specific adapters for better results.',
   );
 
   return {

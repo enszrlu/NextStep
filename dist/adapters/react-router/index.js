@@ -8,7 +8,6 @@ export const useReactRouterAdapter = () => {
     return {
         push: (path) => {
             if (isClient) {
-                console.log('BETA: pushing react-router adapter', path);
                 navigate(path);
             }
         },

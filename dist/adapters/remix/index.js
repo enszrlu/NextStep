@@ -7,7 +7,6 @@ export const useRemixAdapter = () => {
     return {
         push: (path) => {
             if (isClient) {
-                console.log('BETA: pushing remix adapter', path);
                 navigate(path);
             }
         },
