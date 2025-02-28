@@ -1,4 +1,5 @@
-import { Transition } from 'framer-motion';
+import { Transition } from 'motion/react';
+import { NavigationAdapter } from './navigation';
 export interface NextStepContextType {
     currentStep: number;
     currentTour: string | null;
@@ -40,6 +41,10 @@ export interface NextStepProps {
     onSkip?: (step: number, tourName: string | null) => void;
     displayArrow?: boolean;
     clickThroughOverlay?: boolean;
+    navigationAdapter?: () => NavigationAdapter;
+    disableConsoleLogs?: boolean;
+    scrollToTop?: boolean;
+    noInViewScroll?: boolean;
 }
 export interface CardComponentProps {
     step: Step;

@@ -2,7 +2,7 @@
 
 ![NextStep](./public/nextstepjs.png)
 
-**NextStep** is a lightweight onboarding library for Next.js applications. It utilizes [framer-motion](https://www.framer.com/motion/) for smooth animations.
+**NextStep** is a lightweight onboarding library for Next.js / React applications. It utilizes [motion](https://www.motion.dev) for smooth animations and supports multiple React frameworks including Next.js, React Router, and Remix.
 
 **Some of the use cases:**
 
@@ -10,8 +10,6 @@
 - **Engagement Boost**: Make help docs interactive, so users learn by _doing_.
 - **Better Error Handling**: Skip generic toasters—show users exactly what to fix with tailored tours.
 - **Event-Based Tours**: Trigger custom tours after key actions to keep users coming back.
-
-> **Note** `NextStep` now supports non-tailwindcss projects with v1.2 onwards.
 
 The library allows users to use custom cards (tooltips) for easier integration.
 
@@ -24,35 +22,117 @@ The library allows users to use custom cards (tooltips) for easier integration.
 
 ```bash
 # npm
-npm i nextstepjs framer-motion
+npm i nextstepjs motion
 # pnpm
-pnpm add nextstepjs framer-motion
+pnpm add nextstepjs motion
 # yarn
-yarn add nextstepjs framer-motion
+yarn add nextstepjs motion
 # bun
-bun add nextstepjs framer-motion
+bun add nextstepjs motion
 ```
 
-### App Router: Global `layout.tsx`
+### Navigation Adapters (v2.0+)
 
-Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
+NextStep 2.0 introduces a framework-agnostic routing system through navigation adapters. Each adapter is packaged separately to minimize bundle size - only the adapter you import will be included in your bundle.
+
+> **Important:** Make sure to import the adapter you need in your app in order to access full functionality. Without an adapter, navigation features like `nextRoute` and `prevRoute` may not work properly.
+
+#### Built-in Adapters
+
+##### Next.js
+
+NextStep uses Next.js adapter as default, therefore you don't need to import it.
 
 ```tsx
-<NextStepProvider>
-  <NextStep steps={steps}>{children}</NextStep>
-</NextStepProvider>
+// app/layout.tsx or pages/_app.tsx
+import { NextStep, NextStepProvider } from 'nextstepjs';
+
+export default function Layout({ children }) {
+  return (
+    <NextStepProvider>
+      <NextStep steps={steps}>{children}</NextStep>
+    </NextStepProvider>
+  );
+}
 ```
 
-### Pages Router: `_app.tsx`
-
-Wrap your application in `NextStepProvider` and supply the `steps` array to NextStep.
+##### React Router as a Framework
 
 ```tsx
-<NextStepProvider>
-  <NextStep steps={steps}>
-    <Component {...pageProps} />
-  </NextStep>
-</NextStepProvider>
+//app/root.tsx
+import { NextStepProvider, NextStepReact, type Tour } from 'nextstepjs';
+import { useReactRouterAdapter } from 'nextstepjs/adapters/react-router';
+
+export default function App() {
+  return (
+    <NextStepProvider>
+      <NextStepReact navigationAdapter={useReactRouterAdapter} steps={steps}>
+        <Outlet />
+      </NextStepReact>
+    </NextStepProvider>
+  );
+}
+```
+
+##### Remix
+
+```tsx
+// root.tsx
+import { NextStepProvider, NextStepReact } from 'nextstepjs';
+import { useRemixAdapter } from 'nextstepjs/adapters/remix';
+
+export default function App() {
+  return (
+    <NextStepProvider>
+      <NextStepReact navigationAdapter={useRemixAdapter} steps={steps}>
+        <Outlet />
+      </NextStepReact>
+    </NextStepProvider>
+  );
+}
+```
+
+##### Important Configuration for Vite (React Router or Remix)
+
+If you're using Vite with React Router or Remix, add the following configuration to your `vite.config.ts`:
+
+```ts
+export default defineConfig({
+  ssr: {
+    noExternal: ['nextstepjs', 'motion'],
+  },
+});
+```
+
+##### Custom Navigation Adapter
+
+You can create your own navigation adapter for any routing solution by implementing the `NavigationAdapter` interface:
+
+```tsx
+import { NextStepReact } from 'nextstepjs';
+import type { NavigationAdapter } from 'nextstepjs';
+
+const useCustomAdapter = (): NavigationAdapter => {
+  return {
+    push: (path: string) => {
+      // Your navigation logic here
+      // Example: history.push(path)
+    },
+    getCurrentPath: () => {
+      // Your path retrieval logic here
+      // Example: window.location.pathname
+      return window.location.pathname;
+    },
+  };
+};
+
+const App = () => {
+  return (
+    <NextStepReact navigationAdapter={useCustomAdapter} steps={steps}>
+      {children}
+    </NextStepReact>
+  );
+};
 ```
 
 #### Troubleshooting
@@ -61,7 +141,7 @@ If you encounter an error related to module exports when using the Pages Router,
 
 To resolve this issue, ensure that your Next.js project is configured to support ES modules. You can do this by updating your `next.config.js` file to include the following configuration:
 
-```tsx
+```js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -156,9 +236,9 @@ const steps: Tour[] = [
 | `blockKeyboardControl` | `boolean`                                | Optional. Determines whether keyboard control should be blocked                                                                                     |
 | `pointerPadding`       | `number`                                 | Optional. The padding around the pointer (keyhole) highlighting the target element.                                                                 |
 | `pointerRadius`        | `number`                                 | Optional. The border-radius of the pointer (keyhole) highlighting the target element.                                                               |
-| `nextRoute`            | `string`                                 | Optional. The route to navigate to using `next/navigation` when moving to the next step.                                                            |
-| `prevRoute`            | `string`                                 | Optional. The route to navigate to using `next/navigation` when moving to the previous step.                                                        |
-| `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used. **(Available after > v1.1.x)**    |
+| `nextRoute`            | `string`                                 | Optional. The route to navigate to when moving to the next step.                                                                                    |
+| `prevRoute`            | `string`                                 | Optional. The route to navigate to when moving to the previous step.                                                                                |
+| `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                                   |
 
 > **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
 
@@ -170,18 +250,8 @@ Target anything in your app using the element's `id` attribute.
 <div id="nextstep-step1">Onboard Step</div>
 ```
 
-### Routing During a Tour
-
-NextStep allows you to navigate between different routes during a tour using the `nextRoute` and `prevRoute` properties in the step object. These properties enable seamless transitions between different pages or sections of your application.
-
-- `nextRoute`: Specifies the route to navigate to when the "Next" button is clicked.
-- `prevRoute`: Specifies the route to navigate to when the "Previous" button is clicked.
-
-When `nextRoute` or `prevRoute` is provided, NextStep will use Next.js's `next/navigation` to navigate to the specified route.
-
 ### Using NextStepViewport and viewportID
 
-**Only available after > v1.1.x**
 When a selector is in a scrollable area, it is best to wrap the content of the scrollable area with `NextStepViewport`. This component takes `children` and an `id` as prop. By providing the `viewportID` to the step, NextStep will target this element within the viewport. This ensures that the step is anchored to the element even if the container is scrollable.
 
 Here's an example of how to use `NextStepViewport`:
@@ -247,22 +317,26 @@ Here's an example of how to use `NextStepViewport`:
 ];
 ```
 
-### NextStep Props
+### NextStep & NextStepReact Props
 
-| Property              | Type                                               | Description                                                          |
-| --------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
-| `children`            | `React.ReactNode`                                  | Your website or application content                                  |
-| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding           |
-| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                        |
-| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area          |
-| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area             |
-| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                     |
-| `cardTransition`      | `Transition`                                       | Framer Motion transition object for step transitions                 |
-| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                     |
-| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                    |
-| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                  |
-| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour             |
-| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false |
+| Property              | Type                                               | Description                                                                                                   |
+| --------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `children`            | `React.ReactNode`                                  | Your website or application content                                                                           |
+| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding                                                    |
+| `navigationAdapter`   | `NavigationAdapter`                                | Optional. Router adapter for navigation (defaults to Next.js on NextStep and window adapter on NextStepReact) |
+| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                                                                 |
+| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area                                                   |
+| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area                                                      |
+| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                                                              |
+| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                                                                 |
+| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                                                              |
+| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                                                             |
+| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                                                           |
+| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour                                                      |
+| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false                                          |
+| `disableConsoleLogs`  | `boolean`                                          | Optional. If true, console logs are disabled, default is false                                                |
+| `scrollToTop`         | `boolean`                                          | Optional. If true, the page will scroll to the top when the tour ends, default is true                        |
+| `noInViewScroll`      | `boolean`                                          | Optional. If true, the page will not scroll to the target element when it is in view, default is false        |
 
 ```tsx
 <NextStep
