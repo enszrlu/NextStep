@@ -6,6 +6,7 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
+import SmoothSpotlight from './SmoothSpotlight';
 /**
  * NextStepReact component for rendering the onboarding steps.
  *
@@ -846,10 +847,9 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                                         left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
                                         right: 0,
                                         height: viewportRect.height,
-                                    } })] })), _jsx(motion.div, { "data-name": "nextstep-pointer", style: {
+                                    } })] })), _jsx(SmoothSpotlight, { x: pointerPosition.x - pointerPadOffset, y: pointerPosition.y - pointerPadOffset, width: pointerPosition.width + pointerPadding, height: pointerPosition.height + pointerPadding, padding: pointerPadding, radius: pointerRadius, shadowOpacity: shadowOpacity, shadowRgb: shadowRgb }), _jsx(motion.div, { "data-name": "nextstep-pointer", style: {
                                 position: 'relative',
                                 zIndex: 999,
-                                boxShadow: `0 0 200vw 9999vh rgba(${shadowRgb}, ${shadowOpacity})`,
                                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
                                 pointerEvents: 'none',
                             }, initial: pointerPosition
