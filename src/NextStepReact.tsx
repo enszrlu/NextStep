@@ -8,6 +8,7 @@ import { useWindowAdapter } from './adapters/window';
 import { NextStepProps } from './types';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
+import SmoothSpotlight from './SmoothSpotlight';
 
 /**
  * NextStepReact component for rendering the onboarding steps.
@@ -1025,13 +1026,22 @@ const NextStepReact: React.FC<NextStepProps> = ({
               </div>
             )}
 
+            <SmoothSpotlight
+              x={pointerPosition.x - pointerPadOffset}
+              y={pointerPosition.y - pointerPadOffset}
+              width={pointerPosition.width + pointerPadding}
+              height={pointerPosition.height + pointerPadding}
+              padding={pointerPadding}
+              radius={pointerRadius}
+              shadowOpacity={shadowOpacity}
+              shadowRgb={shadowRgb}
+            />
             {/* Pointer */}
             <motion.div
               data-name="nextstep-pointer"
               style={{
                 position: 'relative',
                 zIndex: 999,
-                boxShadow: `0 0 200vw 9999vh rgba(${shadowRgb}, ${shadowOpacity})`,
                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
                 pointerEvents: 'none',
               }}
