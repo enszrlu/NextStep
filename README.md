@@ -104,6 +104,57 @@ export default defineConfig({
 });
 ```
 
+Vite also requires `next/navigation` to be mocked in order to work properly. 
+
+1. Create a mock file for `Next`, such as `next-navigation.ts`, and place it in `/src/mocks`
+```typescript
+// Mock for Next.js navigation to prevent build errors with nextstepjs
+// This file is used to mock Next.js imports when using nextstepjs in a Vite app
+
+export const useRouter = () => {
+  return {
+    push: () => {},
+    replace: () => {},
+    prefetch: () => {},
+    back: () => {},
+    forward: () => {},
+    refresh: () => {},
+  };
+};
+
+export const usePathname = () => {
+  return '';
+};
+
+export const useSearchParams = () => {
+  return new URLSearchParams();
+};
+
+export const useParams = () => {
+  return {};
+};
+```
+
+2. Update `vite.config.mts` to use the proper alias for Next.js navigation imports
+```typescript
+import path from 'node:path';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: [
+      // Mock Next.js navigation imports that nextstepjs might try to access
+      {
+        find: 'next/navigation',
+        replacement: path.join(process.cwd(), 'src/mocks/next-navigation.ts'),
+      },
+    ]
+  }
+})
+```
+
 ##### Custom Navigation Adapter
 
 You can create your own navigation adapter for any routing solution by implementing the `NavigationAdapter` interface:
