@@ -1,6 +1,6 @@
 'use client';
 'use no memo';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation } from 'react-router-dom';
 export const useReactRouterAdapter = () => {
     const navigate = useNavigate();
     const location = useLocation();

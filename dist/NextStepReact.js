@@ -54,6 +54,8 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
     const [viewport, setViewport] = useState(null);
     const [viewportRect, setViewportRect] = useState(null);
     const [scrollableParent, setScrollableParent] = useState(null);
+    const [validationError, setValidationError] = useState(null);
+    const [isValidating, setIsValidating] = useState(false);
     const router = navigationAdapter();
     // - -
     // Handle pop state
@@ -83,6 +85,12 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
             onStart?.(currentTour);
         }
     }, [currentTour, onStart, isNextStepVisible]);
+    // - -
+    // Clear validation error when step changes
+    useEffect(() => {
+        setValidationError(null);
+        setIsValidating(false);
+    }, [currentStep]);
     // - -
     // Initialize
     useEffect(() => {
@@ -380,8 +388,42 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
         };
     }, [currentStep, currentTour]);
     // - -
+    // Validation Helper
+    const validateCurrentStep = async () => {
+        if (!currentTourSteps || currentStep === undefined)
+            return true;
+        const currentStepData = currentTourSteps[currentStep];
+        if (!currentStepData.validation)
+            return true;
+        setIsValidating(true);
+        setValidationError(null);
+        try {
+            const isValid = await currentStepData.validation.validate();
+            if (!isValid) {
+                setValidationError(currentStepData.validation.errorMessage || 'Ação necessária não foi executada');
+                return false;
+            }
+            return true;
+        }
+        catch (error) {
+            setValidationError('Erro durante a validação');
+            if (!disableConsoleLogs) {
+                console.error('Validation error:', error);
+            }
+            return false;
+        }
+        finally {
+            setIsValidating(false);
+        }
+    };
+    // - -
     // Step Controls
-    const nextStep = () => {
+    const nextStep = async () => {
+        // Validate current step before proceeding
+        const isValid = await validateCurrentStep();
+        if (!isValid) {
+            return; // Stop if validation fails
+        }
         if (currentTourSteps && currentStep < currentTourSteps.length - 1) {
             try {
                 const nextStepIndex = currentStep + 1;
@@ -875,7 +917,7 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                                     minWidth: 'min-content',
                                     pointerEvents: 'auto',
                                     zIndex: 999,
-                                }, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) }) })] }) })), pointerPosition &&
+                                }, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour, validationError: validationError, isValidating: isValidating })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour, validationError: validationError, isValidating: isValidating })) }) })] }) })), pointerPosition &&
                 isNextStepVisible &&
                 currentTourSteps?.[currentStep]?.viewportID &&
                 scrollableParent && (_jsx(DynamicPortal, { children: _jsx(motion.div, { "data-name": "nextstep-overlay2", initial: "hidden", animate: isNextStepVisible ? 'visible' : 'hidden', variants: variants, transition: { duration: 0.5 }, style: {
