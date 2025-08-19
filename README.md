@@ -167,6 +167,8 @@ You can create a custom card component for greater control over the design:
 | `prevStep`    |          | A function to go back to the previous step in the onboarding process.           |
 | `arrow`       |          | Returns an SVG object, the orientation is controlled by the steps side prop     |
 | `skipTour`    |          | A function to skip the tour                                                     |
+| `validationError` | `string \| null` | Current validation error message (if any)                                    |
+| `isValidating` | `boolean` | Whether validation is currently in progress                                    |
 
 ```tsx
 'use client';
@@ -180,6 +182,8 @@ export const CustomCard = ({
   prevStep,
   skipTour,
   arrow,
+  validationError,
+  isValidating,
 }: CardComponentProps) => {
   return (
     <div>
@@ -191,8 +195,15 @@ export const CustomCard = ({
       </h2>
       <p>{step.content}</p>
       <button onClick={prevStep}>Previous</button>
-      <button onClick={nextStep}>Next</button>
+      <button onClick={nextStep} disabled={isValidating}>
+        {isValidating ? 'Validating...' : 'Next'}
+      </button>
       <button onClick={skipTour}>Skip</button>
+      {validationError && (
+        <div style={{ color: 'red', marginTop: '0.5rem' }}>
+          {validationError}
+        </div>
+      )}
       {arrow}
     </div>
   );
@@ -239,8 +250,112 @@ const steps: Tour[] = [
 | `nextRoute`            | `string`                                 | Optional. The route to navigate to when moving to the next step.                                                                                    |
 | `prevRoute`            | `string`                                 | Optional. The route to navigate to when moving to the previous step.                                                                                |
 | `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                                   |
+| `validation`           | `StepValidation`                        | Optional. Custom validation function to ensure user completes required actions before proceeding. See [Validation System](#validation-system) for details. |
 
 > **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
+
+### Validation System
+
+NextStep includes a powerful validation system that allows you to ensure users complete required actions before proceeding to the next step. This is particularly useful for steps that require users to open modals, fill forms, or perform specific interactions.
+
+#### Basic Usage
+
+Add a `validation` object to any step that requires validation:
+
+```tsx
+{
+  icon: '📋',
+  title: 'Open Modal',
+  content: 'Click the button to open the modal',
+  selector: '#modal-button',
+  validation: {
+    validate: () => {
+      // Your validation logic here
+      return isModalOpen; // must return boolean or Promise<boolean>
+    },
+    errorMessage: 'Please open the modal before continuing',
+    required: true, // optional, defaults to true
+  },
+}
+```
+
+#### Validation Interface
+
+```tsx
+interface StepValidation {
+  validate: () => boolean | Promise<boolean>;
+  errorMessage?: string;
+  required?: boolean;
+}
+```
+
+#### Examples
+
+**Check if modal is open:**
+```tsx
+validation: {
+  validate: () => {
+    const modal = document.querySelector('.modal');
+    return modal && !modal.classList.contains('hidden');
+  },
+  errorMessage: 'The modal needs to be open to continue',
+}
+```
+
+**Check form field:**
+```tsx
+validation: {
+  validate: () => {
+    const input = document.querySelector('#email-input') as HTMLInputElement;
+    return input && input.value.trim().length > 0;
+  },
+  errorMessage: 'Please fill in the email field',
+}
+```
+
+**Async validation:**
+```tsx
+validation: {
+  validate: async () => {
+    try {
+      const response = await fetch('/api/validate');
+      return response.ok;
+    } catch {
+      return false;
+    }
+  },
+  errorMessage: 'Validation failed. Please try again.',
+}
+```
+
+**React state validation:**
+```tsx
+const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+const steps: Tour[] = [
+  {
+    tour: 'dropdown-tour',
+    steps: [
+      {
+        validation: {
+          validate: () => isDropdownOpen,
+          errorMessage: 'Open the dropdown to continue',
+        },
+      },
+    ],
+  },
+];
+```
+
+#### Behavior
+
+- **Validation triggers** when user clicks "Next"
+- **Visual feedback** shows "Validating..." during validation
+- **Error messages** appear in the card if validation fails
+- **Automatic cleanup** of error states when changing steps
+- **Performance optimized** - validations only run when needed
+
+For more detailed information, see the [Validation System Documentation](./src/docs/validation-feature.md).
 
 ### Target Anything
 

@@ -51,10 +51,10 @@ const NextStepReact: React.FC<NextStepProps> = ({
   shadowOpacity = '0.2',
   cardTransition = { ease: 'anticipate', duration: 0.6 },
   cardComponent: CardComponent,
-  onStart = () => {},
-  onStepChange = () => {},
-  onComplete = () => {},
-  onSkip = () => {},
+  onStart = () => { },
+  onStepChange = () => { },
+  onComplete = () => { },
+  onSkip = () => { },
   displayArrow = true,
   clickThroughOverlay = false,
   navigationAdapter = useWindowAdapter,
@@ -82,6 +82,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
   const [viewport, setViewport] = useState<Element | null>(null);
   const [viewportRect, setViewportRect] = useState<DOMRect | null>(null);
   const [scrollableParent, setScrollableParent] = useState<Element | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   const router = navigationAdapter();
 
@@ -118,6 +120,13 @@ const NextStepReact: React.FC<NextStepProps> = ({
       onStart?.(currentTour);
     }
   }, [currentTour, onStart, isNextStepVisible]);
+
+  // - -
+  // Clear validation error when step changes
+  useEffect(() => {
+    setValidationError(null);
+    setIsValidating(false);
+  }, [currentStep]);
 
   // - -
   // Initialize
@@ -165,8 +174,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
               block: side.includes('top')
                 ? 'end'
                 : side.includes('bottom')
-                ? 'start'
-                : 'center',
+                  ? 'start'
+                  : 'center',
             });
           }
         }
@@ -312,8 +321,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
               block: side.includes('top')
                 ? 'end'
                 : side.includes('bottom')
-                ? 'start'
-                : 'center',
+                  ? 'start'
+                  : 'center',
             });
           }
         }
@@ -354,8 +363,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
           block: side.includes('top')
             ? 'end'
             : side.includes('bottom')
-            ? 'start'
-            : 'center',
+              ? 'start'
+              : 'center',
           inline: 'center',
         });
       }
@@ -459,8 +468,45 @@ const NextStepReact: React.FC<NextStepProps> = ({
   }, [currentStep, currentTour]);
 
   // - -
+  // Validation Helper
+  const validateCurrentStep = async (): Promise<boolean> => {
+    if (!currentTourSteps || currentStep === undefined) return true;
+
+    const currentStepData = currentTourSteps[currentStep];
+    if (!currentStepData.validation) return true;
+
+    setIsValidating(true);
+    setValidationError(null);
+
+    try {
+      const isValid = await currentStepData.validation.validate();
+
+      if (!isValid) {
+        setValidationError(currentStepData.validation.errorMessage || 'Ação necessária não foi executada');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      setValidationError('Erro durante a validação');
+      if (!disableConsoleLogs) {
+        console.error('Validation error:', error);
+      }
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  // - -
   // Step Controls
-  const nextStep = () => {
+  const nextStep = async () => {
+    // Validate current step before proceeding
+    const isValid = await validateCurrentStep();
+    if (!isValid) {
+      return; // Stop if validation fails
+    }
+
     if (currentTourSteps && currentStep < currentTourSteps.length - 1) {
       try {
         const nextStepIndex = currentStep + 1;
@@ -604,8 +650,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
               block: side.includes('top')
                 ? 'end'
                 : side.includes('bottom')
-                ? 'start'
-                : 'center',
+                  ? 'start'
+                  : 'center',
             });
           }
           // Update pointer position after scrolling
@@ -990,7 +1036,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
                     pointerEvents: 'auto',
                     height: `${Math.max(
                       viewportRect.height -
-                        (pointerPosition.y + pointerPosition.height + pointerPadOffset),
+                      (pointerPosition.y + pointerPosition.height + pointerPadOffset),
                       0,
                     )}px`,
                   }}
@@ -1016,9 +1062,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
                     position: 'absolute',
                     top: 0,
                     pointerEvents: 'auto',
-                    left: `${
-                      pointerPosition.x + pointerPosition.width + pointerPadOffset
-                    }px`,
+                    left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset
+                      }px`,
                     right: 0,
                     height: viewportRect.height,
                   }}
@@ -1048,21 +1093,21 @@ const NextStepReact: React.FC<NextStepProps> = ({
               initial={
                 pointerPosition
                   ? {
-                      x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
-                      width: pointerPosition.width + pointerPadding,
-                      height: pointerPosition.height + pointerPadding,
-                    }
+                    x: pointerPosition.x - pointerPadOffset,
+                    y: pointerPosition.y - pointerPadOffset,
+                    width: pointerPosition.width + pointerPadding,
+                    height: pointerPosition.height + pointerPadding,
+                  }
                   : {}
               }
               animate={
                 pointerPosition
                   ? {
-                      x: pointerPosition.x - pointerPadOffset,
-                      y: pointerPosition.y - pointerPadOffset,
-                      width: pointerPosition.width + pointerPadding,
-                      height: pointerPosition.height + pointerPadding,
-                    }
+                    x: pointerPosition.x - pointerPadOffset,
+                    y: pointerPosition.y - pointerPadOffset,
+                    width: pointerPosition.width + pointerPadding,
+                    height: pointerPosition.height + pointerPadding,
+                  }
                   : {}
               }
               transition={cardTransition}
@@ -1097,6 +1142,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
                       />
                     }
                     skipTour={skipTour}
+                    validationError={validationError}
+                    isValidating={isValidating}
                   />
                 ) : (
                   <DefaultCard
@@ -1113,6 +1160,8 @@ const NextStepReact: React.FC<NextStepProps> = ({
                       />
                     }
                     skipTour={skipTour}
+                    validationError={validationError}
+                    isValidating={isValidating}
                   />
                 )}
               </motion.div>
@@ -1178,14 +1227,12 @@ const NextStepReact: React.FC<NextStepProps> = ({
                       left: 0,
                       right: 0,
                       pointerEvents: 'auto',
-                      top: `${
-                        scrollableParent.getBoundingClientRect().bottom + window.scrollY
-                      }px`,
-                      height: `${
-                        documentHeight -
+                      top: `${scrollableParent.getBoundingClientRect().bottom + window.scrollY
+                        }px`,
+                      height: `${documentHeight -
                         scrollableParent.getBoundingClientRect().bottom -
                         window.scrollY
-                      }px`,
+                        }px`,
                       width: `${document.body.scrollWidth}px`,
                       backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
                     }}
@@ -1211,14 +1258,12 @@ const NextStepReact: React.FC<NextStepProps> = ({
                       position: 'absolute',
                       pointerEvents: 'auto',
                       top: scrollableParent.getBoundingClientRect().top + window.scrollY,
-                      left: `${
-                        scrollableParent.getBoundingClientRect().right + window.scrollX
-                      }px`,
-                      width: `${
-                        document.body.scrollWidth -
+                      left: `${scrollableParent.getBoundingClientRect().right + window.scrollX
+                        }px`,
+                      width: `${document.body.scrollWidth -
                         scrollableParent.getBoundingClientRect().right -
                         window.scrollX
-                      }px`,
+                        }px`,
                       height: scrollableParent.getBoundingClientRect().height,
                       backgroundColor: `rgba(${shadowRgb}, ${shadowOpacity})`,
                     }}
