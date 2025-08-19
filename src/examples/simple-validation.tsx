@@ -11,24 +11,24 @@ const SimpleValidationExample: React.FC = () => {
       steps: [
         {
           icon: '👋',
-          title: 'Bem-vindo',
-          content: 'Este exemplo mostra como usar validações simples.',
+          title: 'Welcome',
+          content: 'This example shows how to use simple validations.',
           selector: '#welcome',
         },
         {
           icon: '📋',
-          title: 'Abrir Modal',
-          content: 'Clique no botão para abrir o modal. Você não poderá continuar até que o modal esteja aberto.',
+          title: 'Open Modal',
+          content: 'Click the button to open the modal. You cannot continue until the modal is open.',
           selector: '#modal-button',
           validation: {
             validate: () => isModalOpen,
-            errorMessage: 'Você precisa abrir o modal antes de continuar!',
+            errorMessage: 'You need to open the modal before continuing!',
           },
         },
         {
           icon: '✅',
-          title: 'Sucesso!',
-          content: 'Parabéns! Você completou a validação com sucesso.',
+          title: 'Success!',
+          content: 'Congratulations! You completed the validation successfully.',
           selector: '#success',
         },
       ],
@@ -39,7 +39,7 @@ const SimpleValidationExample: React.FC = () => {
     <div style={{ padding: '2rem', fontFamily: 'Arial, sans-serif' }}>
       <NextStep steps={steps}>
         <div>
-          <h1>Exemplo Simples de Validação</h1>
+          <h1>Simple Validation Example</h1>
 
           <div style={{ marginBottom: '2rem' }}>
             <button
@@ -54,7 +54,7 @@ const SimpleValidationExample: React.FC = () => {
                 fontSize: '1rem',
               }}
             >
-              Iniciar Tour
+              Start Tour
             </button>
           </div>
 
@@ -72,7 +72,7 @@ const SimpleValidationExample: React.FC = () => {
                 fontSize: '1rem',
               }}
             >
-              {isModalOpen ? 'Modal Aberto ✓' : 'Abrir Modal'}
+              {isModalOpen ? 'Modal Open ✓' : 'Open Modal'}
             </button>
 
             {isModalOpen && (
@@ -85,8 +85,8 @@ const SimpleValidationExample: React.FC = () => {
                   borderRadius: '0.375rem',
                 }}
               >
-                <h3>Modal Aberto</h3>
-                <p>Agora você pode continuar o tour!</p>
+                <h3>Modal Open</h3>
+                <p>Now you can continue the tour!</p>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   style={{
@@ -98,7 +98,7 @@ const SimpleValidationExample: React.FC = () => {
                     cursor: 'pointer',
                   }}
                 >
-                  Fechar Modal
+                  Close Modal
                 </button>
               </div>
             )}
@@ -114,8 +114,8 @@ const SimpleValidationExample: React.FC = () => {
               color: '#065F46',
             }}
           >
-            <h3>🎉 Parabéns!</h3>
-            <p>Você completou o tour com validação!</p>
+            <h3>🎉 Congratulations!</h3>
+            <p>You completed the validation tour!</p>
           </div>
         </div>
       </NextStep>

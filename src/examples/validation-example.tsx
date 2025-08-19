@@ -12,42 +12,42 @@ const ValidationExample: React.FC = () => {
       steps: [
         {
           icon: '👋',
-          title: 'Bem-vindo ao exemplo de validação',
-          content: 'Este é um exemplo de como usar validações customizadas nos steps.',
+          title: 'Welcome to validation example',
+          content: 'This is an example of how to use custom validations in steps.',
           selector: '#welcome-button',
         },
         {
           icon: '📋',
-          title: 'Clique para abrir o modal',
-          content: 'Você precisa clicar no botão abaixo para abrir o modal antes de continuar.',
+          title: 'Click to open modal',
+          content: 'You need to click the button below to open the modal before continuing.',
           selector: '#modal-button',
           validation: {
             validate: () => {
-              // Verifica se o modal está aberto
+              // Check if modal is open
               return isModalOpen;
             },
-            errorMessage: 'Por favor, clique no botão para abrir o modal antes de continuar.',
+            errorMessage: 'Please click the button to open the modal before continuing.',
             required: true,
           },
         },
         {
           icon: '🔽',
-          title: 'Agora abra o dropdown',
-          content: 'Clique no dropdown para abri-lo antes de prosseguir.',
+          title: 'Now open the dropdown',
+          content: 'Click the dropdown to open it before proceeding.',
           selector: '#dropdown-button',
           validation: {
             validate: () => {
-              // Verifica se o dropdown está aberto
+              // Check if dropdown is open
               return isDropdownOpen;
             },
-            errorMessage: 'Você precisa abrir o dropdown para continuar.',
+            errorMessage: 'You need to open the dropdown to continue.',
             required: true,
           },
         },
         {
           icon: '✅',
-          title: 'Parabéns!',
-          content: 'Você completou todas as validações com sucesso!',
+          title: 'Congratulations!',
+          content: 'You completed all validations successfully!',
           selector: '#success-message',
         },
       ],
@@ -58,7 +58,7 @@ const ValidationExample: React.FC = () => {
     <div style={{ padding: '2rem', fontFamily: 'Arial, sans-serif' }}>
       <NextStep steps={steps}>
         <div>
-          <h1>Exemplo de Validação de Steps</h1>
+          <h1>Step Validation Example</h1>
 
           <div style={{ marginBottom: '2rem' }}>
             <button
@@ -73,7 +73,7 @@ const ValidationExample: React.FC = () => {
                 fontSize: '1rem',
               }}
             >
-              Iniciar Tour
+              Start Tour
             </button>
           </div>
 
@@ -91,7 +91,7 @@ const ValidationExample: React.FC = () => {
                 fontSize: '1rem',
               }}
             >
-              {isModalOpen ? 'Modal Aberto ✓' : 'Abrir Modal'}
+              {isModalOpen ? 'Modal Open ✓' : 'Open Modal'}
             </button>
 
             {isModalOpen && (
@@ -104,8 +104,8 @@ const ValidationExample: React.FC = () => {
                   borderRadius: '0.375rem',
                 }}
               >
-                <h3>Modal Aberto</h3>
-                <p>Este modal precisa estar aberto para continuar o tour.</p>
+                <h3>Modal Open</h3>
+                <p>This modal needs to be open to continue the tour.</p>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   style={{
@@ -117,7 +117,7 @@ const ValidationExample: React.FC = () => {
                     cursor: 'pointer',
                   }}
                 >
-                  Fechar Modal
+                  Close Modal
                 </button>
               </div>
             )}
@@ -138,7 +138,7 @@ const ValidationExample: React.FC = () => {
                   fontSize: '1rem',
                 }}
               >
-                {isDropdownOpen ? 'Dropdown Aberto ✓' : 'Abrir Dropdown'}
+                {isDropdownOpen ? 'Dropdown Open ✓' : 'Open Dropdown'}
               </button>
 
               {isDropdownOpen && (
@@ -156,11 +156,11 @@ const ValidationExample: React.FC = () => {
                     minWidth: '200px',
                   }}
                 >
-                  <h4>Opções do Dropdown</h4>
+                  <h4>Dropdown Options</h4>
                   <ul style={{ margin: 0, paddingLeft: '1rem' }}>
-                    <li>Opção 1</li>
-                    <li>Opção 2</li>
-                    <li>Opção 3</li>
+                    <li>Option 1</li>
+                    <li>Option 2</li>
+                    <li>Option 3</li>
                   </ul>
                   <button
                     onClick={() => setIsDropdownOpen(false)}
@@ -175,7 +175,7 @@ const ValidationExample: React.FC = () => {
                       fontSize: '0.875rem',
                     }}
                   >
-                    Fechar
+                    Close
                   </button>
                 </div>
               )}
@@ -192,8 +192,8 @@ const ValidationExample: React.FC = () => {
               color: '#065F46',
             }}
           >
-            <h3>🎉 Sucesso!</h3>
-            <p>Você completou todas as validações do tour!</p>
+            <h3>🎉 Success!</h3>
+            <p>You completed all tour validations!</p>
           </div>
         </div>
       </NextStep>
