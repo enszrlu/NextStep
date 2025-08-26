@@ -7,6 +7,7 @@ export type {
   NextStepProps,
   Tour,
   Step,
+  StepValidation,
   NextStepContextType,
   CardComponentProps,
 } from './types';

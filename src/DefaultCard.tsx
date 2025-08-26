@@ -9,6 +9,8 @@ const DefaultCard: React.FC<CardComponentProps> = ({
   prevStep,
   skipTour,
   arrow,
+  validationError,
+  isValidating,
 }) => {
   return (
     <div
@@ -35,6 +37,23 @@ const DefaultCard: React.FC<CardComponentProps> = ({
       </div>
 
       <div style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>{step.content}</div>
+
+      {/* Validation Error Message */}
+      {validationError && (
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.75rem',
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: '0.375rem',
+            color: '#DC2626',
+            fontSize: '0.875rem',
+          }}
+        >
+          {validationError}
+        </div>
+      )}
 
       <div
         style={{
@@ -99,17 +118,19 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         ) : (
           <button
             onClick={nextStep}
+            disabled={isValidating}
             style={{
               padding: '0.5rem 1rem',
               fontWeight: '500',
               color: 'white',
-              backgroundColor: '#2563EB',
+              backgroundColor: isValidating ? '#9CA3AF' : '#2563EB',
               borderRadius: '0.375rem',
-              cursor: 'pointer',
+              cursor: isValidating ? 'not-allowed' : 'pointer',
               display: step.showControls ? 'block' : 'none',
+              opacity: isValidating ? 0.7 : 1,
             }}
           >
-            Next
+            {isValidating ? 'Validando...' : 'Next'}
           </button>
         )}
       </div>

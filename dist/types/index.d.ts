@@ -8,6 +8,11 @@ export interface NextStepContextType {
     startNextStep: (tourName: string) => void;
     isNextStepVisible: boolean;
 }
+export interface StepValidation {
+    validate: () => boolean | Promise<boolean>;
+    errorMessage?: string;
+    required?: boolean;
+}
 export interface Step {
     icon: React.ReactNode | string | null;
     title: string;
@@ -22,6 +27,7 @@ export interface Step {
     nextRoute?: string;
     prevRoute?: string;
     viewportID?: string;
+    validation?: StepValidation;
 }
 export interface Tour {
     tour: string;
@@ -54,4 +60,6 @@ export interface CardComponentProps {
     prevStep: () => void;
     skipTour?: () => void;
     arrow: JSX.Element;
+    validationError?: string | null;
+    isValidating?: boolean;
 }

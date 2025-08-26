@@ -34,7 +34,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "start": "npm run build && node dist/index.js"
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "start": "npm run build && node dist/index.js",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@remix-run/react": ">=1.0.0",
@@ -80,6 +82,10 @@
     "./adapters/remix": {
       "import": "./dist/adapters/remix/index.js",
       "types": "./dist/adapters/remix/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   }
 }

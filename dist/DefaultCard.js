@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTour, arrow, }) => {
+const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTour, arrow, validationError, isValidating, }) => {
     return (_jsxs("div", { style: {
             backgroundColor: 'white',
             borderRadius: '0.5rem',
@@ -12,7 +12,15 @@ const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTo
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     marginBottom: '1rem',
-                }, children: [_jsx("h2", { style: { fontSize: '1.125rem', fontWeight: 'bold' }, children: step.title }), step.icon && _jsx("span", { style: { fontSize: '1.5rem' }, children: step.icon })] }), _jsx("div", { style: { marginBottom: '1rem', fontSize: '0.875rem' }, children: step.content }), _jsx("div", { style: {
+                }, children: [_jsx("h2", { style: { fontSize: '1.125rem', fontWeight: 'bold' }, children: step.title }), step.icon && _jsx("span", { style: { fontSize: '1.5rem' }, children: step.icon })] }), _jsx("div", { style: { marginBottom: '1rem', fontSize: '0.875rem' }, children: step.content }), validationError && (_jsx("div", { style: {
+                    marginBottom: '1rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#FEF2F2',
+                    border: '1px solid #FECACA',
+                    borderRadius: '0.375rem',
+                    color: '#DC2626',
+                    fontSize: '0.875rem',
+                }, children: validationError })), _jsx("div", { style: {
                     marginBottom: '1rem',
                     backgroundColor: '#E5E7EB',
                     borderRadius: '9999px',
@@ -44,15 +52,16 @@ const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTo
                             borderRadius: '0.375rem',
                             cursor: 'pointer',
                             display: step.showControls ? 'block' : 'none',
-                        }, children: "Finish" })) : (_jsx("button", { onClick: nextStep, style: {
+                        }, children: "Finish" })) : (_jsx("button", { onClick: nextStep, disabled: isValidating, style: {
                             padding: '0.5rem 1rem',
                             fontWeight: '500',
                             color: 'white',
-                            backgroundColor: '#2563EB',
+                            backgroundColor: isValidating ? '#9CA3AF' : '#2563EB',
                             borderRadius: '0.375rem',
-                            cursor: 'pointer',
+                            cursor: isValidating ? 'not-allowed' : 'pointer',
                             display: step.showControls ? 'block' : 'none',
-                        }, children: "Next" }))] }), arrow, skipTour && currentStep < totalSteps - 1 && (_jsx("button", { onClick: skipTour, style: {
+                            opacity: isValidating ? 0.7 : 1,
+                        }, children: isValidating ? 'Validando...' : 'Next' }))] }), arrow, skipTour && currentStep < totalSteps - 1 && (_jsx("button", { onClick: skipTour, style: {
                     marginTop: '1rem',
                     fontSize: '0.75rem',
                     width: '100%',

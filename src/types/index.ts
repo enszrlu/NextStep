@@ -11,6 +11,13 @@ export interface NextStepContextType {
   isNextStepVisible: boolean;
 }
 
+// Step Validation
+export interface StepValidation {
+  validate: () => boolean | Promise<boolean>;
+  errorMessage?: string;
+  required?: boolean;
+}
+
 // Step
 export interface Step {
   // Step Content
@@ -20,18 +27,18 @@ export interface Step {
   selector?: string;
   // Options
   side?:
-    | 'top'
-    | 'bottom'
-    | 'left'
-    | 'right'
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right'
-    | 'left-top'
-    | 'left-bottom'
-    | 'right-top'
-    | 'right-bottom';
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'left-top'
+  | 'left-bottom'
+  | 'right-top'
+  | 'right-bottom';
   showControls?: boolean;
   showSkip?: boolean;
   blockKeyboardControl?: boolean;
@@ -42,6 +49,8 @@ export interface Step {
   prevRoute?: string;
   // Dynamic Portal
   viewportID?: string;
+  // Validation
+  validation?: StepValidation;
 }
 
 // Tour
@@ -81,4 +90,6 @@ export interface CardComponentProps {
   prevStep: () => void;
   skipTour?: () => void;
   arrow: JSX.Element;
+  validationError?: string | null;
+  isValidating?: boolean;
 }
