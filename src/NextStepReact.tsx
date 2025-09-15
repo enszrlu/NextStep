@@ -61,6 +61,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
   disableConsoleLogs = false,
   scrollToTop = true,
   noInViewScroll = false,
+  classNames,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -926,10 +927,15 @@ const NextStepReact: React.FC<NextStepProps> = ({
     <div
       data-name="nextstep-wrapper"
       data-nextstep="dev"
+      className={classNames?.wrapper}
       style={{ position: 'relative', width: '100%' }}
     >
       {/* Container for the Website content */}
-      <div data-name="nextstep-site" style={{ display: 'block', width: '100%' }}>
+      <div
+        data-name="nextstep-site"
+        className={classNames?.site}
+        style={{ display: 'block', width: '100%' }}
+      >
         {children}
       </div>
 

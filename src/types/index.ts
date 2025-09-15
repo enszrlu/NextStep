@@ -70,6 +70,10 @@ export interface NextStepProps {
   disableConsoleLogs?: boolean;
   scrollToTop?: boolean;
   noInViewScroll?: boolean;
+  classNames?: {
+    wrapper?: string;
+    site?: string;
+  };
 }
 
 // Custom Card
