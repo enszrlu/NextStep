@@ -83,7 +83,7 @@ const DefaultCard: React.FC<CardComponentProps> = ({
         </span>
         {currentStep === totalSteps - 1 ? (
           <button
-            onClick={skipTour}
+            onClick={nextStep}
             style={{
               padding: '0.5rem 1rem',
               fontWeight: '500',
