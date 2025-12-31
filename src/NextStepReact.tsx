@@ -10,7 +10,6 @@ import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
 import SmoothSpotlight from './SmoothSpotlight';
 
-// Default retry settings for selector lookup
 const DEFAULT_SELECTOR_RETRY_ATTEMPTS = 3;
 const DEFAULT_SELECTOR_RETRY_DELAY_MS = 200;
 
@@ -348,7 +347,6 @@ const NextStepReact: React.FC<NextStepProps> = ({
             return;
           }
 
-          // Schedule retry if we have attempts remaining
           if (remainingAttempts > 0) {
             const timeoutId = window.setTimeout(
               () => attemptLookup(remainingAttempts - 1),
@@ -358,7 +356,6 @@ const NextStepReact: React.FC<NextStepProps> = ({
           }
         };
 
-        // Start the lookup process
         attemptLookup(maxAttempts);
 
         // Setup cleanup to cancel pending retries
