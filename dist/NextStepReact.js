@@ -851,7 +851,7 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                                 position: 'relative',
                                 zIndex: overlayZIndex,
                                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
-                                pointerEvents: 'none',
+                                pointerEvents: `${currentTourSteps?.[currentStep]?.disableInteraction ? 'auto' : 'none'}`,
                             }, initial: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,

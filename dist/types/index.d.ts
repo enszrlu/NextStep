@@ -19,6 +19,7 @@ export interface Step {
     blockKeyboardControl?: boolean;
     pointerPadding?: number;
     pointerRadius?: number;
+    disableInteraction?: boolean;
     nextRoute?: string;
     prevRoute?: string;
     viewportID?: string;

@@ -1045,7 +1045,9 @@ const NextStepReact: React.FC<NextStepProps> = ({
                 position: 'relative',
                 zIndex: overlayZIndex,
                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
-                pointerEvents: 'none',
+                pointerEvents: `${
+                  currentTourSteps?.[currentStep]?.disableInteraction ? 'auto' : 'none'
+                }`,
               }}
               initial={
                 pointerPosition
