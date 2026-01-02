@@ -10,6 +10,9 @@ import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
 import SmoothSpotlight from './SmoothSpotlight';
 
+const DEFAULT_SELECTOR_RETRY_ATTEMPTS = 3;
+const DEFAULT_SELECTOR_RETRY_DELAY_MS = 200;
+
 /**
  * NextStepReact component for rendering the onboarding steps.
  *
@@ -269,6 +272,9 @@ const NextStepReact: React.FC<NextStepProps> = ({
   // - -
   // Update pointerPosition when currentStep changes
   useEffect(() => {
+    // Cleanup function for retry timeouts
+    let cleanupRetries = () => {};
+
     if (isNextStepVisible && currentTourSteps) {
       if (!disableConsoleLogs) {
         console.log('NextStep: Current Step Changed');
@@ -294,8 +300,21 @@ const NextStepReact: React.FC<NextStepProps> = ({
       setScrollableParent(getScrollableParent(tempViewport));
 
       if (step && step.selector) {
-        const element = document.querySelector(step.selector) as Element | null;
-        if (element) {
+        // Track retry state
+        const retryTimeouts: number[] = [];
+        let cancelled = false;
+
+        // Get retry configuration from step or use defaults
+        const maxAttempts = Math.max(
+          step.selectorRetryAttempts ?? DEFAULT_SELECTOR_RETRY_ATTEMPTS,
+          DEFAULT_SELECTOR_RETRY_ATTEMPTS,
+        );
+        const retryDelay = step.selectorRetryDelay ?? DEFAULT_SELECTOR_RETRY_DELAY_MS;
+
+        // Handler for when element is successfully located
+        const handleElementLocated = (element: Element) => {
+          if (cancelled) return;
+
           setPointerPosition(getElementPosition(element));
           currentElementRef.current = element;
           setElementToScroll(element);
@@ -317,7 +336,36 @@ const NextStepReact: React.FC<NextStepProps> = ({
                 : 'center',
             });
           }
-        }
+        };
+
+        // Recursive function to attempt selector lookup with retries
+        const attemptLookup = (remainingAttempts: number) => {
+          if (cancelled) return;
+
+          const element = document.querySelector(step.selector!) as Element | null;
+          if (element) {
+            handleElementLocated(element);
+            return;
+          }
+
+          if (remainingAttempts > 0) {
+            const timeoutId = window.setTimeout(
+              () => attemptLookup(remainingAttempts - 1),
+              retryDelay,
+            );
+            retryTimeouts.push(timeoutId);
+          }
+        };
+
+        attemptLookup(maxAttempts);
+
+        // Setup cleanup to cancel pending retries
+        cleanupRetries = () => {
+          cancelled = true;
+          retryTimeouts.forEach((timeoutId) => {
+            window.clearTimeout(timeoutId);
+          });
+        };
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
         if (step.viewportID) {
@@ -340,6 +388,11 @@ const NextStepReact: React.FC<NextStepProps> = ({
         setElementToScroll(null);
       }
     }
+
+    // Cleanup function to cancel pending retries on unmount or step change
+    return () => {
+      cleanupRetries();
+    };
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
 
   useEffect(() => {

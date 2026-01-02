@@ -43,6 +43,18 @@ export interface Step {
   prevRoute?: string;
   // Dynamic Portal
   viewportID?: string;
+  // Selector retry options (for async-rendered elements)
+  /**
+   * Number of retry attempts when the selector element is not immediately found.
+   * Useful for elements that render asynchronously.
+   * @default 3
+   */
+  selectorRetryAttempts?: number;
+  /**
+   * Delay in milliseconds between selector retry attempts.
+   * @default 200
+   */
+  selectorRetryDelay?: number;
 }
 
 // Tour
