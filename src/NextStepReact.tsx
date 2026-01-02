@@ -61,6 +61,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
   disableConsoleLogs = false,
   scrollToTop = true,
   noInViewScroll = false,
+  overlayZIndex = 999,
 }) => {
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
@@ -949,7 +950,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
               overflow: 'hidden',
               height: isViewportScrollable ? `${viewport.scrollHeight}px` : '100%',
               width: isViewportScrollable ? `${viewport.scrollWidth}px` : '100%',
-              zIndex: 997, // Ensure it's below the pointer but above other content
+              zIndex: overlayZIndex - 2,
               pointerEvents: 'none',
             }}
           >
@@ -960,7 +961,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  zIndex: 998,
+                  zIndex: overlayZIndex - 1,
                   pointerEvents: 'none',
                   height: `${viewport.scrollHeight}px`,
                   width: `${viewport.scrollWidth}px`,
@@ -1035,13 +1036,14 @@ const NextStepReact: React.FC<NextStepProps> = ({
               radius={pointerRadius}
               shadowOpacity={shadowOpacity}
               shadowRgb={shadowRgb}
+              zIndex={overlayZIndex - 1}
             />
             {/* Pointer */}
             <motion.div
               data-name="nextstep-pointer"
               style={{
                 position: 'relative',
-                zIndex: 999,
+                zIndex: overlayZIndex,
                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
                 pointerEvents: 'none',
               }}
@@ -1079,7 +1081,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
                   maxWidth: '100%',
                   minWidth: 'min-content',
                   pointerEvents: 'auto',
-                  zIndex: 999,
+                  zIndex: overlayZIndex,
                 }}
               >
                 {CardComponent ? (
@@ -1140,7 +1142,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
                 overflow: 'hidden',
                 height: `${documentHeight}px`,
                 width: `${document.body.scrollWidth}px`,
-                zIndex: 997,
+                zIndex: overlayZIndex - 2,
                 pointerEvents: 'none',
               }}
             >
@@ -1150,7 +1152,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    zIndex: 998,
+                    zIndex: overlayZIndex - 1,
                     pointerEvents: 'none',
                     width: '100vw',
                     height: documentHeight,

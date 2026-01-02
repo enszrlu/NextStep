@@ -8,6 +8,7 @@ interface SmoothSpotlightProps {
     radius: number;
     shadowOpacity: string;
     shadowRgb: string;
+    zIndex: number;
 }
 declare const SmoothSpotlight: React.FC<SmoothSpotlightProps>;
 export default SmoothSpotlight;

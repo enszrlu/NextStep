@@ -104,9 +104,10 @@ export default defineConfig({
 });
 ```
 
-Vite also requires `next/navigation` to be mocked in order to work properly. 
+Vite also requires `next/navigation` to be mocked in order to work properly.
 
 1. Create a mock file for `Next`, such as `next-navigation.ts`, and place it in `/src/mocks`
+
 ```typescript
 // Mock for Next.js navigation to prevent build errors with nextstepjs
 // This file is used to mock Next.js imports when using nextstepjs in a Vite app
@@ -136,6 +137,7 @@ export const useParams = () => {
 ```
 
 2. Update `vite.config.mts` to use the proper alias for Next.js navigation imports
+
 ```typescript
 import path from 'node:path';
 import { defineConfig } from 'vite';
@@ -150,9 +152,9 @@ export default defineConfig({
         find: 'next/navigation',
         replacement: path.join(process.cwd(), 'src/mocks/next-navigation.ts'),
       },
-    ]
-  }
-})
+    ],
+  },
+});
 ```
 
 ##### Custom Navigation Adapter
@@ -379,24 +381,25 @@ Here's an example of how to use `NextStepViewport`:
 
 ### NextStep & NextStepReact Props
 
-| Property              | Type                                               | Description                                                                                                   |
-| --------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `children`            | `React.ReactNode`                                  | Your website or application content                                                                           |
-| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding                                                    |
-| `navigationAdapter`   | `NavigationAdapter`                                | Optional. Router adapter for navigation (defaults to Next.js on NextStep and window adapter on NextStepReact) |
-| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                                                                 |
-| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area                                                   |
-| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area                                                      |
-| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                                                              |
-| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                                                                 |
-| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                                                              |
-| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                                                             |
-| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                                                           |
-| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour                                                      |
-| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false                                          |
-| `disableConsoleLogs`  | `boolean`                                          | Optional. If true, console logs are disabled, default is false                                                |
-| `scrollToTop`         | `boolean`                                          | Optional. If true, the page will scroll to the top when the tour ends, default is true                        |
-| `noInViewScroll`      | `boolean`                                          | Optional. If true, the page will not scroll to the target element when it is in view, default is false        |
+| Property              | Type                                               | Description                                                                                                     |
+| --------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `children`            | `React.ReactNode`                                  | Your website or application content                                                                             |
+| `steps`               | `Array[]`                                          | Array of Tour objects defining each step of the onboarding                                                      |
+| `navigationAdapter`   | `NavigationAdapter`                                | Optional. Router adapter for navigation (defaults to Next.js on NextStep and window adapter on NextStepReact)   |
+| `showNextStep`        | `boolean`                                          | Controls visibility of the onboarding overlay                                                                   |
+| `shadowRgb`           | `string`                                           | RGB values for the shadow color surrounding the target area                                                     |
+| `shadowOpacity`       | `string`                                           | Opacity value for the shadow surrounding the target area                                                        |
+| `cardComponent`       | `React.ComponentType`                              | Custom card component to replace the default one                                                                |
+| `cardTransition`      | `Transition`                                       | Motion transition object for step transitions                                                                   |
+| `onStart`             | `(tourName: string \| null) => void`               | Callback function triggered when the tour starts                                                                |
+| `onStepChange`        | `(step: number, tourName: string \| null) => void` | Callback function triggered when the step changes                                                               |
+| `onComplete`          | `(tourName: string \| null) => void`               | Callback function triggered when the tour completes                                                             |
+| `onSkip`              | `(step: number, tourName: string \| null) => void` | Callback function triggered when the user skips the tour                                                        |
+| `clickThroughOverlay` | `boolean`                                          | Optional. If true, overlay background is clickable, default is false                                            |
+| `disableConsoleLogs`  | `boolean`                                          | Optional. If true, console logs are disabled, default is false                                                  |
+| `scrollToTop`         | `boolean`                                          | Optional. If true, the page will scroll to the top when the tour ends, default is true                          |
+| `noInViewScroll`      | `boolean`                                          | Optional. If true, the page will not scroll to the target element when it is in view, default is false          |
+| `overlayZIndex`       | `number`                                           | Optional. Base z-index for overlay elements, useful for compatibility with UI libraries like MUI (default: 999) |
 
 ```tsx
 <NextStep
@@ -410,6 +413,7 @@ Here's an example of how to use `NextStepViewport`:
   onComplete={(tourName) => console.log(`Tour completed: ${tourName}`)}
   onSkip={(step, tourName) => console.log(`Tour skipped: ${step} in ${tourName}`)}
   clickThroughOverlay={false}
+  overlayZIndex={1400} // Set higher for MUI compatibility (MUI dialogs use 1300)
 >
   {children}
 </NextStep>

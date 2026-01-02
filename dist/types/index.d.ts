@@ -45,6 +45,7 @@ export interface NextStepProps {
     disableConsoleLogs?: boolean;
     scrollToTop?: boolean;
     noInViewScroll?: boolean;
+    overlayZIndex?: number;
 }
 export interface CardComponentProps {
     step: Step;

@@ -70,6 +70,7 @@ export interface NextStepProps {
   disableConsoleLogs?: boolean;
   scrollToTop?: boolean;
   noInViewScroll?: boolean;
+  overlayZIndex?: number;
 }
 
 // Custom Card
