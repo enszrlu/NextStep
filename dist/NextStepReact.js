@@ -41,7 +41,7 @@ import SmoothSpotlight from './SmoothSpotlight';
  *   <YourAppContent />
  * </NextStepReact>
  */
-const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, scrollToTop = true, noInViewScroll = false, }) => {
+const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity = '0.2', cardTransition = { ease: 'anticipate', duration: 0.6 }, cardComponent: CardComponent, onStart = () => { }, onStepChange = () => { }, onComplete = () => { }, onSkip = () => { }, displayArrow = true, clickThroughOverlay = false, navigationAdapter = useWindowAdapter, disableConsoleLogs = false, scrollToTop = true, noInViewScroll = false, overlayZIndex = 999, }) => {
     const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } = useNextStep();
     const currentTourSteps = steps.find((tour) => tour.tour === currentTour)?.steps;
     const [elementToScroll, setElementToScroll] = useState(null);
@@ -809,12 +809,12 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                         overflow: 'hidden',
                         height: isViewportScrollable ? `${viewport.scrollHeight}px` : '100%',
                         width: isViewportScrollable ? `${viewport.scrollWidth}px` : '100%',
-                        zIndex: 997, // Ensure it's below the pointer but above other content
+                        zIndex: overlayZIndex - 2,
                         pointerEvents: 'none',
                     }, children: [!clickThroughOverlay && viewportRect && (_jsxs("div", { "data-name": "nextstep-prevent-click-overlay", style: {
                                 position: 'absolute',
                                 inset: 0,
-                                zIndex: 998,
+                                zIndex: overlayZIndex - 1,
                                 pointerEvents: 'none',
                                 height: `${viewport.scrollHeight}px`,
                                 width: `${viewport.scrollWidth}px`,
@@ -847,11 +847,11 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                                         left: `${pointerPosition.x + pointerPosition.width + pointerPadOffset}px`,
                                         right: 0,
                                         height: viewportRect.height,
-                                    } })] })), _jsx(SmoothSpotlight, { x: pointerPosition.x - pointerPadOffset, y: pointerPosition.y - pointerPadOffset, width: pointerPosition.width + pointerPadding, height: pointerPosition.height + pointerPadding, padding: pointerPadding, radius: pointerRadius, shadowOpacity: shadowOpacity, shadowRgb: shadowRgb }), _jsx(motion.div, { "data-name": "nextstep-pointer", style: {
+                                    } })] })), _jsx(SmoothSpotlight, { x: pointerPosition.x - pointerPadOffset, y: pointerPosition.y - pointerPadOffset, width: pointerPosition.width + pointerPadding, height: pointerPosition.height + pointerPadding, padding: pointerPadding, radius: pointerRadius, shadowOpacity: shadowOpacity, shadowRgb: shadowRgb, zIndex: overlayZIndex - 1 }), _jsx(motion.div, { "data-name": "nextstep-pointer", style: {
                                 position: 'relative',
-                                zIndex: 999,
+                                zIndex: overlayZIndex,
                                 borderRadius: `${pointerRadius}px ${pointerRadius}px ${pointerRadius}px ${pointerRadius}px`,
-                                pointerEvents: 'none',
+                                pointerEvents: `${currentTourSteps?.[currentStep]?.disableInteraction ? 'auto' : 'none'}`,
                             }, initial: pointerPosition
                                 ? {
                                     x: pointerPosition.x - pointerPadOffset,
@@ -874,7 +874,7 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                                     maxWidth: '100%',
                                     minWidth: 'min-content',
                                     pointerEvents: 'auto',
-                                    zIndex: 999,
+                                    zIndex: overlayZIndex,
                                 }, children: CardComponent ? (_jsx(CardComponent, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) : (_jsx(DefaultCard, { step: currentTourSteps?.[currentStep], currentStep: currentStep, totalSteps: currentTourSteps?.length ?? 0, nextStep: nextStep, prevStep: prevStep, arrow: _jsx(CardArrow, { isVisible: !!(currentTourSteps?.[currentStep]?.selector && displayArrow) }), skipTour: skipTour })) }) })] }) })), pointerPosition &&
                 isNextStepVisible &&
                 currentTourSteps?.[currentStep]?.viewportID &&
@@ -885,12 +885,12 @@ const NextStepReact = ({ children, steps, shadowRgb = '0, 0, 0', shadowOpacity =
                         overflow: 'hidden',
                         height: `${documentHeight}px`,
                         width: `${document.body.scrollWidth}px`,
-                        zIndex: 997,
+                        zIndex: overlayZIndex - 2,
                         pointerEvents: 'none',
                     }, children: !clickThroughOverlay && (_jsxs("div", { style: {
                             position: 'absolute',
                             inset: 0,
-                            zIndex: 998,
+                            zIndex: overlayZIndex - 1,
                             pointerEvents: 'none',
                             width: '100vw',
                             height: documentHeight,

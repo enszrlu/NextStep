@@ -12,6 +12,7 @@ interface SmoothSpotlightProps {
   radius: number;
   shadowOpacity: string;
   shadowRgb: string;
+  zIndex: number;
 }
 
 const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
@@ -23,6 +24,7 @@ const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
   radius,
   shadowOpacity,
   shadowRgb,
+  zIndex,
 }) => {
   const px = x - padding / 2;
   const py = y - padding / 2;
@@ -34,7 +36,7 @@ const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
       style={{
         position: 'absolute',
         inset: 0,
-        zIndex: 998,
+        zIndex: zIndex,
         pointerEvents: 'none',
       }}
     >

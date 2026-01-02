@@ -49,6 +49,7 @@ const NextStep: React.FC<NextStepProps> = ({
   disableConsoleLogs = false,
   scrollToTop = true,
   noInViewScroll = false,
+  overlayZIndex = 999,
 }) => {
   return (
     <NextStepReact
@@ -68,6 +69,7 @@ const NextStep: React.FC<NextStepProps> = ({
       disableConsoleLogs={disableConsoleLogs}
       scrollToTop={scrollToTop}
       noInViewScroll={noInViewScroll}
+      overlayZIndex={overlayZIndex}
     />
   );
 };

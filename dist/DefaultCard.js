@@ -36,7 +36,7 @@ const DefaultCard = ({ step, currentStep, totalSteps, nextStep, prevStep, skipTo
                             borderRadius: '0.375rem',
                             cursor: 'pointer',
                             display: step.showControls ? 'block' : 'none',
-                        }, disabled: currentStep === 0, children: "Previous" }), _jsxs("span", { style: { color: '#6B7280', whiteSpace: 'nowrap' }, children: [currentStep + 1, " of ", totalSteps] }), currentStep === totalSteps - 1 ? (_jsx("button", { onClick: skipTour, style: {
+                        }, disabled: currentStep === 0, children: "Previous" }), _jsxs("span", { style: { color: '#6B7280', whiteSpace: 'nowrap' }, children: [currentStep + 1, " of ", totalSteps] }), currentStep === totalSteps - 1 ? (_jsx("button", { onClick: nextStep, style: {
                             padding: '0.5rem 1rem',
                             fontWeight: '500',
                             color: 'white',

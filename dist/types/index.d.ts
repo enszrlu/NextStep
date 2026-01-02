@@ -19,6 +19,7 @@ export interface Step {
     blockKeyboardControl?: boolean;
     pointerPadding?: number;
     pointerRadius?: number;
+    disableInteraction?: boolean;
     nextRoute?: string;
     prevRoute?: string;
     viewportID?: string;
@@ -45,6 +46,7 @@ export interface NextStepProps {
     disableConsoleLogs?: boolean;
     scrollToTop?: boolean;
     noInViewScroll?: boolean;
+    overlayZIndex?: number;
 }
 export interface CardComponentProps {
     step: Step;
