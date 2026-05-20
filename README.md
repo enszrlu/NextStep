@@ -289,6 +289,7 @@ const steps: Tour[] = [
 | `blockKeyboardControl` | `boolean`                                | Optional. Determines whether keyboard control should be blocked                                                                                     |
 | `pointerPadding`       | `number`                                 | Optional. The padding around the pointer (keyhole) highlighting the target element.                                                                 |
 | `pointerRadius`        | `number`                                 | Optional. The border-radius of the pointer (keyhole) highlighting the target element.                                                               |
+| `cardOffset`           | `number`                                 | Optional. Gap in pixels between the tour card and the spotlight highlight (default: `25`).                                                          |
 | `disableInteraction`   | `boolean`                                | Optional. If true, prevents interaction with the highlighted element (default: false).                                                              |
 | `nextRoute`            | `string`                                 | Optional. The route to navigate to when moving to the next step.                                                                                    |
 | `prevRoute`            | `string`                                 | Optional. The route to navigate to when moving to the previous step.                                                                                |

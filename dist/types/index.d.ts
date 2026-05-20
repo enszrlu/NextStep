@@ -19,6 +19,8 @@ export interface Step {
     blockKeyboardControl?: boolean;
     pointerPadding?: number;
     pointerRadius?: number;
+    /** Gap in pixels between the tour card and the spotlight highlight. Default: `25`. */
+    cardOffset?: number;
     disableInteraction?: boolean;
     nextRoute?: string;
     prevRoute?: string;

@@ -10,6 +10,9 @@ import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
 import SmoothSpotlight from './SmoothSpotlight';
 
+/** Default gap between the tour card and the spotlight highlight (px). */
+const DEFAULT_CARD_OFFSET = 25;
+
 /**
  * NextStepReact component for rendering the onboarding steps.
  *
@@ -688,7 +691,11 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
   // - -
   // Card Side
+  /** Positions the step card relative to the spotlight; `cardOffset` sets the gap (default {@link DEFAULT_CARD_OFFSET}px). */
   const getCardStyle = (side: string): React.CSSProperties => {
+    const cardOffset = currentTourSteps?.[currentStep]?.cardOffset ?? DEFAULT_CARD_OFFSET;
+    const cardOffsetPx = `${cardOffset}px`;
+
     if (!side || !currentTourSteps?.[currentStep].selector) {
       // Center the card if the selector is undefined or empty
       return {
@@ -708,74 +715,74 @@ const NextStepReact: React.FC<NextStepProps> = ({
           transform: `translate(-50%, 0)`,
           left: '50%',
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'bottom':
         return {
           transform: `translate(-50%, 0)`,
           left: '50%',
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'left':
         return {
           transform: `translate(0, -50%)`,
           right: '100%',
           top: '50%',
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       case 'right':
         return {
           transform: `translate(0, -50%)`,
           left: '100%',
           top: '50%',
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'top-left':
         return {
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'top-right':
         return {
           right: 0,
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'bottom-left':
         return {
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'bottom-right':
         return {
           right: 0,
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'right-bottom':
         return {
           left: '100%',
           bottom: 0,
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'right-top':
         return {
           left: '100%',
           top: 0,
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'left-bottom':
         return {
           right: '100%',
           bottom: 0,
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       case 'left-top':
         return {
           right: '100%',
           top: 0,
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       default:
         return {}; // Default case if no side is specified
@@ -785,6 +792,9 @@ const NextStepReact: React.FC<NextStepProps> = ({
   // - -
   // Arrow position based on card side
   const getArrowStyle = (side: string) => {
+    const cardOffset = currentTourSteps?.[currentStep]?.cardOffset ?? DEFAULT_CARD_OFFSET;
+    const arrowOffsetPx = `${cardOffset - 2}px`;
+
     side = checkSideCutOff(side);
 
     switch (side) {
@@ -792,72 +802,72 @@ const NextStepReact: React.FC<NextStepProps> = ({
         return {
           transform: `translate(-50%, 0) rotate(270deg)`,
           left: '50%',
-          top: '-23px',
+          top: `-${arrowOffsetPx}`,
         };
       case 'top':
         return {
           transform: `translate(-50%, 0) rotate(90deg)`,
           left: '50%',
-          bottom: '-23px',
+          bottom: `-${arrowOffsetPx}`,
         };
       case 'right':
         return {
           transform: `translate(0, -50%) rotate(180deg)`,
           top: '50%',
-          left: '-23px',
+          left: `-${arrowOffsetPx}`,
         };
       case 'left':
         return {
           transform: `translate(0, -50%) rotate(0deg)`,
           top: '50%',
-          right: '-23px',
+          right: `-${arrowOffsetPx}`,
         };
       case 'top-left':
         return {
           transform: `rotate(90deg)`,
           left: '10px',
-          bottom: '-23px',
+          bottom: `-${arrowOffsetPx}`,
         };
       case 'top-right':
         return {
           transform: `rotate(90deg)`,
           right: '10px',
-          bottom: '-23px',
+          bottom: `-${arrowOffsetPx}`,
         };
       case 'bottom-left':
         return {
           transform: `rotate(270deg)`,
           left: '10px',
-          top: '-23px',
+          top: `-${arrowOffsetPx}`,
         };
       case 'bottom-right':
         return {
           transform: `rotate(270deg)`,
           right: '10px',
-          top: '-23px',
+          top: `-${arrowOffsetPx}`,
         };
       case 'right-bottom':
         return {
           transform: `rotate(180deg)`,
-          left: '-23px',
+          left: `-${arrowOffsetPx}`,
           bottom: '10px',
         };
       case 'right-top':
         return {
           transform: `rotate(180deg)`,
-          left: '-23px',
+          left: `-${arrowOffsetPx}`,
           top: '10px',
         };
       case 'left-bottom':
         return {
           transform: `rotate(0deg)`,
-          right: '-23px',
+          right: `-${arrowOffsetPx}`,
           bottom: '10px',
         };
       case 'left-top':
         return {
           transform: `rotate(0deg)`,
-          right: '-23px',
+          right: `-${arrowOffsetPx}`,
           top: '10px',
         };
       default:
