@@ -20,3 +20,6 @@ yarn-error.log*
 
 # cursor
 .cursorrules
+
+# build output (rebuilt from src on publish via the prepack script)
+/dist

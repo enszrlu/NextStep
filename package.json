@@ -32,9 +32,16 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "start": "npm run build && node dist/index.js"
+    "dev": "tsc --watch --project tsconfig.json",
+    "start": "npm run build && node dist/index.js",
+    "prepack": "npm run build"
   },
   "peerDependencies": {
     "@remix-run/react": ">=1.0.0",
