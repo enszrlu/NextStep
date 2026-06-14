@@ -9,5 +9,6 @@ export type {
   Step,
   NextStepContextType,
   CardComponentProps,
+  ArrowComponentProps,
 } from './types';
 export type { NavigationAdapter } from './types/navigation';

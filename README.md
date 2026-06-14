@@ -252,6 +252,32 @@ export const CustomCard = ({
 };
 ```
 
+### Custom Arrow
+
+By default NextStep renders a small SVG caret pointing from the card to the highlighted element. You can recolor/resize it with `arrowStyle`, or replace it entirely with `arrowComponent`. Both are provider-level props and fully optional (omit them for the default arrow).
+
+```tsx
+import { NextStep } from 'nextstepjs';
+import type { ArrowComponentProps } from 'nextstepjs';
+
+// Tweak the built-in caret:
+<NextStep steps={steps} arrowStyle={{ color: '#6d28d9' }}>
+  {children}
+</NextStep>;
+
+// Or fully replace it. Spread the provided `style` so it stays anchored to the card,
+// and use `side` (the resolved placement, after any cut-off adjustment) to orient it:
+const MyArrow = ({ side, style }: ArrowComponentProps) => (
+  <div style={{ ...style }} data-side={side}>
+    ◆
+  </div>
+);
+
+<NextStep steps={steps} arrowComponent={MyArrow}>
+  {children}
+</NextStep>;
+```
+
 ### Tours Array
 
 NextStep supports multiple "tours", allowing you to create multiple product tours:
@@ -277,24 +303,28 @@ const steps: Tour[] = [
 
 ### Step Object
 
-| Prop                   | Type                                     | Description                                                                                                                                         |
-| ---------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `icon`                 | `React.ReactNode`, `string`, `null`      | An icon or element to display alongside the step title.                                                                                             |
-| `title`                | `string`                                 | The title of your step                                                                                                                              |
-| `content`              | `React.ReactNode`                        | The main content or body of the step.                                                                                                               |
-| `selector`             | `string`                                 | Optional. A string used to target an `id` that this step refers to. If not provided, card will be displayed in the center top of the document body. |
-| `side`                 | `"top"`, `"bottom"`, `"left"`, `"right"` | Optional. Determines where the tooltip should appear relative to the selector.                                                                      |
-| `showControls`         | `boolean`                                | Optional. Determines whether control buttons (next, prev) should be shown if using the default card.                                                |
-| `showSkip`             | `boolean`                                | Optional. Determines whether skip button should be shown if using the default card.                                                                 |
-| `blockKeyboardControl` | `boolean`                                | Optional. Determines whether keyboard control should be blocked                                                                                     |
-| `pointerPadding`       | `number`                                 | Optional. The padding around the pointer (keyhole) highlighting the target element.                                                                 |
-| `pointerRadius`        | `number`                                 | Optional. The border-radius of the pointer (keyhole) highlighting the target element.                                                               |
-| `disableInteraction`   | `boolean`                                | Optional. If true, prevents interaction with the highlighted element (default: false).                                                              |
-| `nextRoute`            | `string`                                 | Optional. The route to navigate to when moving to the next step.                                                                                    |
-| `prevRoute`            | `string`                                 | Optional. The route to navigate to when moving to the previous step.                                                                                |
-| `viewportID`           | `string`                                 | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                                   |
+| Prop                    | Type                                                                            | Description                                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `icon`                  | `React.ReactNode`, `string`, `null`                                             | Optional. An icon or element to display alongside the step title (used by the default card).                                                                        |
+| `title`                 | `string`                                                                        | The title of your step                                                                                                                                              |
+| `content`               | `React.ReactNode`                                                               | The main content or body of the step.                                                                                                                              |
+| `selector`              | `string`                                                                        | Optional. A string used to target an `id` that this step refers to. If not provided, card will be displayed in the center top of the document body.                 |
+| `side`                  | `"top"`, `"bottom"`, `"left"`, `"right"` (+ corner variants, e.g. `"top-left"`) | Optional. Determines where the tooltip should appear relative to the selector.                                                                                      |
+| `showControls`          | `boolean`                                                                       | Optional. Determines whether control buttons (next, prev) should be shown if using the default card. Ignored when a custom `cardComponent` is provided.            |
+| `showSkip`              | `boolean`                                                                       | Optional. Determines whether skip button should be shown if using the default card. Ignored when a custom `cardComponent` is provided.                             |
+| `blockKeyboardControl`  | `boolean`                                                                       | Optional. Determines whether keyboard control should be blocked                                                                                                    |
+| `pointerPadding`        | `number`                                                                        | Optional. The padding around the pointer (keyhole) highlighting the target element.                                                                                |
+| `pointerRadius`         | `number`                                                                        | Optional. The border-radius of the pointer (keyhole) highlighting the target element.                                                                              |
+| `cardOffset`            | `number`                                                                        | Optional. Gap in pixels between the card and the spotlight highlight; the caret scales with it too (default: 25).                                                   |
+| `scrollOffset`          | `number`                                                                        | Optional. Extra clearance in pixels kept above/below the target when it is scrolled into view — useful when a fixed/sticky header would cover it (default: 0).      |
+| `selectorRetryAttempts` | `number`                                                                        | Optional. Extra attempts to find `selector` when it is missing on the first lookup (for asynchronously rendered targets). `0` keeps the single-lookup behavior (default: 0). |
+| `selectorRetryDelay`    | `number`                                                                        | Optional. Delay in milliseconds between selector retry attempts (default: 200).                                                                                    |
+| `disableInteraction`    | `boolean`                                                                       | Optional. If true, prevents interaction with the highlighted element (default: false).                                                                             |
+| `nextRoute`             | `string`                                                                        | Optional. The route to navigate to when moving to the next step.                                                                                                   |
+| `prevRoute`             | `string`                                                                        | Optional. The route to navigate to when moving to the previous step.                                                                                               |
+| `viewportID`            | `string`                                                                        | Optional. The id of the viewport element to use for positioning. If not provided, the document body will be used.                                                  |
 
-> **Note** `NextStep` handles card cutoff from screen sides. If side is right or left and card is out of the viewport, side would be switched to `top`. If side is top or bottom and card is out of the viewport, then side would be flipped between top and bottom.
+> **Note** `NextStep` handles card cutoff from screen sides. When the requested side does not have room, NextStep verifies the destination side actually has space before flipping, and otherwise falls back to the side with the most room — so the card stays on-screen instead of swapping into another cramped edge.
 
 ### Target Anything
 
@@ -401,6 +431,10 @@ Here's an example of how to use `NextStepViewport`:
 | `scrollToTop`         | `boolean`                                          | Optional. If true, the page will scroll to the top when the tour ends, default is true                          |
 | `noInViewScroll`      | `boolean`                                          | Optional. If true, the page will not scroll to the target element when it is in view, default is false          |
 | `overlayZIndex`       | `number`                                           | Optional. Base z-index for overlay elements, useful for compatibility with UI libraries like MUI (default: 999) |
+| `arrowComponent`      | `React.ComponentType<ArrowComponentProps>`         | Optional. Render a fully custom arrow/caret. Receives the resolved `side` and the computed positioning `style`. When omitted, the built-in SVG arrow is used.     |
+| `arrowStyle`          | `React.CSSProperties`                              | Optional. Styles merged into the built-in arrow SVG (ignored when `arrowComponent` is set). Handy for tweaking the caret color or size.                          |
+
+> **Note** When a custom `cardComponent` is provided, the per-step `showControls` / `showSkip` options only affect the built-in card, so they are ignored (and TypeScript omits them from the step type). Your custom card renders its own controls.
 
 ```tsx
 <NextStep
