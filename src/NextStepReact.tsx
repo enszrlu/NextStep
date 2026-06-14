@@ -5,10 +5,15 @@ import { motion, useInView } from 'motion/react';
 import { useWindowAdapter } from './adapters/window';
 
 // Types
-import { NextStepProps } from './types';
+import { NextStepProps, Tour } from './types';
 import DefaultCard from './DefaultCard';
 import DynamicPortal from './DynamicPortal';
 import SmoothSpotlight from './SmoothSpotlight';
+
+/** Default gap (px) between the tour card and the spotlight highlight. */
+const DEFAULT_CARD_OFFSET = 25;
+/** Default delay (ms) between selector retry attempts. */
+const DEFAULT_SELECTOR_RETRY_DELAY = 200;
 
 /**
  * NextStepReact component for rendering the onboarding steps.
@@ -44,25 +49,31 @@ import SmoothSpotlight from './SmoothSpotlight';
  *   <YourAppContent />
  * </NextStepReact>
  */
-const NextStepReact: React.FC<NextStepProps> = ({
-  children,
-  steps,
-  shadowRgb = '0, 0, 0',
-  shadowOpacity = '0.2',
-  cardTransition = { ease: 'anticipate', duration: 0.6 },
-  cardComponent: CardComponent,
-  onStart = () => {},
-  onStepChange = () => {},
-  onComplete = () => {},
-  onSkip = () => {},
-  displayArrow = true,
-  clickThroughOverlay = false,
-  navigationAdapter = useWindowAdapter,
-  disableConsoleLogs = false,
-  scrollToTop = true,
-  noInViewScroll = false,
-  overlayZIndex = 999,
-}) => {
+const NextStepReact: React.FC<NextStepProps> = (props) => {
+  const {
+    children,
+    shadowRgb = '0, 0, 0',
+    shadowOpacity = '0.2',
+    cardTransition = { ease: 'anticipate', duration: 0.6 },
+    cardComponent: CardComponent,
+    onStart = () => {},
+    onStepChange = () => {},
+    onComplete = () => {},
+    onSkip = () => {},
+    displayArrow = true,
+    clickThroughOverlay = false,
+    navigationAdapter = useWindowAdapter,
+    disableConsoleLogs = false,
+    scrollToTop = true,
+    noInViewScroll = false,
+    overlayZIndex = 999,
+    arrowComponent: ArrowComponent,
+    arrowStyle,
+  } = props;
+  // Normalize to `Tour[]` internally; the custom-card variant only differs in
+  // that its step types omit `showControls` / `showSkip` (see types/index.ts).
+  const steps: Tour[] = props.steps as Tour[];
+
   const { currentTour, currentStep, setCurrentStep, isNextStepVisible, closeNextStep } =
     useNextStep();
 
@@ -76,6 +87,11 @@ const NextStepReact: React.FC<NextStepProps> = ({
     height: number;
   } | null>(null);
   const currentElementRef = useRef<Element | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [cardDimensions, setCardDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const observeRef = useRef(null); // Ref for the observer element
   const isInView = useInView(observeRef);
   const offset = 20;
@@ -161,7 +177,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
             const side = checkSideCutOff(
               currentTourSteps?.[currentStep]?.side || 'right',
             );
-            element.scrollIntoView({
+            scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
               block: side.includes('top')
                 ? 'end'
@@ -234,6 +250,36 @@ const NextStepReact: React.FC<NextStepProps> = ({
   }, [currentStep, currentPath, currentTourSteps, isNextStepVisible]);
 
   // - -
+  // Scroll an element into view, honoring a per-step `scrollOffset` (clearance
+  // above/below the target, e.g. for fixed headers). Applied via `scroll-margin`
+  // so it works for both body-scroll and custom-viewport scroll containers and
+  // preserves smooth scrolling. With no `scrollOffset` it is identical to a plain
+  // `element.scrollIntoView(options)`.
+  const scrollElementIntoViewWithOffset = (
+    element: Element,
+    options: ScrollIntoViewOptions,
+  ) => {
+    const scrollOffset = currentTourSteps?.[currentStep]?.scrollOffset;
+    const el = element as HTMLElement;
+
+    if (scrollOffset && el.style) {
+      const prevMarginTop = el.style.scrollMarginTop;
+      const prevMarginBottom = el.style.scrollMarginBottom;
+      el.style.scrollMarginTop = `${scrollOffset}px`;
+      el.style.scrollMarginBottom = `${scrollOffset}px`;
+      element.scrollIntoView(options);
+      // The destination is computed synchronously at the call above, so restoring
+      // on the next frame leaves the in-flight smooth scroll untouched.
+      requestAnimationFrame(() => {
+        el.style.scrollMarginTop = prevMarginTop;
+        el.style.scrollMarginBottom = prevMarginBottom;
+      });
+    } else {
+      element.scrollIntoView(options);
+    }
+  };
+
+  // - -
   // Helper function to get element position
   const getElementPosition = (element: Element) => {
     const elementRect = element.getBoundingClientRect();
@@ -269,6 +315,9 @@ const NextStepReact: React.FC<NextStepProps> = ({
   // - -
   // Update pointerPosition when currentStep changes
   useEffect(() => {
+    let cancelled = false;
+    const retryTimers: ReturnType<typeof setTimeout>[] = [];
+
     if (isNextStepVisible && currentTourSteps) {
       if (!disableConsoleLogs) {
         console.log('NextStep: Current Step Changed');
@@ -294,8 +343,9 @@ const NextStepReact: React.FC<NextStepProps> = ({
       setScrollableParent(getScrollableParent(tempViewport));
 
       if (step && step.selector) {
-        const element = document.querySelector(step.selector) as Element | null;
-        if (element) {
+        const handleElementFound = (element: Element) => {
+          if (cancelled) return;
+
           setPointerPosition(getElementPosition(element));
           currentElementRef.current = element;
           setElementToScroll(element);
@@ -308,7 +358,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
             const side = checkSideCutOff(
               currentTourSteps?.[currentStep]?.side || 'right',
             );
-            element.scrollIntoView({
+            scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
               block: side.includes('top')
                 ? 'end'
@@ -317,7 +367,30 @@ const NextStepReact: React.FC<NextStepProps> = ({
                 : 'center',
             });
           }
-        }
+        };
+
+        // Retry the lookup for elements that render asynchronously. Defaults to a
+        // single attempt (no retry) so the original behavior is preserved.
+        const maxAttempts = Math.max(step.selectorRetryAttempts ?? 0, 0);
+        const retryDelay = step.selectorRetryDelay ?? DEFAULT_SELECTOR_RETRY_DELAY;
+
+        const attemptLookup = (remainingAttempts: number) => {
+          if (cancelled) return;
+
+          const element = document.querySelector(step.selector!) as Element | null;
+          if (element) {
+            handleElementFound(element);
+            return;
+          }
+
+          if (remainingAttempts > 0) {
+            retryTimers.push(
+              setTimeout(() => attemptLookup(remainingAttempts - 1), retryDelay),
+            );
+          }
+        };
+
+        attemptLookup(maxAttempts);
       } else {
         // Reset pointer position to middle of the screen when selector is empty, undefined, or ""
         if (step.viewportID) {
@@ -340,6 +413,12 @@ const NextStepReact: React.FC<NextStepProps> = ({
         setElementToScroll(null);
       }
     }
+
+    // Cancel any pending selector retries on step change / unmount.
+    return () => {
+      cancelled = true;
+      retryTimers.forEach((timer) => clearTimeout(timer));
+    };
   }, [currentStep, currentTourSteps, isInView, offset, isNextStepVisible]);
 
   useEffect(() => {
@@ -350,7 +429,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
       const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
       if (!noInViewScroll) {
-        elementToScroll.scrollIntoView({
+        scrollElementIntoViewWithOffset(elementToScroll, {
           behavior: 'smooth',
           block: side.includes('top')
             ? 'end'
@@ -458,6 +537,29 @@ const NextStepReact: React.FC<NextStepProps> = ({
       resizeObserver.disconnect();
     };
   }, [currentStep, currentTour]);
+
+  // - -
+  // Measure the rendered card so the caret can be clamped within its edges (D1).
+  useEffect(() => {
+    if (!isNextStepVisible) return;
+
+    const measure = () => {
+      const node = cardRef.current;
+      if (!node) return;
+      const { width, height } = node.getBoundingClientRect();
+      setCardDimensions((prev) =>
+        prev &&
+        Math.abs(prev.width - width) < 0.5 &&
+        Math.abs(prev.height - height) < 0.5
+          ? prev
+          : { width, height },
+      );
+    };
+
+    // Measure after layout settles (the card animates into place).
+    const raf = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(raf);
+  }, [currentStep, currentTourSteps, pointerPosition, isNextStepVisible]);
 
   // - -
   // Step Controls
@@ -600,7 +702,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
           const isInViewport = top >= -offset && top <= window.innerHeight + offset;
           if (!isInViewport) {
             const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || 'right');
-            element.scrollIntoView({
+            scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
               block: side.includes('top')
                 ? 'end'
@@ -638,49 +740,52 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
   // - -
   // Check if Card is Cut Off on Sides
+  // Flips the requested side only when the destination actually has room. If a
+  // side is cramped and its opposite is too, the placement with the most space
+  // wins instead of blindly swapping into another cut-off side (issue #69).
   const checkSideCutOff = (side: string) => {
-    if (!side) {
+    if (!side || !viewport || !pointerPosition) {
       return side;
     }
 
-    if (!viewport) {
-      return side;
-    }
+    // Space (px) the card needs to fit on a given side of the spotlight.
+    const CARD_SPACE = 256;
+    const { x, y, width, height } = pointerPosition;
+
+    // Available room around the spotlight within the (scrollable) viewport.
+    const spaceRight = viewport.scrollWidth - (x + width);
+    const spaceLeft = x;
+    const spaceTop = y;
+    const spaceBottom = viewport.scrollHeight - (y + height);
 
     let tempSide = side;
 
-    let removeSide = false;
-
-    // Check if card would be cut off on sides
-    if (
-      side.startsWith('right') &&
-      pointerPosition &&
-      viewport.scrollWidth < pointerPosition.x + pointerPosition.width + 256
-    ) {
-      removeSide = true;
-    } else if (side.startsWith('left') && pointerPosition && pointerPosition.x < 256) {
-      removeSide = true;
+    // Horizontal primary placement (left/right): flip to the opposite side only
+    // if it has room, otherwise fall back to the roomier vertical side.
+    if (side.startsWith('right') && spaceRight < CARD_SPACE) {
+      if (spaceLeft >= CARD_SPACE) {
+        tempSide = side.replace('right', 'left');
+      } else {
+        tempSide = spaceBottom >= spaceTop ? 'bottom' : 'top';
+      }
+    } else if (side.startsWith('left') && spaceLeft < CARD_SPACE) {
+      if (spaceRight >= CARD_SPACE) {
+        tempSide = side.replace('left', 'right');
+      } else {
+        tempSide = spaceBottom >= spaceTop ? 'bottom' : 'top';
+      }
     }
 
-    // Check if card would be cut off on top or bottom
-    if (side.includes('top') && pointerPosition && pointerPosition.y < 256) {
-      if (removeSide) {
-        tempSide = 'bottom';
-      } else {
-        tempSide = side.replace('top', 'bottom');
+    // Vertical placement (top/bottom): verify the destination has room before
+    // flipping; if neither side fits, keep whichever has more space.
+    if (tempSide.includes('top') && spaceTop < CARD_SPACE) {
+      if (spaceBottom >= CARD_SPACE || spaceBottom > spaceTop) {
+        tempSide = tempSide.replace('top', 'bottom');
       }
-    } else if (
-      side.includes('bottom') &&
-      pointerPosition &&
-      pointerPosition.y + pointerPosition.height + 256 > viewport.scrollHeight
-    ) {
-      if (removeSide) {
-        tempSide = 'top';
-      } else {
-        tempSide = side.replace('bottom', 'top');
+    } else if (tempSide.includes('bottom') && spaceBottom < CARD_SPACE) {
+      if (spaceTop >= CARD_SPACE || spaceTop > spaceBottom) {
+        tempSide = tempSide.replace('bottom', 'top');
       }
-    } else if (removeSide) {
-      tempSide = pointerPosition && pointerPosition.y < 256 ? 'bottom' : 'top';
     }
 
     return tempSide;
@@ -688,6 +793,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
   // - -
   // Card Side
+  // `cardOffset` (default 25px) controls the gap between the card and the spotlight.
   const getCardStyle = (side: string): React.CSSProperties => {
     if (!side || !currentTourSteps?.[currentStep].selector) {
       // Center the card if the selector is undefined or empty
@@ -702,80 +808,83 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
     side = checkSideCutOff(side);
 
+    const cardOffset = currentTourSteps?.[currentStep]?.cardOffset ?? DEFAULT_CARD_OFFSET;
+    const cardOffsetPx = `${cardOffset}px`;
+
     switch (side) {
       case 'top':
         return {
           transform: `translate(-50%, 0)`,
           left: '50%',
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'bottom':
         return {
           transform: `translate(-50%, 0)`,
           left: '50%',
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'left':
         return {
           transform: `translate(0, -50%)`,
           right: '100%',
           top: '50%',
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       case 'right':
         return {
           transform: `translate(0, -50%)`,
           left: '100%',
           top: '50%',
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'top-left':
         return {
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'top-right':
         return {
           right: 0,
           bottom: '100%',
-          marginBottom: '25px',
+          marginBottom: cardOffsetPx,
         };
       case 'bottom-left':
         return {
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'bottom-right':
         return {
           right: 0,
           top: '100%',
-          marginTop: '25px',
+          marginTop: cardOffsetPx,
         };
       case 'right-bottom':
         return {
           left: '100%',
           bottom: 0,
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'right-top':
         return {
           left: '100%',
           top: 0,
-          marginLeft: '25px',
+          marginLeft: cardOffsetPx,
         };
       case 'left-bottom':
         return {
           right: '100%',
           bottom: 0,
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       case 'left-top':
         return {
           right: '100%',
           top: 0,
-          marginRight: '25px',
+          marginRight: cardOffsetPx,
         };
       default:
         return {}; // Default case if no side is specified
@@ -784,81 +893,102 @@ const NextStepReact: React.FC<NextStepProps> = ({
 
   // - -
   // Arrow position based on card side
-  const getArrowStyle = (side: string) => {
+  // The perpendicular gap scales with `cardOffset` (so the caret keeps touching
+  // the card), and for corner placements the caret is centered on the anchor
+  // element rather than pinned a fixed 10px from the card corner (issue #71).
+  const getArrowStyle = (side: string): React.CSSProperties => {
     side = checkSideCutOff(side);
+
+    const cardOffset = currentTourSteps?.[currentStep]?.cardOffset ?? DEFAULT_CARD_OFFSET;
+    // -23px when cardOffset is the default 25 (behavior-preserving).
+    const arrowGap = `-${cardOffset - 2}px`;
+
+    // The spotlight (pointer box) is the target plus `pointerPadding`, centered on
+    // the target, so the anchor's center sits half a pointer box from each edge.
+    // Offsetting the caret by that half-size from the anchored card edge points it
+    // at the element's center. Clamp so it never leaves the card.
+    const halfBoxX = pointerPosition ? (pointerPosition.width + pointerPadding) / 2 : 0;
+    const halfBoxY = pointerPosition ? (pointerPosition.height + pointerPadding) / 2 : 0;
+    const CARET_EDGE = 14; // keep clear of the card's rounded corners
+    const clamp = (value: number, extent?: number) => {
+      const lower = Math.max(value, CARET_EDGE);
+      return extent ? Math.min(lower, Math.max(extent - CARET_EDGE, CARET_EDGE)) : lower;
+    };
+    const caretX = `${clamp(halfBoxX, cardDimensions?.width)}px`;
+    const caretY = `${clamp(halfBoxY, cardDimensions?.height)}px`;
 
     switch (side) {
       case 'bottom':
         return {
           transform: `translate(-50%, 0) rotate(270deg)`,
           left: '50%',
-          top: '-23px',
+          top: arrowGap,
         };
       case 'top':
         return {
           transform: `translate(-50%, 0) rotate(90deg)`,
           left: '50%',
-          bottom: '-23px',
+          bottom: arrowGap,
         };
       case 'right':
         return {
           transform: `translate(0, -50%) rotate(180deg)`,
           top: '50%',
-          left: '-23px',
+          left: arrowGap,
         };
       case 'left':
         return {
           transform: `translate(0, -50%) rotate(0deg)`,
           top: '50%',
-          right: '-23px',
+          right: arrowGap,
         };
       case 'top-left':
         return {
-          transform: `rotate(90deg)`,
-          left: '10px',
-          bottom: '-23px',
+          transform: `translate(-50%, 0) rotate(90deg)`,
+          left: caretX,
+          bottom: arrowGap,
         };
       case 'top-right':
         return {
-          transform: `rotate(90deg)`,
-          right: '10px',
-          bottom: '-23px',
+          transform: `translate(50%, 0) rotate(90deg)`,
+          right: caretX,
+          bottom: arrowGap,
         };
       case 'bottom-left':
         return {
-          transform: `rotate(270deg)`,
-          left: '10px',
-          top: '-23px',
+          transform: `translate(-50%, 0) rotate(270deg)`,
+          left: caretX,
+          top: arrowGap,
         };
       case 'bottom-right':
         return {
-          transform: `rotate(270deg)`,
-          right: '10px',
-          top: '-23px',
+          transform: `translate(50%, 0) rotate(270deg)`,
+          right: caretX,
+          top: arrowGap,
         };
       case 'right-bottom':
         return {
-          transform: `rotate(180deg)`,
-          left: '-23px',
-          bottom: '10px',
+          transform: `translate(0, 50%) rotate(180deg)`,
+          left: arrowGap,
+          bottom: caretY,
         };
       case 'right-top':
         return {
-          transform: `rotate(180deg)`,
-          left: '-23px',
-          top: '10px',
+          transform: `translate(0, -50%) rotate(180deg)`,
+          left: arrowGap,
+          top: caretY,
         };
       case 'left-bottom':
         return {
-          transform: `rotate(0deg)`,
-          right: '-23px',
-          bottom: '10px',
+          transform: `translate(0, 50%) rotate(0deg)`,
+          right: arrowGap,
+          bottom: caretY,
         };
       case 'left-top':
         return {
-          transform: `rotate(0deg)`,
-          right: '-23px',
-          top: '10px',
+          transform: `translate(0, -50%) rotate(0deg)`,
+          right: arrowGap,
+          top: caretY,
         };
       default:
         return {
@@ -873,16 +1003,39 @@ const NextStepReact: React.FC<NextStepProps> = ({
     if (!isVisible) {
       return null;
     }
+
+    const positionStyle = getArrowStyle(currentTourSteps?.[currentStep]?.side as any);
+    const resolvedSide = checkSideCutOff(
+      (currentTourSteps?.[currentStep]?.side as string) || '',
+    );
+
+    // A custom arrow component fully replaces the built-in SVG; it receives the
+    // resolved side and the computed positioning styles.
+    if (ArrowComponent) {
+      return (
+        <ArrowComponent
+          side={resolvedSide}
+          style={{
+            ...positionStyle,
+            position: 'absolute',
+            transformOrigin: 'center',
+          }}
+        />
+      );
+    }
+
     return (
       <svg
         viewBox="0 0 54 54"
         data-name="nextstep-arrow"
         style={{
-          ...getArrowStyle(currentTourSteps?.[currentStep]?.side as any),
+          ...positionStyle,
           position: 'absolute',
           width: '1.5rem',
           height: '1.5rem',
           transformOrigin: 'center',
+          // `arrowStyle` is merged last so callers can tweak color/size.
+          ...arrowStyle,
         }}
       >
         <path id="triangle" d="M27 27L0 0V54L27 27Z" fill="currentColor" />
@@ -1073,6 +1226,7 @@ const NextStepReact: React.FC<NextStepProps> = ({
             >
               {/* Card */}
               <motion.div
+                ref={cardRef}
                 data-name="nextstep-card"
                 transition={cardTransition}
                 style={{
