@@ -179,11 +179,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
             );
             scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
-              block: side.includes('top')
-                ? 'end'
-                : side.includes('bottom')
-                ? 'start'
-                : 'center',
+              block: getScrollBlock(side),
             });
           }
         }
@@ -360,11 +356,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
             );
             scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
-              block: side.includes('top')
-                ? 'end'
-                : side.includes('bottom')
-                ? 'start'
-                : 'center',
+              block: getScrollBlock(side),
             });
           }
         };
@@ -427,15 +419,21 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
         console.log('NextStep: Element to Scroll Changed');
       }
 
+      // `observeRef` is never attached to an element, so `isInView` is always
+      // false and this effect fires for every step. Check the element's actual
+      // viewport visibility (same slack as the init effect) so an already
+      // visible target is not scrolled — with '-top'/'-bottom' aligned sides a
+      // needless `start`/`end` scroll pins the element flush to the viewport
+      // edge and clips the spotlight and card (issue #79).
+      const rect = elementToScroll.getBoundingClientRect();
+      const isElementInViewport =
+        rect.top >= -offset && rect.bottom <= window.innerHeight + offset;
+
       const side = checkSideCutOff(currentTourSteps?.[currentStep]?.side || 'right');
-      if (!noInViewScroll) {
+      if (!noInViewScroll && !isElementInViewport) {
         scrollElementIntoViewWithOffset(elementToScroll, {
           behavior: 'smooth',
-          block: side.includes('top')
-            ? 'end'
-            : side.includes('bottom')
-            ? 'start'
-            : 'center',
+          block: getScrollBlock(side),
           inline: 'center',
         });
       }
@@ -704,11 +702,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
             const side = checkSideCutOff(currentTourSteps?.[stepIndex]?.side || 'right');
             scrollElementIntoViewWithOffset(element, {
               behavior: 'smooth',
-              block: side.includes('top')
-                ? 'end'
-                : side.includes('bottom')
-                ? 'start'
-                : 'center',
+              block: getScrollBlock(side),
             });
           }
           // Update pointer position after scrolling
@@ -776,19 +770,58 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
       }
     }
 
-    // Vertical placement (top/bottom): verify the destination has room before
-    // flipping; if neither side fits, keep whichever has more space.
-    if (tempSide.includes('top') && spaceTop < CARD_SPACE) {
+    // Vertical placement (top/bottom, incl. top-left etc.): verify the
+    // destination has room before flipping; if neither side fits, keep
+    // whichever has more space.
+    if (tempSide.startsWith('top') && spaceTop < CARD_SPACE) {
       if (spaceBottom >= CARD_SPACE || spaceBottom > spaceTop) {
         tempSide = tempSide.replace('top', 'bottom');
       }
-    } else if (tempSide.includes('bottom') && spaceBottom < CARD_SPACE) {
+    } else if (tempSide.startsWith('bottom') && spaceBottom < CARD_SPACE) {
       if (spaceTop >= CARD_SPACE || spaceTop > spaceBottom) {
         tempSide = tempSide.replace('bottom', 'top');
+      }
+    } else if (tempSide.endsWith('-top') || tempSide.endsWith('-bottom')) {
+      // For left-*/right-* the suffix is an alignment, not a placement: '-top'
+      // pins the card's top to the spotlight top so it extends DOWNWARD, and
+      // '-bottom' extends UPWARD. Flip the alignment only when the direction
+      // the card grows into lacks room and the other direction is better
+      // (issue #79: '-top' near the top of the page was wrongly flipped to
+      // '-bottom', pushing the card off-screen above).
+      const roomBelowSpotlightTop = viewport.scrollHeight - y;
+      const roomAboveSpotlightBottom = y + height;
+      if (tempSide.endsWith('-top') && roomBelowSpotlightTop < CARD_SPACE) {
+        if (
+          roomAboveSpotlightBottom >= CARD_SPACE ||
+          roomAboveSpotlightBottom > roomBelowSpotlightTop
+        ) {
+          tempSide = tempSide.replace('-top', '-bottom');
+        }
+      } else if (tempSide.endsWith('-bottom') && roomAboveSpotlightBottom < CARD_SPACE) {
+        if (
+          roomBelowSpotlightTop >= CARD_SPACE ||
+          roomBelowSpotlightTop > roomAboveSpotlightBottom
+        ) {
+          tempSide = tempSide.replace('-bottom', '-top');
+        }
       }
     }
 
     return tempSide;
+  };
+
+  // - -
+  // Scroll target alignment for a given (already cut-off-checked) side. A
+  // 'top'/'bottom' PREFIX places the card above/below the element, so the
+  // element should sit near the opposite viewport edge. A '-top'/'-bottom'
+  // SUFFIX on left/right sides is an alignment: '-top' means the card extends
+  // downward (element belongs near the viewport top), '-bottom' upward.
+  const getScrollBlock = (side: string): ScrollLogicalPosition => {
+    if (side.startsWith('top')) return 'end';
+    if (side.startsWith('bottom')) return 'start';
+    if (side.endsWith('-top')) return 'start';
+    if (side.endsWith('-bottom')) return 'end';
+    return 'center';
   };
 
   // - -
@@ -1138,12 +1171,12 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
                   data-name="nextstep-prevent-click-overlay-bottom"
                   style={{
                     position: 'absolute',
+                    top: `${pointerPosition.y + pointerPosition.height + pointerPadOffset}px`,
                     left: 0,
                     right: 0,
-                    bottom: 0,
                     pointerEvents: 'auto',
                     height: `${Math.max(
-                      viewportRect.height -
+                      viewport.scrollHeight -
                         (pointerPosition.y + pointerPosition.height + pointerPadOffset),
                       0,
                     )}px`,
@@ -1159,7 +1192,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
                     top: 0,
                     pointerEvents: 'auto',
                     width: Math.max(pointerPosition.x - pointerPadOffset, 0),
-                    height: viewportRect.height,
+                    height: viewport.scrollHeight,
                   }}
                 ></div>
 
@@ -1174,7 +1207,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
                       pointerPosition.x + pointerPosition.width + pointerPadOffset
                     }px`,
                     right: 0,
-                    height: viewportRect.height,
+                    height: viewport.scrollHeight,
                   }}
                 ></div>
               </div>
