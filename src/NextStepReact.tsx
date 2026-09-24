@@ -14,6 +14,8 @@ import SmoothSpotlight from './SmoothSpotlight';
 const DEFAULT_CARD_OFFSET = 25;
 /** Default delay (ms) between selector retry attempts. */
 const DEFAULT_SELECTOR_RETRY_DELAY = 200;
+/** Used when the spotlight follows a target that moved while scrolling. */
+const INSTANT_TRANSITION = { duration: 0 };
 
 /**
  * NextStepReact component for rendering the onboarding steps.
@@ -85,6 +87,8 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
     y: number;
     width: number;
     height: number;
+    /** The target moved on its own while scrolling: follow it without animating. */
+    instant?: boolean;
   } | null>(null);
   const currentElementRef = useRef<Element | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -490,6 +494,52 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
       window.addEventListener('resize', updatePointerPosition);
       return () => window.removeEventListener('resize', updatePointerPosition);
     }
+  }, [currentStep, currentTourSteps, isNextStepVisible]);
+
+  // - -
+  // Follow targets that move while scrolling (#72)
+  // The spotlight is positioned in document coordinates, so a regular target
+  // never moves relative to it. A fixed or sticky target (or one inside a
+  // scrolling container, without a viewportID) does, and would drift away
+  // from the spotlight. Scrolls of any container are caught in the capture
+  // phase, checked at most once per frame, and state only changes when the
+  // target really moved — so regular targets cost one rect read per frame.
+  // Those updates skip the animation: easing each scroll frame would make the
+  // spotlight trail behind the element.
+  useEffect(() => {
+    if (!isNextStepVisible || !currentTourSteps) return;
+
+    const selector = currentTourSteps[currentStep]?.selector;
+    if (!selector) return;
+
+    let frame: number | null = null;
+
+    const followTarget = () => {
+      frame = null;
+      const element = document.querySelector(selector);
+      if (!element) return;
+
+      const next = getElementPosition(element);
+      setPointerPosition((prev) =>
+        prev &&
+        prev.x === next.x &&
+        prev.y === next.y &&
+        prev.width === next.width &&
+        prev.height === next.height
+          ? prev
+          : { ...next, instant: true },
+      );
+    };
+
+    const onScroll = () => {
+      if (frame === null) frame = requestAnimationFrame(followTarget);
+    };
+
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, [currentStep, currentTourSteps, isNextStepVisible]);
 
   // - -
@@ -1190,6 +1240,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
               shadowOpacity={shadowOpacity}
               shadowRgb={shadowRgb}
               zIndex={overlayZIndex - 1}
+              transition={pointerPosition.instant ? INSTANT_TRANSITION : undefined}
             />
             {/* Pointer */}
             <motion.div
@@ -1222,7 +1273,7 @@ const NextStepReact: React.FC<NextStepProps> = (props) => {
                     }
                   : {}
               }
-              transition={cardTransition}
+              transition={pointerPosition.instant ? INSTANT_TRANSITION : cardTransition}
             >
               {/* Card */}
               <motion.div
