@@ -1,7 +1,9 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, type Transition } from 'motion/react';
 
 // special thanks to https://github.com/enszrlu/NextStep/issues/32 @dinamicby
+
+const DEFAULT_TRANSITION: Transition = { duration: 0.4, ease: 'easeInOut' };
 
 interface SmoothSpotlightProps {
   x: number;
@@ -13,6 +15,8 @@ interface SmoothSpotlightProps {
   shadowOpacity: string;
   shadowRgb: string;
   zIndex: number;
+  /** How the spotlight moves to a new position. Defaults to 0.4s easeInOut. */
+  transition?: Transition;
 }
 
 const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
@@ -25,6 +29,7 @@ const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
   shadowOpacity,
   shadowRgb,
   zIndex,
+  transition = DEFAULT_TRANSITION,
 }) => {
   const px = x - padding / 2;
   const py = y - padding / 2;
@@ -54,7 +59,7 @@ const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
                 rx: radius,
                 ry: radius,
               }}
-              transition={{ duration: 0.4, ease: 'easeInOut' }}
+              transition={transition}
               fill="black"
             />
           </mask>
